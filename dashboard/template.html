@@ -263,7 +263,16 @@
 
 <script>
 const DATA = /*__DATA__*/null;
-const { meta, positions } = DATA;
+const { meta, venues: VENUES, markets: MARKETS, rows: ROWS } = DATA;
+
+// Liquidation parameters are a property of the venue, not of each position:
+// Enosys is a 10% incentive with a 0.5 close factor; Morpho is ~7.4% with full liquidation.
+const VENUE_PARAMS = { Enosys: { pen: 0.1, cf: 0.5 }, Morpho: { pen: 0.074, cf: 1.0 } };
+
+const positions = ROWS.map(([vi, a, mi, h, d, c, k]) => {
+  const v = VENUES[vi];
+  return { v, a, m: MARKETS[mi], h, d, c, k, ...VENUE_PARAMS[v] };
+});
 
 const fmtUsd = (n, dp = 0) =>
   "$" + n.toLocaleString("en-US", { minimumFractionDigits: dp, maximumFractionDigits: dp });

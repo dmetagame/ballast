@@ -7,15 +7,28 @@
 // XRP-collateralised set the dashboard shows, and writes a self-contained dashboard/index.html
 // with the data inlined — no runtime fetches, so the page works from a file:// URL.
 
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync, writeFileSync, existsSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..");
 
-const enosys = JSON.parse(readFileSync(join(root, "monitor/data/positions.json"), "utf8"));
-const morpho = JSON.parse(readFileSync(join(root, "monitor/data/morpho-positions.json"), "utf8"));
+// Local files when present (normal development); otherwise pull the published snapshot from
+// the public repo, so a hosting provider can build this without vendoring the data.
+const SNAPSHOT = "https://raw.githubusercontent.com/dmetagame/ballast/main/monitor/data";
+
+async function load(name) {
+  const local = join(root, "monitor/data", name);
+  if (existsSync(local)) return JSON.parse(readFileSync(local, "utf8"));
+  const res = await fetch(`${SNAPSHOT}/${name}`);
+  if (!res.ok) throw new Error(`cannot read ${name}: ${res.status} ${res.statusText}`);
+  console.log(`  fetched ${name} from the published snapshot`);
+  return res.json();
+}
+
+const enosys = await load("positions.json");
+const morpho = await load("morpho-positions.json");
 
 // Liquidation cost per venue: Enosys is a 10% incentive with a 0.5 close factor;
 // Morpho's incentive at 77% LLTV is ~7.4% and it permits a full liquidation.
@@ -46,7 +59,14 @@ const meta = {
   collateral: Math.round(sum(positions, (p) => p.c)),
 };
 
-const payload = JSON.stringify({ meta, positions });
+// Compact wire form: intern the repeated strings and emit rows as tuples. The venue implies
+// the liquidation parameters, so they are not repeated per row. Roughly halves the page.
+const VENUES = [...new Set(positions.map((p) => p.v))];
+const MARKETS = [...new Set(positions.map((p) => p.m))];
+const rows = positions.map((p) => [
+  VENUES.indexOf(p.v), p.a, MARKETS.indexOf(p.m), p.h, p.d, p.c, p.k,
+]);
+const payload = JSON.stringify({ meta, venues: VENUES, markets: MARKETS, rows });
 const template = readFileSync(join(here, "template.html"), "utf8");
 const out = template.replace("/*__DATA__*/null", payload);
 writeFileSync(join(here, "index.html"), out);
