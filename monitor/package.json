@@ -1,0 +1,11 @@
+{
+  "name": "ballast-monitor",
+  "private": true,
+  "type": "module",
+  "description": "Risk scanners for FXRP-collateralised leverage on Flare (Morpho Blue + Enosys isolated markets).",
+  "scripts": {
+    "scan:morpho": "node scan-morpho-markets.mjs && node scan-morpho-health.mjs",
+    "scan:enosys": "node scan-enosys-borrowers.mjs && node scan-enosys-health.mjs"
+  },
+  "dependencies": { "viem": "^2.21.0" }
+}

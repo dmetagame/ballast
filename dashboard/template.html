@@ -1,0 +1,506 @@
+<title>Ballast — XRP leverage risk on Flare</title>
+<style>
+  :root {
+    color-scheme: light;
+    --ground: #f4f6f9;
+    --surface: #ffffff;
+    --surface-sunk: #eef1f6;
+    --ink: #0e1116;
+    --ink-2: #3c4653;
+    --ink-muted: #5a6472;
+    --rule: #dfe4ec;
+    --rule-strong: #c6ccd8;
+    --accent: #2a78d6;
+    --accent-soft: rgba(42, 120, 214, 0.13);
+    --grid: #e6eaf1;
+
+    /* status palette — fixed, never themed */
+    --critical: #d03b3b;
+    --warning: #fab219;
+    --good: #0ca30c;
+    --watch: #7c8798;
+
+    --radius: 10px;
+    --pad: clamp(16px, 3vw, 28px);
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ground: #0e1116;
+      --surface: #171b24;
+      --surface-sunk: #1e232e;
+      --ink: #eef1f6;
+      --ink-2: #c3cad6;
+      --ink-muted: #98a2b3;
+      --rule: #262c38;
+      --rule-strong: #333b4a;
+      --accent: #3987e5;
+      --accent-soft: rgba(57, 135, 229, 0.18);
+      --grid: #222835;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ground: #0e1116;
+    --surface: #171b24;
+    --surface-sunk: #1e232e;
+    --ink: #eef1f6;
+    --ink-2: #c3cad6;
+    --ink-muted: #98a2b3;
+    --rule: #262c38;
+    --rule-strong: #333b4a;
+    --accent: #3987e5;
+    --accent-soft: rgba(57, 135, 229, 0.18);
+    --grid: #222835;
+  }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: var(--pad); display: flex; flex-direction: column; gap: 22px; }
+
+  /* ---------------------------------------------------------------- header */
+  header { display: flex; flex-direction: column; gap: 6px; }
+  .eyebrow {
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-muted); font-weight: 600;
+  }
+  h1 { margin: 0; font-size: clamp(22px, 3.4vw, 30px); letter-spacing: -0.02em; text-wrap: balance; font-weight: 650; }
+  .provenance {
+    font-family: var(--mono); font-size: 12px; color: var(--ink-muted);
+    display: flex; flex-wrap: wrap; gap: 4px 14px;
+  }
+
+  /* ------------------------------------------------------------ hero + kpi */
+  .hero {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius);
+    padding: clamp(18px, 3vw, 26px); display: grid; gap: 22px;
+    grid-template-columns: minmax(220px, 0.9fr) 2fr;
+  }
+  @media (max-width: 760px) { .hero { grid-template-columns: 1fr; } }
+  .hero-figure { display: flex; flex-direction: column; gap: 2px; justify-content: center; }
+  .hero-figure .value { font-size: clamp(38px, 7vw, 54px); font-weight: 660; letter-spacing: -0.03em; line-height: 1.02; }
+  .hero-figure .label { color: var(--ink-muted); font-size: 13px; max-width: 24ch; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 2px; background: var(--rule); border-radius: 8px; overflow: hidden; }
+  .kpi { background: var(--surface); padding: 14px 16px; display: flex; flex-direction: column; gap: 3px; }
+  .kpi .k { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); font-weight: 600; }
+  .kpi .v { font-size: 24px; font-weight: 620; letter-spacing: -0.02em; }
+  .kpi .s { font-size: 12px; color: var(--ink-muted); }
+
+  /* ---------------------------------------------------------------- filter */
+  .filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .filters .flabel { font-size: 12px; color: var(--ink-muted); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    font: inherit; font-size: 13px; font-weight: 550; cursor: pointer;
+    background: var(--surface); color: var(--ink-2);
+    border: 1px solid var(--rule); border-radius: 999px; padding: 6px 14px;
+  }
+  .chip:hover { border-color: var(--rule-strong); color: var(--ink); }
+  .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .chip:focus-visible, .th-btn:focus-visible, .toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .toggle {
+    margin-left: auto; font: inherit; font-size: 12.5px; cursor: pointer; color: var(--ink-muted);
+    background: none; border: 1px solid var(--rule); border-radius: 6px; padding: 5px 11px;
+  }
+  .toggle:hover { color: var(--ink); border-color: var(--rule-strong); }
+
+  /* ---------------------------------------------------------------- charts */
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 880px) { .charts { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius);
+    padding: 18px; display: flex; flex-direction: column; gap: 4px; min-width: 0;
+  }
+  .card h2 { margin: 0; font-size: 14.5px; font-weight: 620; letter-spacing: -0.01em; }
+  .card .sub { margin: 0 0 12px; font-size: 12.5px; color: var(--ink-muted); }
+
+  /* health distribution — horizontal bars with direct labels */
+  .dist { display: flex; flex-direction: column; gap: 10px; margin-top: 2px; }
+  .row { display: grid; grid-template-columns: 118px 1fr auto; align-items: center; gap: 12px; }
+  .row .name { font-size: 12.5px; color: var(--ink-2); display: flex; align-items: center; gap: 7px; }
+  .row .dot { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+  .track { background: var(--surface-sunk); border-radius: 4px; height: 22px; position: relative; overflow: hidden; }
+  .fill { height: 100%; border-radius: 0 4px 4px 0; transition: width .25s ease; }
+  .row .amt { font-family: var(--mono); font-size: 12.5px; font-variant-numeric: tabular-nums; color: var(--ink-2); white-space: nowrap; }
+  .row .amt b { font-weight: 620; color: var(--ink); }
+
+  /* area chart */
+  .plot { width: 100%; display: block; overflow: visible; }
+  .plot .gridline { stroke: var(--grid); stroke-width: 1; }
+  .plot .axis { stroke: var(--rule-strong); stroke-width: 1; }
+  .plot text { fill: var(--ink-muted); font-family: var(--sans); font-size: 10.5px; }
+  .plot .tick { font-variant-numeric: tabular-nums; }
+  .plot .crosshair { stroke: var(--rule-strong); stroke-width: 1; }
+  .tip {
+    position: absolute; pointer-events: none; opacity: 0; transition: opacity .12s;
+    background: var(--surface); border: 1px solid var(--rule-strong); border-radius: 7px;
+    padding: 8px 10px; font-size: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.16); z-index: 5;
+    white-space: nowrap;
+  }
+  .tip .t { font-weight: 620; margin-bottom: 3px; }
+  .tip .l { color: var(--ink-muted); font-family: var(--mono); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+  .plotwrap { position: relative; }
+
+  /* ---------------------------------------------------------------- table */
+  .tablecard { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; }
+  .tablehead { padding: 16px 18px 12px; display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: baseline; }
+  .tablehead h2 { margin: 0; font-size: 14.5px; font-weight: 620; }
+  .tablehead .sub { font-size: 12.5px; color: var(--ink-muted); }
+  .scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: right; padding: 9px 14px; white-space: nowrap; border-top: 1px solid var(--rule); }
+  th:first-child, td:first-child { text-align: left; }
+  th { position: sticky; top: 0; background: var(--surface); z-index: 1; }
+  .th-btn {
+    font: inherit; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 620;
+    color: var(--ink-muted); background: none; border: 0; cursor: pointer; padding: 0;
+  }
+  .th-btn:hover { color: var(--ink); }
+  .th-btn[data-active="true"] { color: var(--accent); }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  td.addr { font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
+  tbody tr:hover { background: var(--surface-sunk); }
+  .sev { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 560; }
+  .sev .g { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+  .venue { font-size: 11px; color: var(--ink-muted); border: 1px solid var(--rule); border-radius: 4px; padding: 1px 6px; }
+
+  footer { color: var(--ink-muted); font-size: 12.5px; display: flex; flex-direction: column; gap: 6px; padding-bottom: 8px; }
+  footer code { font-family: var(--mono); font-size: 12px; }
+  a { color: var(--accent); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Ballast · risk monitor</div>
+    <h1>XRP-collateralised leverage on Flare</h1>
+    <div class="provenance">
+      <span>measured on Flare mainnet</span>
+      <span>block 66,470,000</span>
+      <span>2026-08-02</span>
+      <span>XRP $1.0795 (FTSO)</span>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-figure">
+      <div class="value" id="heroDebt">—</div>
+      <div class="label">of borrowing secured by FXRP and stXRP, across Morpho Blue and the Enosys isolated markets.</div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="k">Positions</div><div class="v" id="kPos">—</div><div class="s" id="kAddr">—</div></div>
+      <div class="kpi"><div class="k">Collateral</div><div class="v" id="kColl">—</div><div class="s">backing the debt</div></div>
+      <div class="kpi"><div class="k">Within 25% of liquidation</div><div class="v" id="kNear">—</div><div class="s" id="kNearDebt">—</div></div>
+      <div class="kpi"><div class="k">Penalties at XRP −20%</div><div class="v" id="kPen">—</div><div class="s" id="kPenPos">—</div></div>
+    </div>
+  </section>
+
+  <div class="filters">
+    <span class="flabel">Venue</span>
+    <div class="chips" id="venueChips">
+      <button class="chip" data-venue="all" aria-pressed="true">All</button>
+      <button class="chip" data-venue="Morpho" aria-pressed="false">Morpho Blue</button>
+      <button class="chip" data-venue="Enosys" aria-pressed="false">Enosys</button>
+    </div>
+    <button class="toggle" id="tableToggle" aria-pressed="false">Show chart data as tables</button>
+  </div>
+
+  <div class="charts">
+    <div class="card">
+      <h2>Health factor distribution</h2>
+      <p class="sub">Morpho liquidates below 1.00. Bars show position counts; debt is labelled directly.</p>
+      <div class="dist" id="dist"></div>
+      <div id="distTable" hidden></div>
+    </div>
+
+    <div class="card">
+      <h2>Debt liquidated by XRP drawdown</h2>
+      <p class="sub">Cumulative debt crossing its liquidation threshold as XRP falls.</p>
+      <div class="plotwrap">
+        <svg class="plot" id="curve" viewBox="0 0 460 250" role="img" aria-label="Cumulative debt liquidated as XRP falls"></svg>
+        <div class="tip" id="curveTip"></div>
+      </div>
+      <div id="curveTable" hidden></div>
+    </div>
+  </div>
+
+  <section class="tablecard">
+    <div class="tablehead">
+      <h2>Closest to liquidation</h2>
+      <span class="sub" id="tableSub">—</span>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th><button class="th-btn" data-sort="a">Address</button></th>
+            <th><button class="th-btn" data-sort="v">Venue</button></th>
+            <th><button class="th-btn" data-sort="h" data-active="true">Health</button></th>
+            <th><button class="th-btn" data-sort="k">XRP drop to liquidation</button></th>
+            <th><button class="th-btn" data-sort="d">Debt</button></th>
+            <th><button class="th-btn" data-sort="c">Collateral</button></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <div>Health is computed with Morpho's own share accounting, so 1.00 is exactly the seizure line. Penalty estimates use each venue's real parameters: Enosys at a 10% incentive with a 0.5 close factor, Morpho at ~7.4% with full liquidation.</div>
+    <div>Positions with debt below $1 are excluded. stFLR-collateralised Morpho positions are excluded because they are not XRP-linked. Regenerate with <code>node dashboard/build.mjs</code>.</div>
+  </footer>
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const { meta, positions } = DATA;
+
+const fmtUsd = (n, dp = 0) =>
+  "$" + n.toLocaleString("en-US", { minimumFractionDigits: dp, maximumFractionDigits: dp });
+const fmtCompact = (n) =>
+  n >= 1e6 ? "$" + (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? "$" + Math.round(n / 1e3) + "K" : "$" + Math.round(n);
+const short = (a) => a.slice(0, 6) + "…" + a.slice(-4);
+const sum = (a, f) => a.reduce((s, x) => s + f(x), 0);
+
+const BUCKETS = [
+  { name: "Critical", hint: "< 1.10", color: "var(--critical)", test: (h) => h < 1.1 },
+  { name: "At risk", hint: "1.10 – 1.25", color: "var(--warning)", test: (h) => h >= 1.1 && h < 1.25 },
+  { name: "Watch", hint: "1.25 – 1.50", color: "var(--watch)", test: (h) => h >= 1.25 && h < 1.5 },
+  { name: "Safe", hint: "≥ 1.50", color: "var(--good)", test: (h) => h >= 1.5 },
+];
+const bucketOf = (h) => BUCKETS.find((b) => b.test(h));
+
+let venue = "all";
+let sortKey = "h";
+let sortDir = 1;
+let showTables = false;
+
+const view = () => (venue === "all" ? positions : positions.filter((p) => p.v === venue));
+
+/* ---------------------------------------------------------------- summary */
+function renderSummary(rows) {
+  const debt = sum(rows, (p) => p.d);
+  document.getElementById("heroDebt").textContent = fmtCompact(debt);
+  document.getElementById("kPos").textContent = rows.length.toLocaleString();
+  document.getElementById("kAddr").textContent =
+    new Set(rows.map((p) => p.a)).size.toLocaleString() + " unique addresses";
+  document.getElementById("kColl").textContent = fmtCompact(sum(rows, (p) => p.c));
+
+  const near = rows.filter((p) => p.k !== null && p.k <= 25);
+  document.getElementById("kNear").textContent = near.length.toLocaleString();
+  document.getElementById("kNearDebt").textContent = fmtCompact(sum(near, (p) => p.d)) + " of debt";
+
+  const at20 = rows.filter((p) => p.k !== null && p.k <= 20);
+  document.getElementById("kPen").textContent = fmtCompact(sum(at20, (p) => p.d * p.cf * p.pen));
+  document.getElementById("kPenPos").textContent = at20.length + " positions liquidated";
+}
+
+/* --------------------------------------------------- health distribution */
+function renderDist(rows) {
+  const groups = BUCKETS.map((b) => {
+    const g = rows.filter((p) => b.test(p.h));
+    return { ...b, n: g.length, debt: sum(g, (p) => p.d) };
+  });
+  const max = Math.max(1, ...groups.map((g) => g.n));
+
+  document.getElementById("dist").innerHTML = groups
+    .map(
+      (g) => `
+      <div class="row">
+        <div class="name"><span class="dot" style="background:${g.color}"></span>${g.name}
+          <span style="color:var(--ink-muted);font-family:var(--mono);font-size:11px">${g.hint}</span></div>
+        <div class="track"><div class="fill" style="width:${(g.n / max) * 100}%;background:${g.color}"></div></div>
+        <div class="amt"><b>${g.n}</b> · ${fmtCompact(g.debt)}</div>
+      </div>`
+    )
+    .join("");
+
+  document.getElementById("distTable").innerHTML = `
+    <div class="scroll"><table><thead><tr>
+      <th>Band</th><th>Health</th><th>Positions</th><th>Debt</th></tr></thead><tbody>
+      ${groups
+        .map(
+          (g) => `<tr><td><span class="sev"><span class="g" style="background:${g.color}"></span>${g.name}</span></td>
+          <td class="num">${g.hint}</td><td class="num">${g.n}</td><td class="num">${fmtUsd(g.debt)}</td></tr>`
+        )
+        .join("")}
+    </tbody></table></div>`;
+}
+
+/* ------------------------------------------------------ drawdown curve */
+function curveData(rows) {
+  const pts = [];
+  for (let d = 0; d <= 40; d++) {
+    const hit = rows.filter((p) => p.k !== null && p.k <= d);
+    pts.push({ drop: d, n: hit.length, debt: sum(hit, (p) => p.d) });
+  }
+  return pts;
+}
+
+function renderCurve(rows) {
+  const pts = curveData(rows);
+  const svg = document.getElementById("curve");
+  const W = 460, H = 250, L = 52, R = 10, T = 12, B = 32;
+  const pw = W - L - R, ph = H - T - B;
+  const maxDebt = Math.max(1, ...pts.map((p) => p.debt));
+
+  const niceMax = (() => {
+    const pow = Math.pow(10, Math.floor(Math.log10(maxDebt)));
+    return Math.ceil(maxDebt / (pow / 2)) * (pow / 2);
+  })();
+
+  const x = (d) => L + (d / 40) * pw;
+  const y = (v) => T + ph - (v / niceMax) * ph;
+
+  const ticksY = [0, 0.25, 0.5, 0.75, 1].map((f) => f * niceMax);
+  const ticksX = [0, 10, 20, 30, 40];
+
+  const line = pts.map((p, i) => `${i ? "L" : "M"}${x(p.drop).toFixed(1)},${y(p.debt).toFixed(1)}`).join("");
+  const area = `${line}L${x(40).toFixed(1)},${y(0)}L${x(0).toFixed(1)},${y(0)}Z`;
+  const last = pts[pts.length - 1];
+
+  svg.innerHTML = `
+    <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="var(--accent)" stop-opacity="0.02"/>
+    </linearGradient></defs>
+    ${ticksY
+      .map((v) => `<line class="gridline" x1="${L}" y1="${y(v).toFixed(1)}" x2="${W - R}" y2="${y(v).toFixed(1)}"/>
+        <text class="tick" x="${L - 8}" y="${(y(v) + 3.5).toFixed(1)}" text-anchor="end">${fmtCompact(v)}</text>`)
+      .join("")}
+    <path d="${area}" fill="url(#ag)"/>
+    <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>
+    <line class="axis" x1="${L}" y1="${T + ph}" x2="${W - R}" y2="${T + ph}"/>
+    ${ticksX
+      .map((d) => `<text class="tick" x="${x(d).toFixed(1)}" y="${H - 12}" text-anchor="middle">−${d}%</text>`)
+      .join("")}
+    <circle cx="${x(last.drop).toFixed(1)}" cy="${y(last.debt).toFixed(1)}" r="4"
+      fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>
+    <line class="crosshair" id="chair" x1="0" y1="${T}" x2="0" y2="${T + ph}" style="opacity:0"/>
+    <rect id="hit" x="${L}" y="${T}" width="${pw}" height="${ph}" fill="transparent" style="cursor:crosshair"/>`;
+
+  const tip = document.getElementById("curveTip");
+  const hit = svg.querySelector("#hit");
+  const chair = svg.querySelector("#chair");
+
+  const move = (evt) => {
+    const r = svg.getBoundingClientRect();
+    const px = ((evt.clientX - r.left) / r.width) * W;
+    const d = Math.round(Math.min(40, Math.max(0, ((px - L) / pw) * 40)));
+    const p = pts[d];
+    chair.setAttribute("x1", x(d));
+    chair.setAttribute("x2", x(d));
+    chair.style.opacity = "1";
+    tip.style.opacity = "1";
+    tip.innerHTML = `<div class="t">XRP −${d}%</div>
+      <div class="l">${fmtUsd(p.debt)} debt liquidated</div>
+      <div class="l">${p.n} position${p.n === 1 ? "" : "s"}</div>`;
+    const relX = (x(d) / W) * r.width;
+    tip.style.left = Math.min(r.width - tip.offsetWidth - 4, Math.max(0, relX + 12)) + "px";
+    tip.style.top = "10px";
+  };
+  hit.addEventListener("mousemove", move);
+  hit.addEventListener("mouseleave", () => {
+    tip.style.opacity = "0";
+    chair.style.opacity = "0";
+  });
+
+  const marks = [5, 10, 15, 20, 25, 30, 40];
+  document.getElementById("curveTable").innerHTML = `
+    <div class="scroll"><table><thead><tr>
+      <th>XRP drop</th><th>Positions</th><th>Debt liquidated</th><th>Penalties</th></tr></thead><tbody>
+      ${marks
+        .map((d) => {
+          const hits = rows.filter((p) => p.k !== null && p.k <= d);
+          return `<tr><td class="num">−${d}%</td><td class="num">${hits.length}</td>
+            <td class="num">${fmtUsd(sum(hits, (p) => p.d))}</td>
+            <td class="num">${fmtUsd(sum(hits, (p) => p.d * p.cf * p.pen))}</td></tr>`;
+        })
+        .join("")}
+    </tbody></table></div>`;
+}
+
+/* ---------------------------------------------------------------- table */
+function renderTable(rows) {
+  const sorted = [...rows].sort((a, b) => {
+    let va = a[sortKey], vb = b[sortKey];
+    if (sortKey === "k") { va = va === null ? Infinity : va; vb = vb === null ? Infinity : vb; }
+    if (typeof va === "string") return va.localeCompare(vb) * sortDir;
+    return (va - vb) * sortDir;
+  });
+  const top = sorted.slice(0, 40);
+
+  document.getElementById("tableSub").textContent =
+    `${top.length} of ${rows.length} positions shown, ordered by ${
+      { h: "health", k: "drop to liquidation", d: "debt", c: "collateral", a: "address", v: "venue" }[sortKey]
+    }`;
+
+  document.getElementById("tbody").innerHTML = top
+    .map((p) => {
+      const b = bucketOf(p.h);
+      return `<tr>
+        <td class="addr" title="${p.a}">${short(p.a)}</td>
+        <td><span class="venue">${p.v}</span></td>
+        <td class="num"><span class="sev"><span class="g" style="background:${b.color}"></span>${p.h.toFixed(3)}</span></td>
+        <td class="num">${p.k === null ? "—" : "−" + p.k.toFixed(1) + "%"}</td>
+        <td class="num">${fmtUsd(p.d)}</td>
+        <td class="num">${fmtUsd(p.c)}</td>
+      </tr>`;
+    })
+    .join("");
+}
+
+/* ---------------------------------------------------------------- render */
+function render() {
+  const rows = view();
+  renderSummary(rows);
+  renderDist(rows);
+  renderCurve(rows);
+  renderTable(rows);
+}
+
+document.getElementById("venueChips").addEventListener("click", (e) => {
+  const btn = e.target.closest(".chip");
+  if (!btn) return;
+  venue = btn.dataset.venue;
+  document.querySelectorAll("#venueChips .chip").forEach((c) =>
+    c.setAttribute("aria-pressed", String(c === btn))
+  );
+  render();
+});
+
+document.querySelectorAll(".th-btn").forEach((btn) =>
+  btn.addEventListener("click", () => {
+    const k = btn.dataset.sort;
+    sortDir = sortKey === k ? -sortDir : k === "d" || k === "c" ? -1 : 1;
+    sortKey = k;
+    document.querySelectorAll(".th-btn").forEach((b) =>
+      b.setAttribute("data-active", String(b === btn))
+    );
+    renderTable(view());
+  })
+);
+
+document.getElementById("tableToggle").addEventListener("click", (e) => {
+  showTables = !showTables;
+  document.getElementById("distTable").hidden = !showTables;
+  document.getElementById("curveTable").hidden = !showTables;
+  document.getElementById("dist").hidden = showTables;
+  document.getElementById("curve").parentElement.hidden = showTables;
+  e.target.setAttribute("aria-pressed", String(showTables));
+  e.target.textContent = showTables ? "Show charts" : "Show chart data as tables";
+});
+
+window.addEventListener("resize", () => renderCurve(view()));
+render();
+</script>
