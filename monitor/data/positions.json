@@ -1,6 +1,6 @@
 [
   {
-    "acct": "0x308e69912d90dbb27e34f65d192ca8f4e13f7982",
+    "acct": "0x308e…7982",
     "health": 1.0038,
     "collUSD": 10.53,
     "debtUSD": 10.49,
@@ -16,7 +16,7 @@
     ]
   },
   {
-    "acct": "0xe7512d41e7388ab9a9927d5248a3fde545e12b1c",
+    "acct": "0xe751…2b1c",
     "health": 1.0089,
     "collUSD": 7.19,
     "debtUSD": 7.12,
@@ -32,7 +32,7 @@
     ]
   },
   {
-    "acct": "0xfda568e301697a4c5ff8c1d204ad1fa7c0289d77",
+    "acct": "0xfda5…9d77",
     "health": 1.015,
     "collUSD": 36271.54,
     "debtUSD": 35736.85,
@@ -48,7 +48,7 @@
     ]
   },
   {
-    "acct": "0x250bd726bbd31a30d6bd3c5a508d487c635e790f",
+    "acct": "0x250b…790f",
     "health": 1.0156,
     "collUSD": 8484.02,
     "debtUSD": 8353.99,
@@ -64,7 +64,7 @@
     ]
   },
   {
-    "acct": "0xce25c9eab2adf1c3e8a9d62df2397f109f29d9c1",
+    "acct": "0xce25…d9c1",
     "health": 1.0231,
     "collUSD": 25.72,
     "debtUSD": 25.14,
@@ -80,7 +80,7 @@
     ]
   },
   {
-    "acct": "0xf6471de2b2216d0f50a65681c52cfa8d04e71358",
+    "acct": "0xf647…1358",
     "health": 1.025,
     "collUSD": 190.61,
     "debtUSD": 185.97,
@@ -96,7 +96,7 @@
     ]
   },
   {
-    "acct": "0xe77ed89481888efe548ea7e189a864bfe05d1ffb",
+    "acct": "0xe77e…1ffb",
     "health": 1.027,
     "collUSD": 1129.81,
     "debtUSD": 1100.14,
@@ -112,7 +112,7 @@
     ]
   },
   {
-    "acct": "0xf09093c0be23a754bc48e8fe19c0872a36d6f0f6",
+    "acct": "0xf090…f0f6",
     "health": 1.0276,
     "collUSD": 431.27,
     "debtUSD": 419.7,
@@ -128,7 +128,7 @@
     ]
   },
   {
-    "acct": "0x2858c435f722f19d09fd17c9f74c2895d3493f6d",
+    "acct": "0x2858…3f6d",
     "health": 1.03,
     "collUSD": 14138.51,
     "debtUSD": 13726.09,
@@ -149,7 +149,7 @@
     ]
   },
   {
-    "acct": "0xed03c28e4fe4d5791296cc9a176b1a02ad59883d",
+    "acct": "0xed03…883d",
     "health": 1.0313,
     "collUSD": 5315.07,
     "debtUSD": 5153.63,
@@ -170,7 +170,7 @@
     ]
   },
   {
-    "acct": "0x0aed36e68a5feb38b0bb92b8ffadd67b088e328f",
+    "acct": "0x0aed…328f",
     "health": 1.0368,
     "collUSD": 21912.41,
     "debtUSD": 21134.52,
@@ -191,7 +191,7 @@
     ]
   },
   {
-    "acct": "0x330e5df351282c934b44c8319ced64f622ef1979",
+    "acct": "0x330e…1979",
     "health": 1.0404,
     "collUSD": 2045.02,
     "debtUSD": 1965.61,
@@ -212,7 +212,7 @@
     ]
   },
   {
-    "acct": "0xba8e0562099224372efe3766b6b9933eb33b9db4",
+    "acct": "0xba8e…9db4",
     "health": 1.0407,
     "collUSD": 2222.42,
     "debtUSD": 2135.6,
@@ -233,7 +233,7 @@
     ]
   },
   {
-    "acct": "0x90f4943c1195675031d2c1a9cdc05e04a89f07a1",
+    "acct": "0x90f4…07a1",
     "health": 1.0506,
     "collUSD": 755751.5,
     "debtUSD": 719370.85,
@@ -254,7 +254,7 @@
     ]
   },
   {
-    "acct": "0x88fd4807c8726c10688f75438a64ca3f6782573b",
+    "acct": "0x88fd…573b",
     "health": 1.0545,
     "collUSD": 7697.6,
     "debtUSD": 7299.72,
@@ -275,7 +275,7 @@
     ]
   },
   {
-    "acct": "0x756835adbf208fea266f556f4fa092150894b069",
+    "acct": "0x7568…b069",
     "health": 1.0586,
     "collUSD": 119071.29,
     "debtUSD": 112478.95,
@@ -301,7 +301,7 @@
     ]
   },
   {
-    "acct": "0x3fc005ff96c410976f3dd7420545b81ad8874305",
+    "acct": "0x3fc0…4305",
     "health": 1.0727,
     "collUSD": 3581.63,
     "debtUSD": 3338.9,
@@ -322,7 +322,7 @@
     ]
   },
   {
-    "acct": "0x42c09d7b142f6a715c15b3e02264456510862da6",
+    "acct": "0x42c0…2da6",
     "health": 1.0808,
     "collUSD": 16967.31,
     "debtUSD": 15698.15,
@@ -343,7 +343,7 @@
     ]
   },
   {
-    "acct": "0x04835da4b30ac297b404bae2ff59cb7ecfa9ff69",
+    "acct": "0x0483…ff69",
     "health": 1.0865,
     "collUSD": 21549.57,
     "debtUSD": 19833.48,
@@ -359,7 +359,7 @@
     ]
   },
   {
-    "acct": "0xb089b83fde5a8274f6827d43dc6d1b28423baa4c",
+    "acct": "0xb089…aa4c",
     "health": 1.0881,
     "collUSD": 10963.47,
     "debtUSD": 10076.1,
@@ -380,7 +380,7 @@
     ]
   },
   {
-    "acct": "0x3a1a409e0fb6280c9e86e4fed96d4b69c2e50f2d",
+    "acct": "0x3a1a…0f2d",
     "health": 1.0883,
     "collUSD": 1200.9,
     "debtUSD": 1103.44,
@@ -401,7 +401,7 @@
     ]
   },
   {
-    "acct": "0xb96fc728e7e619e43dcefc0728b874bff4b8d51a",
+    "acct": "0xb96f…d51a",
     "health": 1.0889,
     "collUSD": 2.27,
     "debtUSD": 2.08,
@@ -422,7 +422,7 @@
     ]
   },
   {
-    "acct": "0x5ff244ac70830273d14a2a665b798214376f044f",
+    "acct": "0x5ff2…044f",
     "health": 1.0904,
     "collUSD": 20765.7,
     "debtUSD": 19043.58,
@@ -443,7 +443,7 @@
     ]
   },
   {
-    "acct": "0x93f1d5fc50e2304de634e8fc7f2f97a5d6f21b6f",
+    "acct": "0x93f1…1b6f",
     "health": 1.0933,
     "collUSD": 4987.2,
     "debtUSD": 4561.45,
@@ -464,7 +464,7 @@
     ]
   },
   {
-    "acct": "0x240626782d4e827c87794399ac159e64a8f4c4af",
+    "acct": "0x2406…c4af",
     "health": 1.0941,
     "collUSD": 51.68,
     "debtUSD": 47.24,
@@ -480,7 +480,7 @@
     ]
   },
   {
-    "acct": "0x2efaf81d668ca9f1a23ac0bdb2a7f91035e715e0",
+    "acct": "0x2efa…15e0",
     "health": 1.0965,
     "collUSD": 2784.15,
     "debtUSD": 2539.02,
@@ -501,7 +501,7 @@
     ]
   },
   {
-    "acct": "0x7f287b5805a399b5705f491c2109ede671eeb097",
+    "acct": "0x7f28…b097",
     "health": 1.0988,
     "collUSD": 55624.23,
     "debtUSD": 50622.17,
@@ -522,7 +522,7 @@
     ]
   },
   {
-    "acct": "0x82df2a3d23d71d8fb418f281e9e1aae0de3e99c1",
+    "acct": "0x82df…99c1",
     "health": 1.1063,
     "collUSD": 378.06,
     "debtUSD": 341.72,
@@ -543,7 +543,7 @@
     ]
   },
   {
-    "acct": "0x2838367e93c476c83bb522a96403e59bd5c819a6",
+    "acct": "0x2838…19a6",
     "health": 1.1144,
     "collUSD": 356.63,
     "debtUSD": 320.02,
@@ -564,7 +564,7 @@
     ]
   },
   {
-    "acct": "0xc01bad29db8644420cedb664e29c49083b3af517",
+    "acct": "0xc01b…f517",
     "health": 1.1159,
     "collUSD": 247,
     "debtUSD": 221.34,
@@ -585,7 +585,7 @@
     ]
   },
   {
-    "acct": "0xf6b38f5042c01071ed32ee1b232fa24e4f91eb06",
+    "acct": "0xf6b3…eb06",
     "health": 1.1234,
     "collUSD": 102.26,
     "debtUSD": 91.02,
@@ -606,7 +606,7 @@
     ]
   },
   {
-    "acct": "0xcd391e89af67abf856a9a5c62f003fd7e526de3f",
+    "acct": "0xcd39…de3f",
     "health": 1.1268,
     "collUSD": 98418.41,
     "debtUSD": 87346.67,
@@ -627,7 +627,7 @@
     ]
   },
   {
-    "acct": "0x03291db934b4a0950ac8edc88f9b90f3b4206ecd",
+    "acct": "0x0329…6ecd",
     "health": 1.1292,
     "collUSD": 604.36,
     "debtUSD": 535.2,
@@ -648,7 +648,7 @@
     ]
   },
   {
-    "acct": "0xe0dfa408a859780bd5fba2e97fbc53c0129ac054",
+    "acct": "0xe0df…c054",
     "health": 1.1313,
     "collUSD": 3504.71,
     "debtUSD": 3097.85,
@@ -669,7 +669,7 @@
     ]
   },
   {
-    "acct": "0x5b75e692c813f4d759ee48bea3e0aa775e6b269f",
+    "acct": "0x5b75…269f",
     "health": 1.1326,
     "collUSD": 1592.08,
     "debtUSD": 1405.69,
@@ -685,7 +685,7 @@
     ]
   },
   {
-    "acct": "0xbd10a197b856bc7883f3e43bdd992a7329c4f1c5",
+    "acct": "0xbd10…f1c5",
     "health": 1.1391,
     "collUSD": 359249.71,
     "debtUSD": 315393.63,
@@ -706,7 +706,7 @@
     ]
   },
   {
-    "acct": "0x05515ed73a941642e4f82a8158beb029ba545899",
+    "acct": "0x0551…5899",
     "health": 1.1395,
     "collUSD": 9485.52,
     "debtUSD": 8324.44,
@@ -727,7 +727,7 @@
     ]
   },
   {
-    "acct": "0xfa28eb69eeff9f9f0643db12534f71efc49e2925",
+    "acct": "0xfa28…2925",
     "health": 1.1398,
     "collUSD": 79.69,
     "debtUSD": 69.91,
@@ -748,7 +748,7 @@
     ]
   },
   {
-    "acct": "0xaaf515981c07682e0466c83086bfa4a2b542c233",
+    "acct": "0xaaf5…c233",
     "health": 1.1406,
     "collUSD": 141.1,
     "debtUSD": 123.71,
@@ -769,7 +769,7 @@
     ]
   },
   {
-    "acct": "0xe667e818f19c3d9379b08758fb65913e8afd277c",
+    "acct": "0xe667…277c",
     "health": 1.1436,
     "collUSD": 24787,
     "debtUSD": 21674.51,
@@ -790,7 +790,7 @@
     ]
   },
   {
-    "acct": "0x28d7fd410f1a658588cd52668590821c76beb723",
+    "acct": "0x28d7…b723",
     "health": 1.144,
     "collUSD": 41.65,
     "debtUSD": 36.41,
@@ -811,7 +811,7 @@
     ]
   },
   {
-    "acct": "0x056c8afe7c061de838055edb2533d12d199fe5de",
+    "acct": "0x056c…e5de",
     "health": 1.1448,
     "collUSD": 31541.55,
     "debtUSD": 27552.87,
@@ -832,7 +832,7 @@
     ]
   },
   {
-    "acct": "0x75d2fe119f3ef1ee0a9e110dcb399bcdcbcf990a",
+    "acct": "0x75d2…990a",
     "health": 1.1472,
     "collUSD": 5489.13,
     "debtUSD": 4784.84,
@@ -848,7 +848,7 @@
     ]
   },
   {
-    "acct": "0x631e0e85ff006d89eb3fad9d9285de07a57f2712",
+    "acct": "0x631e…2712",
     "health": 1.1495,
     "collUSD": 1994.03,
     "debtUSD": 1734.62,
@@ -869,7 +869,7 @@
     ]
   },
   {
-    "acct": "0xe5defbaa0ba5c0c50b8e63414746c92b65852da6",
+    "acct": "0xe5de…2da6",
     "health": 1.1513,
     "collUSD": 15873.22,
     "debtUSD": 13787.54,
@@ -890,7 +890,7 @@
     ]
   },
   {
-    "acct": "0x612abfe54269515f0cc63b4a12fee32d48889ff2",
+    "acct": "0x612a…9ff2",
     "health": 1.1581,
     "collUSD": 387.17,
     "debtUSD": 334.3,
@@ -911,7 +911,7 @@
     ]
   },
   {
-    "acct": "0xa7ece0230b9cdad343b4812b09d1c1a29dd68b81",
+    "acct": "0xa7ec…8b81",
     "health": 1.1604,
     "collUSD": 2688.71,
     "debtUSD": 2317.06,
@@ -932,7 +932,7 @@
     ]
   },
   {
-    "acct": "0x1df85d4f7e20f5bc31fd1bc3ffb841d4573e865b",
+    "acct": "0x1df8…865b",
     "health": 1.1623,
     "collUSD": 414.35,
     "debtUSD": 356.48,
@@ -953,7 +953,7 @@
     ]
   },
   {
-    "acct": "0x363b93f08ac91e18ebd72895e3f66c2927eb4869",
+    "acct": "0x363b…4869",
     "health": 1.1628,
     "collUSD": 32122.57,
     "debtUSD": 27624.27,
@@ -974,7 +974,7 @@
     ]
   },
   {
-    "acct": "0x0de117db57ef47646825971029814d32000addd9",
+    "acct": "0x0de1…ddd9",
     "health": 1.1685,
     "collUSD": 2661.83,
     "debtUSD": 2278.04,
@@ -995,7 +995,7 @@
     ]
   },
   {
-    "acct": "0x78d49a21f0e76466341db1700ee7f32717aa0149",
+    "acct": "0x78d4…0149",
     "health": 1.1737,
     "collUSD": 21801.69,
     "debtUSD": 18574.84,
@@ -1016,7 +1016,7 @@
     ]
   },
   {
-    "acct": "0xb20e4378814a90df93d91626c02d4b2e17b7f1ef",
+    "acct": "0xb20e…f1ef",
     "health": 1.1739,
     "collUSD": 26628.5,
     "debtUSD": 22683.99,
@@ -1037,7 +1037,7 @@
     ]
   },
   {
-    "acct": "0xbb5d708b8a262eddc9b77237c3796d5e72184a0a",
+    "acct": "0xbb5d…4a0a",
     "health": 1.1783,
     "collUSD": 37.66,
     "debtUSD": 31.96,
@@ -1053,7 +1053,7 @@
     ]
   },
   {
-    "acct": "0x89c1862f99ab53dcef340ea9784e523fa6d2355d",
+    "acct": "0x89c1…355d",
     "health": 1.1787,
     "collUSD": 4774.79,
     "debtUSD": 4050.74,
@@ -1074,7 +1074,7 @@
     ]
   },
   {
-    "acct": "0x2d0283c73a5cdd10bc42bf6817067512616e595e",
+    "acct": "0x2d02…595e",
     "health": 1.1796,
     "collUSD": 2123.91,
     "debtUSD": 1800.49,
@@ -1095,7 +1095,7 @@
     ]
   },
   {
-    "acct": "0x4358ff2830091146d19b58b5d6f0ed0aba6f910f",
+    "acct": "0x4358…910f",
     "health": 1.1822,
     "collUSD": 7.23,
     "debtUSD": 6.11,
@@ -1116,7 +1116,7 @@
     ]
   },
   {
-    "acct": "0x6b80019269041abc0942ba006baf25feee6578c3",
+    "acct": "0x6b80…78c3",
     "health": 1.183,
     "collUSD": 773.57,
     "debtUSD": 653.92,
@@ -1137,7 +1137,7 @@
     ]
   },
   {
-    "acct": "0x6bc14a99ccf7f9037c98d75eec6c6d807f9d953f",
+    "acct": "0x6bc1…953f",
     "health": 1.184,
     "collUSD": 3394.53,
     "debtUSD": 2866.96,
@@ -1158,7 +1158,7 @@
     ]
   },
   {
-    "acct": "0x0c885f212a22072eee56e8f74e5ff23b844afe48",
+    "acct": "0x0c88…fe48",
     "health": 1.1843,
     "collUSD": 1908.95,
     "debtUSD": 1611.89,
@@ -1179,7 +1179,7 @@
     ]
   },
   {
-    "acct": "0xf8161dbfbdc43d2b50b8d668b243d216cb5d24c0",
+    "acct": "0xf816…24c0",
     "health": 1.1924,
     "collUSD": 170050.67,
     "debtUSD": 142610.26,
@@ -1200,7 +1200,7 @@
     ]
   },
   {
-    "acct": "0x4f9d527c63017e4f8930e90bd04ce1ce765f7f95",
+    "acct": "0x4f9d…7f95",
     "health": 1.1938,
     "collUSD": 709.51,
     "debtUSD": 594.33,
@@ -1221,7 +1221,7 @@
     ]
   },
   {
-    "acct": "0x13c7efd28f55f79531e91062a01bb2058c6cfbf5",
+    "acct": "0x13c7…fbf5",
     "health": 1.1947,
     "collUSD": 2.1,
     "debtUSD": 1.76,
@@ -1242,7 +1242,7 @@
     ]
   },
   {
-    "acct": "0xc8b1a6306d88c2cabd625a9693e14891d7a1d2dc",
+    "acct": "0xc8b1…d2dc",
     "health": 1.196,
     "collUSD": 52.56,
     "debtUSD": 43.95,
@@ -1263,7 +1263,7 @@
     ]
   },
   {
-    "acct": "0x0a5503e0473cd774acc7026b4af574740b67da22",
+    "acct": "0x0a55…da22",
     "health": 1.1966,
     "collUSD": 11991.57,
     "debtUSD": 10021.71,
@@ -1284,7 +1284,7 @@
     ]
   },
   {
-    "acct": "0xd4ce022e11f1c5213bd51bd669d03fa1c7015c6e",
+    "acct": "0xd4ce…5c6e",
     "health": 1.2016,
     "collUSD": 5454.77,
     "debtUSD": 4539.45,
@@ -1305,7 +1305,7 @@
     ]
   },
   {
-    "acct": "0x7343f2dce7ad6bcf8a9df903d0c4b6e22a766290",
+    "acct": "0x7343…6290",
     "health": 1.2042,
     "collUSD": 1439.73,
     "debtUSD": 1195.61,
@@ -1321,7 +1321,7 @@
     ]
   },
   {
-    "acct": "0x3d06a43c75a168143c96351a6892d862ed255d7c",
+    "acct": "0x3d06…5d7c",
     "health": 1.2056,
     "collUSD": 1059.48,
     "debtUSD": 878.83,
@@ -1342,7 +1342,7 @@
     ]
   },
   {
-    "acct": "0x67257ee0fc1c11260c8e1db2fde6465fb7045a88",
+    "acct": "0x6725…5a88",
     "health": 1.2058,
     "collUSD": 4.15,
     "debtUSD": 3.44,
@@ -1363,7 +1363,7 @@
     ]
   },
   {
-    "acct": "0xba49cd3db8164be7b1261e7941d2c8d1210a4cdd",
+    "acct": "0xba49…4cdd",
     "health": 1.2073,
     "collUSD": 36.99,
     "debtUSD": 30.64,
@@ -1379,7 +1379,7 @@
     ]
   },
   {
-    "acct": "0xc037375ef5332e91d0cf30f416632193d4a073f8",
+    "acct": "0xc037…73f8",
     "health": 1.2078,
     "collUSD": 9394.82,
     "debtUSD": 7778.39,
@@ -1400,7 +1400,7 @@
     ]
   },
   {
-    "acct": "0xa6ab6ee9921d7ccc1b5c507e209fd1280645d1c9",
+    "acct": "0xa6ab…d1c9",
     "health": 1.2093,
     "collUSD": 21234.7,
     "debtUSD": 17558.83,
@@ -1421,7 +1421,7 @@
     ]
   },
   {
-    "acct": "0x49a753cd648e331ba42c59def744628ad2e60594",
+    "acct": "0x49a7…0594",
     "health": 1.2117,
     "collUSD": 3958.86,
     "debtUSD": 3267.08,
@@ -1442,7 +1442,7 @@
     ]
   },
   {
-    "acct": "0x3ff3fe3d3244c56ca409023966b625d5f36b9534",
+    "acct": "0x3ff3…9534",
     "health": 1.2155,
     "collUSD": 247.2,
     "debtUSD": 203.37,
@@ -1463,7 +1463,7 @@
     ]
   },
   {
-    "acct": "0xe6d319c1a292b0c9b16658ae865b65a23db3ef2a",
+    "acct": "0xe6d3…ef2a",
     "health": 1.2169,
     "collUSD": 30.24,
     "debtUSD": 24.85,
@@ -1479,7 +1479,7 @@
     ]
   },
   {
-    "acct": "0x30f7b1c53a7c2583c2d3b51277bd6e0e90b2db8d",
+    "acct": "0x30f7…db8d",
     "health": 1.2183,
     "collUSD": 64354.85,
     "debtUSD": 52824.22,
@@ -1500,7 +1500,7 @@
     ]
   },
   {
-    "acct": "0x8e229020ebfc61dba9f51e9435b9d3ddcc99e85d",
+    "acct": "0x8e22…e85d",
     "health": 1.219,
     "collUSD": 84.07,
     "debtUSD": 68.97,
@@ -1521,7 +1521,7 @@
     ]
   },
   {
-    "acct": "0xca1ca9d4eae7ebed4d0f18edd5a469865cb3869d",
+    "acct": "0xca1c…869d",
     "health": 1.2193,
     "collUSD": 1123.06,
     "debtUSD": 921.06,
@@ -1542,7 +1542,7 @@
     ]
   },
   {
-    "acct": "0x489c82a82030b1197eb812f2a5a4dc7ec542b741",
+    "acct": "0x489c…b741",
     "health": 1.2207,
     "collUSD": 70516.44,
     "debtUSD": 57769.46,
@@ -1563,7 +1563,7 @@
     ]
   },
   {
-    "acct": "0x2f766abd3faa749929633a76b7de86707c5aebdf",
+    "acct": "0x2f76…ebdf",
     "health": 1.2269,
     "collUSD": 106667.42,
     "debtUSD": 86938.56,
@@ -1584,7 +1584,7 @@
     ]
   },
   {
-    "acct": "0x4e6caba1aca9e1448f6488f6708c60c03531a7a3",
+    "acct": "0x4e6c…a7a3",
     "health": 1.227,
     "collUSD": 581.89,
     "debtUSD": 474.25,
@@ -1605,7 +1605,7 @@
     ]
   },
   {
-    "acct": "0x40ac17368eb76356d305586596b6ff5a5a1d1cd6",
+    "acct": "0x40ac…1cd6",
     "health": 1.2278,
     "collUSD": 30.77,
     "debtUSD": 25.06,
@@ -1621,7 +1621,7 @@
     ]
   },
   {
-    "acct": "0x0b15463c669f72af121050c2adbf78352afbf23c",
+    "acct": "0x0b15…f23c",
     "health": 1.2344,
     "collUSD": 60.48,
     "debtUSD": 48.99,
@@ -1637,7 +1637,7 @@
     ]
   },
   {
-    "acct": "0xa57c58b4bf8e84d18286af123aaf5fcda29de05e",
+    "acct": "0xa57c…e05e",
     "health": 1.2354,
     "collUSD": 3.78,
     "debtUSD": 3.06,
@@ -1653,7 +1653,7 @@
     ]
   },
   {
-    "acct": "0xca27b3cb98dbef164eda97e23ac4b4fcb6d4ccd4",
+    "acct": "0xca27…ccd4",
     "health": 1.2415,
     "collUSD": 224.48,
     "debtUSD": 180.81,
@@ -1669,7 +1669,7 @@
     ]
   },
   {
-    "acct": "0xbe17b51cc2161e6c5e0e6edde4f611368c9d010f",
+    "acct": "0xbe17…010f",
     "health": 1.2439,
     "collUSD": 47607.06,
     "debtUSD": 38271.92,
@@ -1690,7 +1690,7 @@
     ]
   },
   {
-    "acct": "0xc12545ee43325b66f9b58e16d0e6cacc9e3397c5",
+    "acct": "0xc125…97c5",
     "health": 1.2445,
     "collUSD": 34.02,
     "debtUSD": 27.34,
@@ -1706,7 +1706,7 @@
     ]
   },
   {
-    "acct": "0x7faae4fc08de79b30f915fecd9ca07f8c5629c94",
+    "acct": "0x7faa…9c94",
     "health": 1.2467,
     "collUSD": 34.12,
     "debtUSD": 27.37,
@@ -1722,7 +1722,7 @@
     ]
   },
   {
-    "acct": "0x209d65ed4d6e6ef32ed5e79e01f02f8775219ef6",
+    "acct": "0x209d…9ef6",
     "health": 1.2475,
     "collUSD": 38,
     "debtUSD": 30.46,
@@ -1743,7 +1743,7 @@
     ]
   },
   {
-    "acct": "0xbd5dcde9541b92cd2f1802cf715578cb12ded885",
+    "acct": "0xbd5d…d885",
     "health": 1.2478,
     "collUSD": 54845.6,
     "debtUSD": 43953.99,
@@ -1764,7 +1764,7 @@
     ]
   },
   {
-    "acct": "0x8581a3343b6777f93dcdac9279fe1a8e17a26ee1",
+    "acct": "0x8581…6ee1",
     "health": 1.2494,
     "collUSD": 101.6,
     "debtUSD": 81.32,
@@ -1780,7 +1780,7 @@
     ]
   },
   {
-    "acct": "0x3629311188d077b17a73d1af893d716c0d5296f0",
+    "acct": "0x3629…96f0",
     "health": 1.2516,
     "collUSD": 2010.74,
     "debtUSD": 1606.53,
@@ -1801,7 +1801,7 @@
     ]
   },
   {
-    "acct": "0x5a9543e76ce514b2ee3492cd91220ffcadca997f",
+    "acct": "0x5a95…997f",
     "health": 1.2527,
     "collUSD": 15.12,
     "debtUSD": 12.07,
@@ -1822,7 +1822,7 @@
     ]
   },
   {
-    "acct": "0x0820c4c95130219667570151b2adc032a0167960",
+    "acct": "0x0820…7960",
     "health": 1.2706,
     "collUSD": 4545.52,
     "debtUSD": 3577.49,
@@ -1843,7 +1843,7 @@
     ]
   },
   {
-    "acct": "0xc180a0e8824bb495bbe4bb8e5749351e0c689697",
+    "acct": "0xc180…9697",
     "health": 1.2711,
     "collUSD": 1166.42,
     "debtUSD": 917.68,
@@ -1864,7 +1864,7 @@
     ]
   },
   {
-    "acct": "0x9db221b200f326b807eba03a74f22a9f7b8954d7",
+    "acct": "0x9db2…54d7",
     "health": 1.275,
     "collUSD": 680.37,
     "debtUSD": 533.63,
@@ -1885,7 +1885,7 @@
     ]
   },
   {
-    "acct": "0xfc447a9af520cd92cfa6ae3d722efe24051b5db6",
+    "acct": "0xfc44…5db6",
     "health": 1.2753,
     "collUSD": 3.91,
     "debtUSD": 3.07,
@@ -1906,7 +1906,7 @@
     ]
   },
   {
-    "acct": "0xb1ee43be96d165bddd917bf134295cab76c52eb6",
+    "acct": "0xb1ee…2eb6",
     "health": 1.2844,
     "collUSD": 1.52,
     "debtUSD": 1.18,
@@ -1927,7 +1927,7 @@
     ]
   },
   {
-    "acct": "0x39da35d8a14e439a3b6ec8369b6cc9acf634c955",
+    "acct": "0x39da…c955",
     "health": 1.2847,
     "collUSD": 7946.9,
     "debtUSD": 6185.57,
@@ -1948,7 +1948,7 @@
     ]
   },
   {
-    "acct": "0x51bd04116be936e77a2911a83a02bde45d5cf23f",
+    "acct": "0x51bd…f23f",
     "health": 1.2931,
     "collUSD": 574.4,
     "debtUSD": 444.21,
@@ -1969,7 +1969,7 @@
     ]
   },
   {
-    "acct": "0x950a17ad069080bf4bccfce91e6bbab9e3fc7396",
+    "acct": "0x950a…7396",
     "health": 1.2934,
     "collUSD": 1496.26,
     "debtUSD": 1156.89,
@@ -1990,7 +1990,7 @@
     ]
   },
   {
-    "acct": "0x3fdc903e0901f566fce69d937978671412c31eba",
+    "acct": "0x3fdc…1eba",
     "health": 1.2941,
     "collUSD": 3448.88,
     "debtUSD": 2665.1,
@@ -2011,7 +2011,7 @@
     ]
   },
   {
-    "acct": "0x7c7b13fc204311ea12a2f8f4ba78e5459d6c0368",
+    "acct": "0x7c7b…0368",
     "health": 1.2942,
     "collUSD": 19784.78,
     "debtUSD": 15287.18,
@@ -2032,7 +2032,7 @@
     ]
   },
   {
-    "acct": "0x203832c4de17b790e645377c1fe1c7ce4c392071",
+    "acct": "0x2038…2071",
     "health": 1.3027,
     "collUSD": 7116.67,
     "debtUSD": 5463.13,
@@ -2053,7 +2053,7 @@
     ]
   },
   {
-    "acct": "0xce4adaf0654d31167fb175d6a2076b9b434e39d8",
+    "acct": "0xce4a…39d8",
     "health": 1.3113,
     "collUSD": 5210.42,
     "debtUSD": 3973.52,
@@ -2074,7 +2074,7 @@
     ]
   },
   {
-    "acct": "0xb8f4c4a2185a49bd43b512b9ad4d28a89827180a",
+    "acct": "0xb8f4…180a",
     "health": 1.3134,
     "collUSD": 8.04,
     "debtUSD": 6.12,
@@ -2090,7 +2090,7 @@
     ]
   },
   {
-    "acct": "0xb7a0c8edb0b5353b943bc32703c962890ea1da47",
+    "acct": "0xb7a0…da47",
     "health": 1.3178,
     "collUSD": 193.98,
     "debtUSD": 147.2,
@@ -2111,7 +2111,7 @@
     ]
   },
   {
-    "acct": "0x5acdc0d3803b7649974a274b9417a51e97382386",
+    "acct": "0x5acd…2386",
     "health": 1.3181,
     "collUSD": 10431.24,
     "debtUSD": 7913.69,
@@ -2132,7 +2132,7 @@
     ]
   },
   {
-    "acct": "0xc00ad4001ac25839c5308d22d49bc3debdb25e64",
+    "acct": "0xc00a…5e64",
     "health": 1.3184,
     "collUSD": 241236.49,
     "debtUSD": 182973.47,
@@ -2153,7 +2153,7 @@
     ]
   },
   {
-    "acct": "0xbe3f82034778fbf474060f7d4a032f592559ab4d",
+    "acct": "0xbe3f…ab4d",
     "health": 1.3208,
     "collUSD": 2116.86,
     "debtUSD": 1602.75,
@@ -2174,7 +2174,7 @@
     ]
   },
   {
-    "acct": "0xc2a016b4ae5eda94566eae426ded73609ae6d04b",
+    "acct": "0xc2a0…d04b",
     "health": 1.3217,
     "collUSD": 442.86,
     "debtUSD": 335.06,
@@ -2190,7 +2190,7 @@
     ]
   },
   {
-    "acct": "0xf46af1301339671d9e04cc38b236a8374e4e8d1e",
+    "acct": "0xf46a…8d1e",
     "health": 1.3236,
     "collUSD": 550.1,
     "debtUSD": 415.61,
@@ -2211,7 +2211,7 @@
     ]
   },
   {
-    "acct": "0xe895e4504ed2b58c51ffd14f8ce479639bbb570d",
+    "acct": "0xe895…570d",
     "health": 1.3329,
     "collUSD": 817.21,
     "debtUSD": 613.08,
@@ -2227,7 +2227,7 @@
     ]
   },
   {
-    "acct": "0x18ef2000fda8d2b5c26bfb22120feaca238bfa7b",
+    "acct": "0x18ef…fa7b",
     "health": 1.3331,
     "collUSD": 5153.34,
     "debtUSD": 3865.55,
@@ -2248,7 +2248,7 @@
     ]
   },
   {
-    "acct": "0xa5faee4b1ce81b7ae9d6efa25c48ed6d8efed620",
+    "acct": "0xa5fa…d620",
     "health": 1.3446,
     "collUSD": 2778.07,
     "debtUSD": 2066.07,
@@ -2269,7 +2269,7 @@
     ]
   },
   {
-    "acct": "0xf5fa3d9c6070de39a9790c2af81451c1cc4ae211",
+    "acct": "0xf5fa…e211",
     "health": 1.3455,
     "collUSD": 287.56,
     "debtUSD": 213.72,
@@ -2290,7 +2290,7 @@
     ]
   },
   {
-    "acct": "0xe2f8bd822b1b656bc2eae4b77dd87ae43fac05a6",
+    "acct": "0xe2f8…05a6",
     "health": 1.3456,
     "collUSD": 317.5,
     "debtUSD": 235.95,
@@ -2311,7 +2311,7 @@
     ]
   },
   {
-    "acct": "0x3c3679c15853092012afbc0b6e7a866ed3a3da40",
+    "acct": "0x3c36…da40",
     "health": 1.3466,
     "collUSD": 1403.48,
     "debtUSD": 1042.26,
@@ -2332,7 +2332,7 @@
     ]
   },
   {
-    "acct": "0x0191b183c61d8cc2aece340f82d2c1cb5b28d84a",
+    "acct": "0x0191…d84a",
     "health": 1.3477,
     "collUSD": 28214.01,
     "debtUSD": 20935.15,
@@ -2353,7 +2353,7 @@
     ]
   },
   {
-    "acct": "0xa7a6e2224b9ebff6a45b4e7eb996e13645e83a01",
+    "acct": "0xa7a6…3a01",
     "health": 1.3501,
     "collUSD": 93871.85,
     "debtUSD": 69530.72,
@@ -2374,7 +2374,7 @@
     ]
   },
   {
-    "acct": "0x9f323e9a5c679ed7d80cddeaecd1e63868575853",
+    "acct": "0x9f32…5853",
     "health": 1.3501,
     "collUSD": 209.33,
     "debtUSD": 155.04,
@@ -2390,7 +2390,7 @@
     ]
   },
   {
-    "acct": "0xcab99b7f6a9e464f21a8196a633fb2d5e78dd616",
+    "acct": "0xcab9…d616",
     "health": 1.3524,
     "collUSD": 1449.45,
     "debtUSD": 1071.8,
@@ -2411,7 +2411,7 @@
     ]
   },
   {
-    "acct": "0x4ab66773384656b59b3f5253cadb819592a8d087",
+    "acct": "0x4ab6…d087",
     "health": 1.3542,
     "collUSD": 5315.85,
     "debtUSD": 3925.31,
@@ -2432,7 +2432,7 @@
     ]
   },
   {
-    "acct": "0xadeed59f446cb0a141837e8f7c22710d759cba65",
+    "acct": "0xadee…ba65",
     "health": 1.3586,
     "collUSD": 1964852.7,
     "debtUSD": 1446233.78,
@@ -2453,7 +2453,7 @@
     ]
   },
   {
-    "acct": "0x058ffd3c43b697c0849c13139dd0020e2cdcb3e2",
+    "acct": "0x058f…b3e2",
     "health": 1.3589,
     "collUSD": 77.52,
     "debtUSD": 57.05,
@@ -2474,7 +2474,7 @@
     ]
   },
   {
-    "acct": "0x462872f9f2ff8e57a76f64eb06274827fcd89bd3",
+    "acct": "0x4628…9bd3",
     "health": 1.3624,
     "collUSD": 961.98,
     "debtUSD": 706.09,
@@ -2495,7 +2495,7 @@
     ]
   },
   {
-    "acct": "0x97f87ddeef586f0719ebbb865afa79c1c29ca616",
+    "acct": "0x97f8…a616",
     "health": 1.3651,
     "collUSD": 106140.38,
     "debtUSD": 77754.48,
@@ -2516,7 +2516,7 @@
     ]
   },
   {
-    "acct": "0x3ba548a19765f36cdcbcd18212e75770d1117344",
+    "acct": "0x3ba5…7344",
     "health": 1.3751,
     "collUSD": 149.92,
     "debtUSD": 109.02,
@@ -2532,7 +2532,7 @@
     ]
   },
   {
-    "acct": "0xe8aabf166bbe8b075052ecb4ebbf2bc01bfc6d3e",
+    "acct": "0xe8aa…6d3e",
     "health": 1.3759,
     "collUSD": 2095.1,
     "debtUSD": 1522.73,
@@ -2553,7 +2553,7 @@
     ]
   },
   {
-    "acct": "0xe156a1be244e72ef3b1292a86308fa5478ae4499",
+    "acct": "0xe156…4499",
     "health": 1.3776,
     "collUSD": 79993.49,
     "debtUSD": 58067.96,
@@ -2574,7 +2574,7 @@
     ]
   },
   {
-    "acct": "0x25eb5cbcbb57793496f2618898acd842c81b5e9b",
+    "acct": "0x25eb…5e9b",
     "health": 1.3788,
     "collUSD": 3714.88,
     "debtUSD": 2694.33,
@@ -2595,7 +2595,7 @@
     ]
   },
   {
-    "acct": "0x6fa3f866c185b29901ac1eca99957866e5c67caa",
+    "acct": "0x6fa3…7caa",
     "health": 1.3829,
     "collUSD": 8241.93,
     "debtUSD": 5959.94,
@@ -2621,7 +2621,7 @@
     ]
   },
   {
-    "acct": "0xfc2d2fc56370bdf666de5602e5d7fd8a3a21fffc",
+    "acct": "0xfc2d…fffc",
     "health": 1.3869,
     "collUSD": 4542.26,
     "debtUSD": 3275.12,
@@ -2642,7 +2642,7 @@
     ]
   },
   {
-    "acct": "0x4e6e687e20f70c78e87f9ffbc61543d8866ba974",
+    "acct": "0x4e6e…a974",
     "health": 1.3886,
     "collUSD": 1.51,
     "debtUSD": 1.09,
@@ -2658,7 +2658,7 @@
     ]
   },
   {
-    "acct": "0x9e24a36a2a31afc5cf5a7b6679280fb3107d16f1",
+    "acct": "0x9e24…16f1",
     "health": 1.3909,
     "collUSD": 10706.33,
     "debtUSD": 7697.66,
@@ -2684,7 +2684,7 @@
     ]
   },
   {
-    "acct": "0x13e76a6ca3e070d0920c49f1abc8eb91a386faed",
+    "acct": "0x13e7…faed",
     "health": 1.3991,
     "collUSD": 86.84,
     "debtUSD": 62.07,
@@ -2705,7 +2705,7 @@
     ]
   },
   {
-    "acct": "0xde8a562f4d90932d6acccb70425d00685f70f3d5",
+    "acct": "0xde8a…f3d5",
     "health": 1.3995,
     "collUSD": 92.61,
     "debtUSD": 66.17,
@@ -2726,7 +2726,7 @@
     ]
   },
   {
-    "acct": "0x21cfc00363c51d0fe65539b166839e76acbe1a46",
+    "acct": "0x21cf…1a46",
     "health": 1.4093,
     "collUSD": 38.56,
     "debtUSD": 27.36,
@@ -2747,7 +2747,7 @@
     ]
   },
   {
-    "acct": "0x5ab06bd9453028c553d7203ef612b1200ff34fa2",
+    "acct": "0x5ab0…4fa2",
     "health": 1.4103,
     "collUSD": 7332.46,
     "debtUSD": 5199.31,
@@ -2768,7 +2768,7 @@
     ]
   },
   {
-    "acct": "0xddd590c1ea303da2b5ad1c8a02dd31b8937e8a3a",
+    "acct": "0xddd5…8a3a",
     "health": 1.4166,
     "collUSD": 635.01,
     "debtUSD": 448.25,
@@ -2789,7 +2789,7 @@
     ]
   },
   {
-    "acct": "0x87f6653357c41ad6549bc214fba33f5c5214ccf1",
+    "acct": "0x87f6…ccf1",
     "health": 1.4173,
     "collUSD": 11018.32,
     "debtUSD": 7774.18,
@@ -2810,7 +2810,7 @@
     ]
   },
   {
-    "acct": "0xa88fc4c46831e1519651ba37ea4b7306adc7d017",
+    "acct": "0xa88f…d017",
     "health": 1.4202,
     "collUSD": 75583.14,
     "debtUSD": 53221.44,
@@ -2831,7 +2831,7 @@
     ]
   },
   {
-    "acct": "0x166d5d6057fe0c046b239ea9cca48020255750f4",
+    "acct": "0x166d…50f4",
     "health": 1.4241,
     "collUSD": 1549.78,
     "debtUSD": 1088.22,
@@ -2852,7 +2852,7 @@
     ]
   },
   {
-    "acct": "0xa7580b185b2f37930ce8b1d1847f3cd860f10f69",
+    "acct": "0xa758…0f69",
     "health": 1.4304,
     "collUSD": 309.93,
     "debtUSD": 216.68,
@@ -2873,7 +2873,7 @@
     ]
   },
   {
-    "acct": "0x544512ad8174edd73f79159e70ebe0ecad568930",
+    "acct": "0x5445…8930",
     "health": 1.4308,
     "collUSD": 2649.99,
     "debtUSD": 1852.14,
@@ -2894,7 +2894,7 @@
     ]
   },
   {
-    "acct": "0x1090bbc15bd50dc42243e60be2a561daf86109fe",
+    "acct": "0x1090…09fe",
     "health": 1.4326,
     "collUSD": 457.66,
     "debtUSD": 319.46,
@@ -2915,7 +2915,7 @@
     ]
   },
   {
-    "acct": "0x05e96ea34dea6120c8a8306178ac847fbe29189e",
+    "acct": "0x05e9…189e",
     "health": 1.4341,
     "collUSD": 10356.01,
     "debtUSD": 7221.14,
@@ -2936,7 +2936,7 @@
     ]
   },
   {
-    "acct": "0x477da26d3c1879215d924897202f0b3d663b8555",
+    "acct": "0x477d…8555",
     "health": 1.4369,
     "collUSD": 47582.71,
     "debtUSD": 33115.53,
@@ -2957,7 +2957,7 @@
     ]
   },
   {
-    "acct": "0x7c5c77ab20bdf0cb691d9036f230566e1b5dfde2",
+    "acct": "0x7c5c…fde2",
     "health": 1.4373,
     "collUSD": 7098.49,
     "debtUSD": 4938.72,
@@ -2978,7 +2978,7 @@
     ]
   },
   {
-    "acct": "0x5fcfb123554fc389251b5829f77ee42e2adc0f61",
+    "acct": "0x5fcf…0f61",
     "health": 1.4404,
     "collUSD": 210.16,
     "debtUSD": 145.9,
@@ -2999,7 +2999,7 @@
     ]
   },
   {
-    "acct": "0x81a187e9f652001426df8232a2863cc2a30b4223",
+    "acct": "0x81a1…4223",
     "health": 1.4413,
     "collUSD": 7741.94,
     "debtUSD": 5371.51,
@@ -3020,7 +3020,7 @@
     ]
   },
   {
-    "acct": "0xbe12a5213c04fd2202c47f65ae5160221b740477",
+    "acct": "0xbe12…0477",
     "health": 1.4419,
     "collUSD": 6197.23,
     "debtUSD": 4297.82,
@@ -3041,7 +3041,7 @@
     ]
   },
   {
-    "acct": "0x3d761f3c45a1a3eab4765bb7e8972798c6fcde92",
+    "acct": "0x3d76…de92",
     "health": 1.4454,
     "collUSD": 7302.85,
     "debtUSD": 5052.61,
@@ -3062,7 +3062,7 @@
     ]
   },
   {
-    "acct": "0xebe437724b7ab99f27eaf85f38aab0119c6fe476",
+    "acct": "0xebe4…e476",
     "health": 1.4502,
     "collUSD": 152.02,
     "debtUSD": 104.83,
@@ -3083,7 +3083,7 @@
     ]
   },
   {
-    "acct": "0xc341c4898fea0d5f527ddca2a4dc1e6edab09ecc",
+    "acct": "0xc341…9ecc",
     "health": 1.4562,
     "collUSD": 10500.2,
     "debtUSD": 7210.78,
@@ -3104,7 +3104,7 @@
     ]
   },
   {
-    "acct": "0xf5ea27b88974c693f684ca3e7f581652e4327ad9",
+    "acct": "0xf5ea…7ad9",
     "health": 1.4574,
     "collUSD": 26.31,
     "debtUSD": 18.05,
@@ -3120,7 +3120,7 @@
     ]
   },
   {
-    "acct": "0x615b0f0620c02eca95b313762cce9c1c8c620998",
+    "acct": "0x615b…0998",
     "health": 1.4587,
     "collUSD": 1942.77,
     "debtUSD": 1331.85,
@@ -3141,7 +3141,7 @@
     ]
   },
   {
-    "acct": "0x19dacf0c7404241c8323defd08e58c55820afd2f",
+    "acct": "0x19da…fd2f",
     "health": 1.4618,
     "collUSD": 37788.87,
     "debtUSD": 25850.94,
@@ -3157,7 +3157,7 @@
     ]
   },
   {
-    "acct": "0x29f748e18c46412fc2d839d6b5172d6f96d0e5b5",
+    "acct": "0x29f7…e5b5",
     "health": 1.4632,
     "collUSD": 4106.08,
     "debtUSD": 2806.19,
@@ -3178,7 +3178,7 @@
     ]
   },
   {
-    "acct": "0xb0364f7739a0bf119e528c1b6e3a59f8a06df11b",
+    "acct": "0xb036…f11b",
     "health": 1.4645,
     "collUSD": 5696.12,
     "debtUSD": 3889.6,
@@ -3199,7 +3199,7 @@
     ]
   },
   {
-    "acct": "0x9795c4f39f567fcdd723c6ff6d0b25ad5b99d8cc",
+    "acct": "0x9795…d8cc",
     "health": 1.4649,
     "collUSD": 7694.99,
     "debtUSD": 5253.07,
@@ -3220,7 +3220,7 @@
     ]
   },
   {
-    "acct": "0xabd99d9af2795adebfd69968fec4f81b3d1bb273",
+    "acct": "0xabd9…b273",
     "health": 1.4681,
     "collUSD": 10726.37,
     "debtUSD": 7306.23,
@@ -3236,7 +3236,7 @@
     ]
   },
   {
-    "acct": "0x08296e09b0e5a24445bf77d8a443580b82128f95",
+    "acct": "0x0829…8f95",
     "health": 1.4725,
     "collUSD": 23296.85,
     "debtUSD": 15820.94,
@@ -3257,7 +3257,7 @@
     ]
   },
   {
-    "acct": "0x0a5a4b83a2d4b3755ba7d34322aa3b76b2edd6eb",
+    "acct": "0x0a5a…d6eb",
     "health": 1.476,
     "collUSD": 79544.53,
     "debtUSD": 53892.1,
@@ -3278,7 +3278,7 @@
     ]
   },
   {
-    "acct": "0x0dcda42e1193054367d026b662593c843e8cc7ce",
+    "acct": "0x0dcd…c7ce",
     "health": 1.4842,
     "collUSD": 2562.31,
     "debtUSD": 1726.4,
@@ -3299,7 +3299,7 @@
     ]
   },
   {
-    "acct": "0xff450fd64ac7586d8ca3a326855d874a828bd971",
+    "acct": "0xff45…d971",
     "health": 1.4848,
     "collUSD": 31629.89,
     "debtUSD": 21302.38,
@@ -3320,7 +3320,7 @@
     ]
   },
   {
-    "acct": "0x672b2108327e4f1007660b2ce3c03bfe62b92923",
+    "acct": "0x672b…2923",
     "health": 1.4857,
     "collUSD": 196.18,
     "debtUSD": 132.05,
@@ -3341,7 +3341,7 @@
     ]
   },
   {
-    "acct": "0x5d0ca3b33d0d915a0cef127442d7a0ebcc3e9151",
+    "acct": "0x5d0c…9151",
     "health": 1.4925,
     "collUSD": 803303.6,
     "debtUSD": 538219.94,
@@ -3362,7 +3362,7 @@
     ]
   },
   {
-    "acct": "0xc4e48bb844d7cc12c6231786de63f36eba002bf0",
+    "acct": "0xc4e4…2bf0",
     "health": 1.4971,
     "collUSD": 1209.12,
     "debtUSD": 807.62,
@@ -3383,7 +3383,7 @@
     ]
   },
   {
-    "acct": "0x6a9e9795c1e64b27e760f3abd8a32acfcc3c3690",
+    "acct": "0x6a9e…3690",
     "health": 1.5026,
     "collUSD": 11316.65,
     "debtUSD": 7531.39,
@@ -3404,7 +3404,7 @@
     ]
   },
   {
-    "acct": "0x016fa5392c263ae1d7f24c4aeb338f62bafc61d5",
+    "acct": "0x016f…61d5",
     "health": 1.5081,
     "collUSD": 46863.56,
     "debtUSD": 31075.08,
@@ -3430,7 +3430,7 @@
     ]
   },
   {
-    "acct": "0xf838603c80a79cdee6b57314013af7b4b7f44c0e",
+    "acct": "0xf838…4c0e",
     "health": 1.5111,
     "collUSD": 5787.04,
     "debtUSD": 3829.62,
@@ -3451,7 +3451,7 @@
     ]
   },
   {
-    "acct": "0xd98f10ba79091eb4cf58bafeb6681a77ee30b385",
+    "acct": "0xd98f…b385",
     "health": 1.5116,
     "collUSD": 11177.22,
     "debtUSD": 7394.34,
@@ -3472,7 +3472,7 @@
     ]
   },
   {
-    "acct": "0x03a4e34aeaa87a03005a33da42884f8d8e346b41",
+    "acct": "0x03a4…6b41",
     "health": 1.5166,
     "collUSD": 4297.81,
     "debtUSD": 2833.77,
@@ -3493,7 +3493,7 @@
     ]
   },
   {
-    "acct": "0xc00282ad94ac0425d7361d1f98e7318f9e4a27b5",
+    "acct": "0xc002…27b5",
     "health": 1.5169,
     "collUSD": 2532.07,
     "debtUSD": 1669.19,
@@ -3514,7 +3514,7 @@
     ]
   },
   {
-    "acct": "0xf6bbfe9d66ff80ce203fa6880fba9b1068a5fbcc",
+    "acct": "0xf6bb…fbcc",
     "health": 1.5192,
     "collUSD": 982.6,
     "debtUSD": 646.77,
@@ -3535,7 +3535,7 @@
     ]
   },
   {
-    "acct": "0xf5228b56c2c4159244b763c4199b57c285051aaa",
+    "acct": "0xf522…1aaa",
     "health": 1.5207,
     "collUSD": 2.46,
     "debtUSD": 1.62,
@@ -3556,7 +3556,7 @@
     ]
   },
   {
-    "acct": "0x2b01bd032f781c58f90d5120ce64425bbd30035c",
+    "acct": "0x2b01…035c",
     "health": 1.5214,
     "collUSD": 39.3,
     "debtUSD": 25.83,
@@ -3577,7 +3577,7 @@
     ]
   },
   {
-    "acct": "0x681ad9ce67f1f19851750497f2c28c2c1067174c",
+    "acct": "0x681a…174c",
     "health": 1.523,
     "collUSD": 4932.99,
     "debtUSD": 3238.92,
@@ -3598,7 +3598,7 @@
     ]
   },
   {
-    "acct": "0x4c5e9958b7e2d80e6d947143684df6d1a086ddcd",
+    "acct": "0x4c5e…ddcd",
     "health": 1.524,
     "collUSD": 12083.24,
     "debtUSD": 7928.63,
@@ -3619,7 +3619,7 @@
     ]
   },
   {
-    "acct": "0x8aa4935c541d3be452ff3c5147afc57fd3fdeffb",
+    "acct": "0x8aa4…effb",
     "health": 1.527,
     "collUSD": 5172.41,
     "debtUSD": 3387.37,
@@ -3640,7 +3640,7 @@
     ]
   },
   {
-    "acct": "0x67873974337d602bba1be025e9ef089d9b47c17b",
+    "acct": "0x6787…c17b",
     "health": 1.53,
     "collUSD": 4535,
     "debtUSD": 2963.98,
@@ -3661,7 +3661,7 @@
     ]
   },
   {
-    "acct": "0x9c6e55e513eb7b4c5eeb2cbdb7b9a93e9e0787f3",
+    "acct": "0x9c6e…87f3",
     "health": 1.533,
     "collUSD": 5952.55,
     "debtUSD": 3882.92,
@@ -3682,7 +3682,7 @@
     ]
   },
   {
-    "acct": "0x837f558b24addcab47157bfd4dbed3ec9dbbb49e",
+    "acct": "0x837f…b49e",
     "health": 1.5462,
     "collUSD": 6826.43,
     "debtUSD": 4414.93,
@@ -3703,7 +3703,7 @@
     ]
   },
   {
-    "acct": "0xe1585519854b644a3f6d14fdedd017d3e05fd2e3",
+    "acct": "0xe158…d2e3",
     "health": 1.5568,
     "collUSD": 1770.05,
     "debtUSD": 1136.96,
@@ -3724,7 +3724,7 @@
     ]
   },
   {
-    "acct": "0x47a2a149ae492a734593dcf5dafdba518231a047",
+    "acct": "0x47a2…a047",
     "health": 1.5628,
     "collUSD": 26510.98,
     "debtUSD": 16963.84,
@@ -3745,7 +3745,7 @@
     ]
   },
   {
-    "acct": "0x775ec389ff7c8bcd14d7cc0522bab1ec14dff01a",
+    "acct": "0x775e…f01a",
     "health": 1.5731,
     "collUSD": 303.4,
     "debtUSD": 192.87,
@@ -3766,7 +3766,7 @@
     ]
   },
   {
-    "acct": "0x6daafaf2b610c774c845d573e92b2b31ad6c8974",
+    "acct": "0x6daa…8974",
     "health": 1.5771,
     "collUSD": 8676.56,
     "debtUSD": 5501.45,
@@ -3787,7 +3787,7 @@
     ]
   },
   {
-    "acct": "0xce366685a6d936945b6508b9b272bb6866940263",
+    "acct": "0xce36…0263",
     "health": 1.5799,
     "collUSD": 50329.22,
     "debtUSD": 31856.08,
@@ -3808,7 +3808,7 @@
     ]
   },
   {
-    "acct": "0xe7d9294b83f8901531759ba1fad96b69b6c191b0",
+    "acct": "0xe7d9…91b0",
     "health": 1.5866,
     "collUSD": 1678.26,
     "debtUSD": 1057.78,
@@ -3829,7 +3829,7 @@
     ]
   },
   {
-    "acct": "0x5c8cecdbeb0b2a98c727ec80db3f685607a6e77b",
+    "acct": "0x5c8c…e77b",
     "health": 1.5873,
     "collUSD": 2267.95,
     "debtUSD": 1428.82,
@@ -3855,7 +3855,7 @@
     ]
   },
   {
-    "acct": "0x92ae55520eea44e09e6aff1d760659c76e1e9e8d",
+    "acct": "0x92ae…9e8d",
     "health": 1.5874,
     "collUSD": 852.3,
     "debtUSD": 536.9,
@@ -3876,7 +3876,7 @@
     ]
   },
   {
-    "acct": "0x5e383dccfeb559e2c79590f8bf4fda048f13bec9",
+    "acct": "0x5e38…bec9",
     "health": 1.5899,
     "collUSD": 95.93,
     "debtUSD": 60.34,
@@ -3897,7 +3897,7 @@
     ]
   },
   {
-    "acct": "0xe8e8da38931ea148e76928176eecd8929c2d5722",
+    "acct": "0xe8e8…5722",
     "health": 1.5909,
     "collUSD": 11252.03,
     "debtUSD": 7072.87,
@@ -3918,7 +3918,7 @@
     ]
   },
   {
-    "acct": "0xa91571cc045e7a21193a59d5843a5097532bfa6b",
+    "acct": "0xa915…fa6b",
     "health": 1.593,
     "collUSD": 323.35,
     "debtUSD": 202.98,
@@ -3939,7 +3939,7 @@
     ]
   },
   {
-    "acct": "0x4f3973a294b3d2f96f6cf1a783ae95cc61904499",
+    "acct": "0x4f39…4499",
     "health": 1.5931,
     "collUSD": 182.4,
     "debtUSD": 114.5,
@@ -3960,7 +3960,7 @@
     ]
   },
   {
-    "acct": "0xe4593deeef3ee0769abc48fefd182c76d026e473",
+    "acct": "0xe459…e473",
     "health": 1.6001,
     "collUSD": 16.32,
     "debtUSD": 10.2,
@@ -3981,7 +3981,7 @@
     ]
   },
   {
-    "acct": "0xf8d896475f95f74b04213a7831fb1ebab4c4556a",
+    "acct": "0xf8d8…556a",
     "health": 1.6047,
     "collUSD": 4457.09,
     "debtUSD": 2777.54,
@@ -4002,7 +4002,7 @@
     ]
   },
   {
-    "acct": "0xea8aa4ce25968a83546d2d1944dbaa9acfe2af5a",
+    "acct": "0xea8a…af5a",
     "health": 1.6047,
     "collUSD": 2854.55,
     "debtUSD": 1778.84,
@@ -4023,7 +4023,7 @@
     ]
   },
   {
-    "acct": "0xd53123a06563c97ea6a19de6ec83b61183729c2f",
+    "acct": "0xd531…9c2f",
     "health": 1.6065,
     "collUSD": 101949.49,
     "debtUSD": 63459.48,
@@ -4044,7 +4044,7 @@
     ]
   },
   {
-    "acct": "0xed83abd4f5c9ab0ab8c55ff0e3b473a9e5649bd3",
+    "acct": "0xed83…9bd3",
     "health": 1.6091,
     "collUSD": 52.14,
     "debtUSD": 32.41,
@@ -4060,7 +4060,7 @@
     ]
   },
   {
-    "acct": "0x22ccaf49f43f94ef9f4d3b060310195df2b7e2a4",
+    "acct": "0x22cc…e2a4",
     "health": 1.614,
     "collUSD": 15101.8,
     "debtUSD": 9356.71,
@@ -4081,7 +4081,7 @@
     ]
   },
   {
-    "acct": "0xe74eda2e18d61f7139c3c780bd6222991753144a",
+    "acct": "0xe74e…144a",
     "health": 1.6166,
     "collUSD": 3778.71,
     "debtUSD": 2337.4,
@@ -4102,7 +4102,7 @@
     ]
   },
   {
-    "acct": "0xabdf30e6f87cfed90a73a22dbbe8760daa23483b",
+    "acct": "0xabdf…483b",
     "health": 1.6183,
     "collUSD": 4847.51,
     "debtUSD": 2995.46,
@@ -4123,7 +4123,7 @@
     ]
   },
   {
-    "acct": "0x0a90265aff98ca7146f42422f2ef46545867ba27",
+    "acct": "0x0a90…ba27",
     "health": 1.6212,
     "collUSD": 3277.42,
     "debtUSD": 2021.54,
@@ -4144,7 +4144,7 @@
     ]
   },
   {
-    "acct": "0x747cbbe14244150216cd44f64b63517c673b53e7",
+    "acct": "0x747c…53e7",
     "health": 1.6357,
     "collUSD": 3276.06,
     "debtUSD": 2002.82,
@@ -4165,7 +4165,7 @@
     ]
   },
   {
-    "acct": "0xc96857e8b2586748f19ce7e6ab4f0fade34d247f",
+    "acct": "0xc968…247f",
     "health": 1.6427,
     "collUSD": 1189.25,
     "debtUSD": 723.97,
@@ -4186,7 +4186,7 @@
     ]
   },
   {
-    "acct": "0x4448829f084f23f2ec91ddfb0d6d00d9f7fded09",
+    "acct": "0x4448…ed09",
     "health": 1.6483,
     "collUSD": 27386.98,
     "debtUSD": 16614.9,
@@ -4207,7 +4207,7 @@
     ]
   },
   {
-    "acct": "0x1b8c5585f1cf34e593009e58c268a2a01f7e5459",
+    "acct": "0x1b8c…5459",
     "health": 1.6501,
     "collUSD": 36.72,
     "debtUSD": 22.25,
@@ -4223,7 +4223,7 @@
     ]
   },
   {
-    "acct": "0xa1ecd0b02df00f88635c1a588c2bb8c09d6c7603",
+    "acct": "0xa1ec…7603",
     "health": 1.6523,
     "collUSD": 16525.53,
     "debtUSD": 10001.61,
@@ -4244,7 +4244,7 @@
     ]
   },
   {
-    "acct": "0x2cfe221856e5a41902de8149e808b9c51945b791",
+    "acct": "0x2cfe…b791",
     "health": 1.6586,
     "collUSD": 70.37,
     "debtUSD": 42.43,
@@ -4265,7 +4265,7 @@
     ]
   },
   {
-    "acct": "0xc12404f5866649dd59a74df44cfa1deeda0c7afe",
+    "acct": "0xc124…7afe",
     "health": 1.6649,
     "collUSD": 15301.32,
     "debtUSD": 9190.45,
@@ -4281,7 +4281,7 @@
     ]
   },
   {
-    "acct": "0xc91e23b24108770d4383224059b029e880a6ba45",
+    "acct": "0xc91e…ba45",
     "health": 1.6689,
     "collUSD": 599.96,
     "debtUSD": 359.5,
@@ -4302,7 +4302,7 @@
     ]
   },
   {
-    "acct": "0x1131825a3764eeb96596da9eba4acb746ab9448d",
+    "acct": "0x1131…448d",
     "health": 1.671,
     "collUSD": 1701.39,
     "debtUSD": 1018.21,
@@ -4323,7 +4323,7 @@
     ]
   },
   {
-    "acct": "0x8614c23cc4cdda62224904b7868c06629d4e8df6",
+    "acct": "0x8614…8df6",
     "health": 1.6718,
     "collUSD": 350.83,
     "debtUSD": 209.86,
@@ -4344,7 +4344,7 @@
     ]
   },
   {
-    "acct": "0xa067a2049fe44eee5f46b4b4af10967bf6c3b8a8",
+    "acct": "0xa067…b8a8",
     "health": 1.6859,
     "collUSD": 15564.54,
     "debtUSD": 9232.44,
@@ -4365,7 +4365,7 @@
     ]
   },
   {
-    "acct": "0x5ff0d04bae3e509611bb960ed9ef672796ef7628",
+    "acct": "0x5ff0…7628",
     "health": 1.6971,
     "collUSD": 5143.69,
     "debtUSD": 3030.79,
@@ -4386,7 +4386,7 @@
     ]
   },
   {
-    "acct": "0x49cc40b073708cc3760736a95c5e269a660653d9",
+    "acct": "0x49cc…53d9",
     "health": 1.6996,
     "collUSD": 17798.65,
     "debtUSD": 10472.04,
@@ -4407,7 +4407,7 @@
     ]
   },
   {
-    "acct": "0x9364422ddee50c75429ed0ab6bb4f557dc062263",
+    "acct": "0x9364…2263",
     "health": 1.7036,
     "collUSD": 3802.83,
     "debtUSD": 2232.17,
@@ -4428,7 +4428,7 @@
     ]
   },
   {
-    "acct": "0x9af41aa3f81e4706723566a456d47ed415923917",
+    "acct": "0x9af4…3917",
     "health": 1.7047,
     "collUSD": 6148.7,
     "debtUSD": 3606.98,
@@ -4449,7 +4449,7 @@
     ]
   },
   {
-    "acct": "0x822c3175b8331a4c6130307677408bb2b7f12b6d",
+    "acct": "0x822c…2b6d",
     "health": 1.709,
     "collUSD": 9981.03,
     "debtUSD": 5840.11,
@@ -4470,7 +4470,7 @@
     ]
   },
   {
-    "acct": "0x58127bdde713eff4cc08fd503c69518044c504fe",
+    "acct": "0x5812…04fe",
     "health": 1.711,
     "collUSD": 56.38,
     "debtUSD": 32.95,
@@ -4491,7 +4491,7 @@
     ]
   },
   {
-    "acct": "0x590da0ce51064f10ba56d577c9032f6699b28da2",
+    "acct": "0x590d…8da2",
     "health": 1.7151,
     "collUSD": 159877.63,
     "debtUSD": 93215.48,
@@ -4512,7 +4512,7 @@
     ]
   },
   {
-    "acct": "0xadcf6661dca24225d7984ee96b55e939fc6ddd10",
+    "acct": "0xadcf…dd10",
     "health": 1.7175,
     "collUSD": 116062.01,
     "debtUSD": 67576.08,
@@ -4533,7 +4533,7 @@
     ]
   },
   {
-    "acct": "0x68c8aa26b6c84fd1590bb4932080ae87deef802f",
+    "acct": "0x68c8…802f",
     "health": 1.7231,
     "collUSD": 3450.64,
     "debtUSD": 2002.52,
@@ -4554,7 +4554,7 @@
     ]
   },
   {
-    "acct": "0xff85f6bf7c8ffa5541c3c62ae82fd6454de2022f",
+    "acct": "0xff85…022f",
     "health": 1.7245,
     "collUSD": 8080.68,
     "debtUSD": 4685.82,
@@ -4575,7 +4575,7 @@
     ]
   },
   {
-    "acct": "0x29049259946bdfc47f643a7a09c905098d5e8e13",
+    "acct": "0x2904…8e13",
     "health": 1.7285,
     "collUSD": 14266.23,
     "debtUSD": 8253.41,
@@ -4596,7 +4596,7 @@
     ]
   },
   {
-    "acct": "0x9a51fda2e769a4abb594694c2d9ae1ef811dbf4d",
+    "acct": "0x9a51…bf4d",
     "health": 1.7292,
     "collUSD": 12797.83,
     "debtUSD": 7400.99,
@@ -4617,7 +4617,7 @@
     ]
   },
   {
-    "acct": "0x7e48621233dd42c174aa147faa15d7caa1945239",
+    "acct": "0x7e48…5239",
     "health": 1.7314,
     "collUSD": 15157.65,
     "debtUSD": 8754.36,
@@ -4638,7 +4638,7 @@
     ]
   },
   {
-    "acct": "0x52437d267e0f3f8a81cef3f294d42006156487d5",
+    "acct": "0x5243…87d5",
     "health": 1.7387,
     "collUSD": 37.99,
     "debtUSD": 21.85,
@@ -4659,7 +4659,7 @@
     ]
   },
   {
-    "acct": "0xee962ff37c5405b5d1eed8958aaa04838efb3e18",
+    "acct": "0xee96…3e18",
     "health": 1.7479,
     "collUSD": 15798.82,
     "debtUSD": 9038.57,
@@ -4680,7 +4680,7 @@
     ]
   },
   {
-    "acct": "0xe83cbbe24cbd9c9a105b7b812bc001c38ceb9ba3",
+    "acct": "0xe83c…9ba3",
     "health": 1.749,
     "collUSD": 46006.96,
     "debtUSD": 26304.36,
@@ -4701,7 +4701,7 @@
     ]
   },
   {
-    "acct": "0x1bf7342e548a9764126cd496fa12b619d3c3425f",
+    "acct": "0x1bf7…425f",
     "health": 1.7498,
     "collUSD": 2703.89,
     "debtUSD": 1545.21,
@@ -4722,7 +4722,7 @@
     ]
   },
   {
-    "acct": "0xc8bb23c2f387543ec86ec72b39206fb46c623760",
+    "acct": "0xc8bb…3760",
     "health": 1.7523,
     "collUSD": 1953.54,
     "debtUSD": 1114.84,
@@ -4743,7 +4743,7 @@
     ]
   },
   {
-    "acct": "0xda74fcbff146cce76a9bb1999d493d51eddadd14",
+    "acct": "0xda74…dd14",
     "health": 1.7558,
     "collUSD": 28634.22,
     "debtUSD": 16307.95,
@@ -4764,7 +4764,7 @@
     ]
   },
   {
-    "acct": "0x03c97046713fe750c1084739f1d14464fc5c59d9",
+    "acct": "0x03c9…59d9",
     "health": 1.7575,
     "collUSD": 237.48,
     "debtUSD": 135.12,
@@ -4785,7 +4785,7 @@
     ]
   },
   {
-    "acct": "0x6c36f3da96ca913a271b2742c8bcd465555d87ab",
+    "acct": "0x6c36…87ab",
     "health": 1.7605,
     "collUSD": 1579.93,
     "debtUSD": 897.43,
@@ -4806,7 +4806,7 @@
     ]
   },
   {
-    "acct": "0xb679809392a0bf129f5a536f3e2d7ed491eca340",
+    "acct": "0xb679…a340",
     "health": 1.7661,
     "collUSD": 14.31,
     "debtUSD": 8.1,
@@ -4827,7 +4827,7 @@
     ]
   },
   {
-    "acct": "0xf7602097f74ca77e2c4393154d6c542015ffbf55",
+    "acct": "0xf760…bf55",
     "health": 1.7663,
     "collUSD": 386.28,
     "debtUSD": 218.69,
@@ -4848,7 +4848,7 @@
     ]
   },
   {
-    "acct": "0xe557e9d348ff15a852969a65482c73185f7772c7",
+    "acct": "0xe557…72c7",
     "health": 1.7669,
     "collUSD": 3.78,
     "debtUSD": 2.14,
@@ -4869,7 +4869,7 @@
     ]
   },
   {
-    "acct": "0x5e476e418dfa42040b486ce93cf6ab99c1a7c11b",
+    "acct": "0x5e47…c11b",
     "health": 1.7682,
     "collUSD": 25701.77,
     "debtUSD": 14535.72,
@@ -4890,7 +4890,7 @@
     ]
   },
   {
-    "acct": "0x581988bb7fe9013f0033723eb7ed454f6d1acf6f",
+    "acct": "0x5819…cf6f",
     "health": 1.7691,
     "collUSD": 8698.61,
     "debtUSD": 4916.85,
@@ -4911,7 +4911,7 @@
     ]
   },
   {
-    "acct": "0xdd0c8040b11273a9bb3e4fbd588499241253145e",
+    "acct": "0xdd0c…145e",
     "health": 1.7717,
     "collUSD": 793.88,
     "debtUSD": 448.09,
@@ -4932,7 +4932,7 @@
     ]
   },
   {
-    "acct": "0xdd0dbad43666ec36ee337c58ba901c208c159b09",
+    "acct": "0xdd0d…9b09",
     "health": 1.7724,
     "collUSD": 2096.14,
     "debtUSD": 1182.64,
@@ -4953,7 +4953,7 @@
     ]
   },
   {
-    "acct": "0xd7616af2239c02918a3423e3fff5761dee47b040",
+    "acct": "0xd761…b040",
     "health": 1.7902,
     "collUSD": 8002.3,
     "debtUSD": 4469.99,
@@ -4974,7 +4974,7 @@
     ]
   },
   {
-    "acct": "0xf93cfb992b99ee6b295da272feb2fe3bdeafae27",
+    "acct": "0xf93c…ae27",
     "health": 1.7967,
     "collUSD": 72.38,
     "debtUSD": 40.29,
@@ -4995,7 +4995,7 @@
     ]
   },
   {
-    "acct": "0x98c5add2e63c02beb8ccaa0156e4fefd480c3267",
+    "acct": "0x98c5…3267",
     "health": 1.8108,
     "collUSD": 34593.52,
     "debtUSD": 19103.96,
@@ -5016,7 +5016,7 @@
     ]
   },
   {
-    "acct": "0xfeb86f7f2b60a00435a7d9419f2c440ab47512ee",
+    "acct": "0xfeb8…12ee",
     "health": 1.8159,
     "collUSD": 385.45,
     "debtUSD": 212.26,
@@ -5037,7 +5037,7 @@
     ]
   },
   {
-    "acct": "0x7b11114e2de92110153ef88817dfbaaec2ec1e5b",
+    "acct": "0x7b11…1e5b",
     "health": 1.8167,
     "collUSD": 452.56,
     "debtUSD": 249.11,
@@ -5058,7 +5058,7 @@
     ]
   },
   {
-    "acct": "0x26fb4b9893747f0a17bacb02467633c5499bca1a",
+    "acct": "0x26fb…ca1a",
     "health": 1.8192,
     "collUSD": 9.82,
     "debtUSD": 5.4,
@@ -5074,7 +5074,7 @@
     ]
   },
   {
-    "acct": "0x285b699a1fbc7f0b6a73ce83d5b1ef35fc6f7a37",
+    "acct": "0x285b…7a37",
     "health": 1.826,
     "collUSD": 300.52,
     "debtUSD": 164.57,
@@ -5095,7 +5095,7 @@
     ]
   },
   {
-    "acct": "0x8f65d27c67f4aec557059d9a113ad95b7869bb59",
+    "acct": "0x8f65…bb59",
     "health": 1.8307,
     "collUSD": 2570.52,
     "debtUSD": 1404.13,
@@ -5116,7 +5116,7 @@
     ]
   },
   {
-    "acct": "0x4f5fe8da30c1c11fe537730940ced62ac37ea371",
+    "acct": "0x4f5f…a371",
     "health": 1.8348,
     "collUSD": 44645.67,
     "debtUSD": 24332.51,
@@ -5137,7 +5137,7 @@
     ]
   },
   {
-    "acct": "0x64b09334c4ebec14da444eba7b5372969a5793ca",
+    "acct": "0x64b0…93ca",
     "health": 1.8375,
     "collUSD": 38550.26,
     "debtUSD": 20979.52,
@@ -5158,7 +5158,7 @@
     ]
   },
   {
-    "acct": "0x2c189c336129c0a89f95ac6c57dcc9c726cc31e7",
+    "acct": "0x2c18…31e7",
     "health": 1.8475,
     "collUSD": 113350.92,
     "debtUSD": 61353.4,
@@ -5179,7 +5179,7 @@
     ]
   },
   {
-    "acct": "0x13f29c656fdc665bad371e0b8bab1f10c5b0a6d4",
+    "acct": "0x13f2…a6d4",
     "health": 1.8522,
     "collUSD": 15129.53,
     "debtUSD": 8168.43,
@@ -5200,7 +5200,7 @@
     ]
   },
   {
-    "acct": "0x2e1b65c4fbcd486765aafed8344472badff9aa99",
+    "acct": "0x2e1b…aa99",
     "health": 1.8527,
     "collUSD": 2280.33,
     "debtUSD": 1230.84,
@@ -5221,7 +5221,7 @@
     ]
   },
   {
-    "acct": "0x7c78adc5a21453a2740744545a84717cbe3f702b",
+    "acct": "0x7c78…702b",
     "health": 1.8527,
     "collUSD": 57845.83,
     "debtUSD": 31221.95,
@@ -5242,7 +5242,7 @@
     ]
   },
   {
-    "acct": "0x0a2046876d4a56c40f36a9ddcec72865e1784d5b",
+    "acct": "0x0a20…4d5b",
     "health": 1.8675,
     "collUSD": 1974.28,
     "debtUSD": 1057.19,
@@ -5263,7 +5263,7 @@
     ]
   },
   {
-    "acct": "0x8f78c90e707f0e233f2c286b35157a4e1ee98c2f",
+    "acct": "0x8f78…8c2f",
     "health": 1.8703,
     "collUSD": 1120.93,
     "debtUSD": 599.34,
@@ -5284,7 +5284,7 @@
     ]
   },
   {
-    "acct": "0x51b07b8757de436eadf1ff0421abe41ac84be93a",
+    "acct": "0x51b0…e93a",
     "health": 1.8744,
     "collUSD": 25.7,
     "debtUSD": 13.71,
@@ -5305,7 +5305,7 @@
     ]
   },
   {
-    "acct": "0x30824c59642ae219fdd27810feb46ce574ded74c",
+    "acct": "0x3082…d74c",
     "health": 1.8755,
     "collUSD": 31.92,
     "debtUSD": 17.02,
@@ -5326,7 +5326,7 @@
     ]
   },
   {
-    "acct": "0x4a327b2e05da4cae5f396298b14e377689b41ac6",
+    "acct": "0x4a32…1ac6",
     "health": 1.88,
     "collUSD": 37855.26,
     "debtUSD": 20135.73,
@@ -5347,7 +5347,7 @@
     ]
   },
   {
-    "acct": "0x5b44228e5a9addccb17423f01ac2032cdfa29649",
+    "acct": "0x5b44…9649",
     "health": 1.8887,
     "collUSD": 755.66,
     "debtUSD": 400.1,
@@ -5368,7 +5368,7 @@
     ]
   },
   {
-    "acct": "0x3804fcd80d805a64813cfd1e614e10d4e2f9e73c",
+    "acct": "0x3804…e73c",
     "health": 1.8991,
     "collUSD": 54407.46,
     "debtUSD": 28649.17,
@@ -5389,7 +5389,7 @@
     ]
   },
   {
-    "acct": "0xb61f76f565dc91f07a4e5b333168301f56301eca",
+    "acct": "0xb61f…1eca",
     "health": 1.9192,
     "collUSD": 130.5,
     "debtUSD": 68,
@@ -5405,7 +5405,7 @@
     ]
   },
   {
-    "acct": "0xba15d3f14356160e072c04e5e4adf4f27b5ca00b",
+    "acct": "0xba15…a00b",
     "health": 1.9207,
     "collUSD": 4646.37,
     "debtUSD": 2419.04,
@@ -5426,7 +5426,7 @@
     ]
   },
   {
-    "acct": "0x7063f88225710c32617ce43f6a252d1d8e073fb7",
+    "acct": "0x7063…3fb7",
     "health": 1.954,
     "collUSD": 5497.73,
     "debtUSD": 2813.52,
@@ -5447,7 +5447,7 @@
     ]
   },
   {
-    "acct": "0x6f59bb1052bab2fefd335bfdb022ee9179cf9af5",
+    "acct": "0x6f59…9af5",
     "health": 1.956,
     "collUSD": 2267.96,
     "debtUSD": 1159.47,
@@ -5468,7 +5468,7 @@
     ]
   },
   {
-    "acct": "0x96ea6c538f76694ed18989a44b39af868da2351a",
+    "acct": "0x96ea…351a",
     "health": 1.962,
     "collUSD": 6.13,
     "debtUSD": 3.13,
@@ -5489,7 +5489,7 @@
     ]
   },
   {
-    "acct": "0xe81d3f189ff8fbb3fd5cf1900036963c4f06025f",
+    "acct": "0xe81d…025f",
     "health": 1.9701,
     "collUSD": 574.68,
     "debtUSD": 291.7,
@@ -5510,7 +5510,7 @@
     ]
   },
   {
-    "acct": "0x5701ae4057194bd00d3d47206e51b1dae3c5db2a",
+    "acct": "0x5701…db2a",
     "health": 1.9711,
     "collUSD": 4572.76,
     "debtUSD": 2319.94,
@@ -5531,7 +5531,7 @@
     ]
   },
   {
-    "acct": "0xb17fbf0cba89008e52efee401e1805a948f2d7a2",
+    "acct": "0xb17f…d7a2",
     "health": 1.9715,
     "collUSD": 7390.23,
     "debtUSD": 3748.62,
@@ -5552,7 +5552,7 @@
     ]
   },
   {
-    "acct": "0xebff21d54ff118e5a7fbe915b149b9dfe2dca84d",
+    "acct": "0xebff…a84d",
     "health": 1.9726,
     "collUSD": 2.27,
     "debtUSD": 1.15,
@@ -5573,7 +5573,7 @@
     ]
   },
   {
-    "acct": "0x64243639fdddcde1bce555618a4528b8ea3505c1",
+    "acct": "0x6424…05c1",
     "health": 1.9792,
     "collUSD": 62170.66,
     "debtUSD": 31412.42,
@@ -5599,7 +5599,7 @@
     ]
   },
   {
-    "acct": "0xd901fbcc69fb2bfb316b76ff16dfa175688abcf9",
+    "acct": "0xd901…bcf9",
     "health": 1.9795,
     "collUSD": 6413.14,
     "debtUSD": 3239.85,
@@ -5620,7 +5620,7 @@
     ]
   },
   {
-    "acct": "0x3ad517d1a784ec6ccabb78ca9af6f8eaf55342ec",
+    "acct": "0x3ad5…42ec",
     "health": 1.9917,
     "collUSD": 3026.51,
     "debtUSD": 1519.54,
@@ -5641,7 +5641,7 @@
     ]
   },
   {
-    "acct": "0x9c3a506ddc6b86d85878526ff4fec7215f2f8d62",
+    "acct": "0x9c3a…8d62",
     "health": 1.9943,
     "collUSD": 20027.87,
     "debtUSD": 10042.47,
@@ -5662,7 +5662,7 @@
     ]
   },
   {
-    "acct": "0x8b0bf4b159bc309fec528c9782e32bdd1afe0d41",
+    "acct": "0x8b0b…0d41",
     "health": 2.0028,
     "collUSD": 10197.75,
     "debtUSD": 5091.65,
@@ -5683,7 +5683,7 @@
     ]
   },
   {
-    "acct": "0x05bcc326b0f12e969ca16efa13c34f2d1e77c632",
+    "acct": "0x05bc…c632",
     "health": 2.0133,
     "collUSD": 15104.83,
     "debtUSD": 7502.59,
@@ -5704,7 +5704,7 @@
     ]
   },
   {
-    "acct": "0x603cb6f9e72a05fbc8cec30d19f948193a36016e",
+    "acct": "0x603c…016e",
     "health": 2.0157,
     "collUSD": 65422.22,
     "debtUSD": 32455.86,
@@ -5725,7 +5725,7 @@
     ]
   },
   {
-    "acct": "0x0263788b5602baa58d0455e198f242b361f3e092",
+    "acct": "0x0263…e092",
     "health": 2.0261,
     "collUSD": 410.45,
     "debtUSD": 202.59,
@@ -5746,7 +5746,7 @@
     ]
   },
   {
-    "acct": "0xfaeda5a753f7135b60843dfd8374626c196f00f9",
+    "acct": "0xfaed…00f9",
     "health": 2.0342,
     "collUSD": 11633.19,
     "debtUSD": 5718.81,
@@ -5767,7 +5767,7 @@
     ]
   },
   {
-    "acct": "0xc4f12cf7643629edba49c390fd98e1db5a2fd20c",
+    "acct": "0xc4f1…d20c",
     "health": 2.0418,
     "collUSD": 97.33,
     "debtUSD": 47.67,
@@ -5783,7 +5783,7 @@
     ]
   },
   {
-    "acct": "0x51e2bd51b6a3d8b8d5dd6bbd38ece99583765c78",
+    "acct": "0x51e2…5c78",
     "health": 2.0531,
     "collUSD": 11.34,
     "debtUSD": 5.52,
@@ -5804,7 +5804,7 @@
     ]
   },
   {
-    "acct": "0x907a0499d7e3705dc81fc156af45cf7d2091fa2b",
+    "acct": "0x907a…fa2b",
     "health": 2.0593,
     "collUSD": 20816.77,
     "debtUSD": 10108.48,
@@ -5825,7 +5825,7 @@
     ]
   },
   {
-    "acct": "0x1f43ffc1e174ce745852d98d29d84c2d69653c7b",
+    "acct": "0x1f43…3c7b",
     "health": 2.0638,
     "collUSD": 502044.21,
     "debtUSD": 243264.2,
@@ -5841,7 +5841,7 @@
     ]
   },
   {
-    "acct": "0x6c0b2d40c34f58db55714cb7a40f005530ef1046",
+    "acct": "0x6c0b…1046",
     "health": 2.0702,
     "collUSD": 22.68,
     "debtUSD": 10.96,
@@ -5857,7 +5857,7 @@
     ]
   },
   {
-    "acct": "0x9c6696141460e8d4a1839c03e48c4583436ac71c",
+    "acct": "0x9c66…c71c",
     "health": 2.0744,
     "collUSD": 130924.4,
     "debtUSD": 63113.88,
@@ -5878,7 +5878,7 @@
     ]
   },
   {
-    "acct": "0xdbe036e63cbc957301bfaae164e6e0685cccea49",
+    "acct": "0xdbe0…ea49",
     "health": 2.0756,
     "collUSD": 2106.4,
     "debtUSD": 1014.82,
@@ -5899,7 +5899,7 @@
     ]
   },
   {
-    "acct": "0x9efd04ab9968b88399a298fb6c20ddaaa67eb81c",
+    "acct": "0x9efd…b81c",
     "health": 2.0765,
     "collUSD": 2181.78,
     "debtUSD": 1050.72,
@@ -5920,7 +5920,7 @@
     ]
   },
   {
-    "acct": "0xb9b6a9945dd373e02a8c171a75e80a1e20dda698",
+    "acct": "0xb9b6…a698",
     "health": 2.093,
     "collUSD": 11330,
     "debtUSD": 5413.27,
@@ -5936,7 +5936,7 @@
     ]
   },
   {
-    "acct": "0xf1b4f48a5b43e77ecc2f58d931fc9d942a92ea4c",
+    "acct": "0xf1b4…ea4c",
     "health": 2.0957,
     "collUSD": 5208.01,
     "debtUSD": 2485.15,
@@ -5952,7 +5952,7 @@
     ]
   },
   {
-    "acct": "0xae7c8b1656d9707bb62cbf37d4e7a67be50b4bdf",
+    "acct": "0xae7c…4bdf",
     "health": 2.1205,
     "collUSD": 869.05,
     "debtUSD": 409.83,
@@ -5973,7 +5973,7 @@
     ]
   },
   {
-    "acct": "0x04f7c19721028de444b2bbc2bf296f629727f411",
+    "acct": "0x04f7…f411",
     "health": 2.127,
     "collUSD": 1901.3,
     "debtUSD": 893.89,
@@ -5994,7 +5994,7 @@
     ]
   },
   {
-    "acct": "0x9e3e4b75e1d8a8c7e28ecc657719fc055f505c9e",
+    "acct": "0x9e3e…5c9e",
     "health": 2.1524,
     "collUSD": 11586.48,
     "debtUSD": 5383.13,
@@ -6015,7 +6015,7 @@
     ]
   },
   {
-    "acct": "0x168f2740af05e12e884fffffe5e9f795a3f6eafe",
+    "acct": "0x168f…eafe",
     "health": 2.1537,
     "collUSD": 6944.17,
     "debtUSD": 3224.24,
@@ -6036,7 +6036,7 @@
     ]
   },
   {
-    "acct": "0x5589c2c145e40ce478d93104689f6263ac6cd4d7",
+    "acct": "0x5589…d4d7",
     "health": 2.154,
     "collUSD": 7.56,
     "debtUSD": 3.51,
@@ -6057,7 +6057,7 @@
     ]
   },
   {
-    "acct": "0xc8598903d485b9d4590c5e414dce6a78bce76893",
+    "acct": "0xc859…6893",
     "health": 2.1604,
     "collUSD": 1082.86,
     "debtUSD": 501.24,
@@ -6073,7 +6073,7 @@
     ]
   },
   {
-    "acct": "0x5cd3940e203caeb69f14eb6b00597572b65c4d6f",
+    "acct": "0x5cd3…4d6f",
     "health": 2.1671,
     "collUSD": 6802.8,
     "debtUSD": 3139.08,
@@ -6094,7 +6094,7 @@
     ]
   },
   {
-    "acct": "0xd4da14dabe00acfe3e22b0e93a76f97e7f0aac77",
+    "acct": "0xd4da…ac77",
     "health": 2.1726,
     "collUSD": 117466.81,
     "debtUSD": 54068.25,
@@ -6115,7 +6115,7 @@
     ]
   },
   {
-    "acct": "0x869939e7d8cf3bd942597a0eb7616bfbf1cb1784",
+    "acct": "0x8699…1784",
     "health": 2.1768,
     "collUSD": 66488.99,
     "debtUSD": 30544.5,
@@ -6136,7 +6136,7 @@
     ]
   },
   {
-    "acct": "0x92f7989d2cb196c15ba239b36ce6769e4c9a16d5",
+    "acct": "0x92f7…16d5",
     "health": 2.1769,
     "collUSD": 5899.82,
     "debtUSD": 2710.24,
@@ -6157,7 +6157,7 @@
     ]
   },
   {
-    "acct": "0x98f65db2de538248c8854498b177bb3cf9752ecc",
+    "acct": "0x98f6…2ecc",
     "health": 2.1866,
     "collUSD": 99763.67,
     "debtUSD": 45625.95,
@@ -6178,7 +6178,7 @@
     ]
   },
   {
-    "acct": "0x7ff24d6eb37f257570898d98733015549653ca3c",
+    "acct": "0x7ff2…ca3c",
     "health": 2.1887,
     "collUSD": 76132.78,
     "debtUSD": 34784.04,
@@ -6199,7 +6199,7 @@
     ]
   },
   {
-    "acct": "0x8bc7639eb29f2caec085e52ec1fe0d0ee8581cad",
+    "acct": "0x8bc7…1cad",
     "health": 2.2075,
     "collUSD": 385.44,
     "debtUSD": 174.61,
@@ -6220,7 +6220,7 @@
     ]
   },
   {
-    "acct": "0x73ea29edd6c2da381f469ee6c50add62ef1a0cd5",
+    "acct": "0x73ea…0cd5",
     "health": 2.211,
     "collUSD": 1113.1,
     "debtUSD": 503.43,
@@ -6241,7 +6241,7 @@
     ]
   },
   {
-    "acct": "0x4d1d8747e49c2c36232e1744108e3ae2b97d605d",
+    "acct": "0x4d1d…605d",
     "health": 2.2189,
     "collUSD": 2290.47,
     "debtUSD": 1032.24,
@@ -6257,7 +6257,7 @@
     ]
   },
   {
-    "acct": "0xabc8a404d8d18d2dfc8d15a8576e232fdc37c82f",
+    "acct": "0xabc8…c82f",
     "health": 2.2228,
     "collUSD": 7885.71,
     "debtUSD": 3547.58,
@@ -6278,7 +6278,7 @@
     ]
   },
   {
-    "acct": "0xb4733d2081ba481875a9991d47b1cf763e7835bb",
+    "acct": "0xb473…35bb",
     "health": 2.2429,
     "collUSD": 234.73,
     "debtUSD": 104.65,
@@ -6299,7 +6299,7 @@
     ]
   },
   {
-    "acct": "0x5a141afaba8af73a429014a6188431ba803806b0",
+    "acct": "0x5a14…06b0",
     "health": 2.248,
     "collUSD": 45353.56,
     "debtUSD": 20175.02,
@@ -6320,7 +6320,7 @@
     ]
   },
   {
-    "acct": "0x680b01b5e02e46c3b4a7660e0d35a16e0a1874bb",
+    "acct": "0x680b…74bb",
     "health": 2.2651,
     "collUSD": 14253.37,
     "debtUSD": 6292.64,
@@ -6341,7 +6341,7 @@
     ]
   },
   {
-    "acct": "0x529bf315d0d5e81149577c6b49c3f8f704f896ad",
+    "acct": "0x529b…96ad",
     "health": 2.2737,
     "collUSD": 1447.94,
     "debtUSD": 636.82,
@@ -6357,7 +6357,7 @@
     ]
   },
   {
-    "acct": "0xab3d232319329472f44d0771859db047b5fdee22",
+    "acct": "0xab3d…ee22",
     "health": 2.2832,
     "collUSD": 98321.8,
     "debtUSD": 43062.49,
@@ -6378,7 +6378,7 @@
     ]
   },
   {
-    "acct": "0x2a5ab27cced6ca5dd9ce1c5987c0ef84e7361f93",
+    "acct": "0x2a5a…1f93",
     "health": 2.2948,
     "collUSD": 507.38,
     "debtUSD": 221.1,
@@ -6399,7 +6399,7 @@
     ]
   },
   {
-    "acct": "0xdb9389801320c28a699a9583127f575f3dc87962",
+    "acct": "0xdb93…7962",
     "health": 2.3014,
     "collUSD": 11176.6,
     "debtUSD": 4856.42,
@@ -6420,7 +6420,7 @@
     ]
   },
   {
-    "acct": "0xd5c88cada167462b6737e12518c0a074badab3a9",
+    "acct": "0xd5c8…b3a9",
     "health": 2.3039,
     "collUSD": 1250.39,
     "debtUSD": 542.73,
@@ -6441,7 +6441,7 @@
     ]
   },
   {
-    "acct": "0x96232ad7098ab99c5bac7a3475b04daa16f1cb49",
+    "acct": "0x9623…cb49",
     "health": 2.3093,
     "collUSD": 4.9,
     "debtUSD": 2.12,
@@ -6462,7 +6462,7 @@
     ]
   },
   {
-    "acct": "0xbc8b94af041cbeae5df8242e30d349324d634430",
+    "acct": "0xbc8b…4430",
     "health": 2.3227,
     "collUSD": 36.64,
     "debtUSD": 15.78,
@@ -6478,7 +6478,7 @@
     ]
   },
   {
-    "acct": "0xb1ca6292cc7c97e0a988fd2d45fb712f5e4ff0b2",
+    "acct": "0xb1ca…f0b2",
     "health": 2.3254,
     "collUSD": 248.15,
     "debtUSD": 106.71,
@@ -6499,7 +6499,7 @@
     ]
   },
   {
-    "acct": "0x4eb29dd9963fa6c782960eb3ef5a493dd63c3259",
+    "acct": "0x4eb2…3259",
     "health": 2.3519,
     "collUSD": 22533.47,
     "debtUSD": 9581,
@@ -6520,7 +6520,7 @@
     ]
   },
   {
-    "acct": "0x3a8ce3f951b53b0fc7a0c67cd2c72dfaaceeb845",
+    "acct": "0x3a8c…b845",
     "health": 2.3658,
     "collUSD": 15610.39,
     "debtUSD": 6598.24,
@@ -6541,7 +6541,7 @@
     ]
   },
   {
-    "acct": "0x72fedd0806c5abe6f8c95454d8d5087f129255fb",
+    "acct": "0x72fe…55fb",
     "health": 2.3732,
     "collUSD": 7720.8,
     "debtUSD": 3253.28,
@@ -6562,7 +6562,7 @@
     ]
   },
   {
-    "acct": "0x35ed26100d307723cd185e845d90de1854b08062",
+    "acct": "0x35ed…8062",
     "health": 2.3841,
     "collUSD": 1822.52,
     "debtUSD": 764.46,
@@ -6583,7 +6583,7 @@
     ]
   },
   {
-    "acct": "0x2c4b2fe03b7043b6a5f21ef38c17cff09e840e95",
+    "acct": "0x2c4b…0e95",
     "health": 2.3852,
     "collUSD": 400.42,
     "debtUSD": 167.88,
@@ -6604,7 +6604,7 @@
     ]
   },
   {
-    "acct": "0x70471578f6c32102598811d9de5f451bd508903a",
+    "acct": "0x7047…903a",
     "health": 2.3901,
     "collUSD": 157.24,
     "debtUSD": 65.79,
@@ -6620,7 +6620,7 @@
     ]
   },
   {
-    "acct": "0x6c98064cd84c09c827fb76e772dbb805f54aa564",
+    "acct": "0x6c98…a564",
     "health": 2.3955,
     "collUSD": 2328.03,
     "debtUSD": 971.84,
@@ -6641,7 +6641,7 @@
     ]
   },
   {
-    "acct": "0x774827cfb933b22b71f9a74af9eb4c2a4d78626a",
+    "acct": "0x7748…626a",
     "health": 2.4036,
     "collUSD": 2098.47,
     "debtUSD": 873.04,
@@ -6662,7 +6662,7 @@
     ]
   },
   {
-    "acct": "0xb139e2f39919412f8c681868639f1c6689f19d9b",
+    "acct": "0xb139…9d9b",
     "health": 2.4134,
     "collUSD": 5.05,
     "debtUSD": 2.09,
@@ -6683,7 +6683,7 @@
     ]
   },
   {
-    "acct": "0x6e04cc09af4e9b865d25db63793235b891eb9860",
+    "acct": "0x6e04…9860",
     "health": 2.4249,
     "collUSD": 1897.27,
     "debtUSD": 782.42,
@@ -6699,7 +6699,7 @@
     ]
   },
   {
-    "acct": "0x4a04b932202469f3675d1a1efed6d60381a2b0b0",
+    "acct": "0x4a04…b0b0",
     "health": 2.4326,
     "collUSD": 96527.91,
     "debtUSD": 39680.71,
@@ -6720,7 +6720,7 @@
     ]
   },
   {
-    "acct": "0x6fb7eaf821cc7653b3807e7c6b06bdfb121bb776",
+    "acct": "0x6fb7…b776",
     "health": 2.4414,
     "collUSD": 756.44,
     "debtUSD": 309.83,
@@ -6741,7 +6741,7 @@
     ]
   },
   {
-    "acct": "0x9190a051ccb99e8e84658215a6bb62f6f9cf658d",
+    "acct": "0x9190…658d",
     "health": 2.4426,
     "collUSD": 3656.11,
     "debtUSD": 1496.8,
@@ -6762,7 +6762,7 @@
     ]
   },
   {
-    "acct": "0xa9b242ab1406cf8e4a80658006b315119384346c",
+    "acct": "0xa9b2…346c",
     "health": 2.4538,
     "collUSD": 2263.9,
     "debtUSD": 922.62,
@@ -6778,7 +6778,7 @@
     ]
   },
   {
-    "acct": "0x43f20159b0e65f69f807e40913bb7d41bb001f77",
+    "acct": "0x43f2…1f77",
     "health": 2.476,
     "collUSD": 749.07,
     "debtUSD": 302.53,
@@ -6799,7 +6799,7 @@
     ]
   },
   {
-    "acct": "0x2198a30b70449b1c6e1cea99d1d58f0719db2dd3",
+    "acct": "0x2198…2dd3",
     "health": 2.4775,
     "collUSD": 3716.33,
     "debtUSD": 1500.04,
@@ -6820,7 +6820,7 @@
     ]
   },
   {
-    "acct": "0x5892009b9e1ef9d753ee4933f358310389006e25",
+    "acct": "0x5892…6e25",
     "health": 2.4779,
     "collUSD": 37.8,
     "debtUSD": 15.26,
@@ -6836,7 +6836,7 @@
     ]
   },
   {
-    "acct": "0x9181f6ba05295451e70dc068e75005be832e2bdc",
+    "acct": "0x9181…2bdc",
     "health": 2.4802,
     "collUSD": 188.12,
     "debtUSD": 75.85,
@@ -6857,7 +6857,7 @@
     ]
   },
   {
-    "acct": "0xa2db2a25534a251081b5643330955b68cd54adee",
+    "acct": "0xa2db…adee",
     "health": 2.4885,
     "collUSD": 2.7,
     "debtUSD": 1.08,
@@ -6873,7 +6873,7 @@
     ]
   },
   {
-    "acct": "0xc563e369206cdefde136fdd1384b275276f54dce",
+    "acct": "0xc563…4dce",
     "health": 2.4923,
     "collUSD": 4356.86,
     "debtUSD": 1748.11,
@@ -6894,7 +6894,7 @@
     ]
   },
   {
-    "acct": "0x03cd99f6628b8162dda5a06d991afb4f3a6c14dc",
+    "acct": "0x03cd…14dc",
     "health": 2.4985,
     "collUSD": 12979.47,
     "debtUSD": 5194.8,
@@ -6910,7 +6910,7 @@
     ]
   },
   {
-    "acct": "0x2e92dbce12009bf98f6779a403830c2f361c45b3",
+    "acct": "0x2e92…45b3",
     "health": 2.504,
     "collUSD": 10550.81,
     "debtUSD": 4213.5,
@@ -6931,7 +6931,7 @@
     ]
   },
   {
-    "acct": "0xef108281ee13503cdc57d087e77a7331ed5e3974",
+    "acct": "0xef10…3974",
     "health": 2.5089,
     "collUSD": 110.76,
     "debtUSD": 44.15,
@@ -6952,7 +6952,7 @@
     ]
   },
   {
-    "acct": "0xb98869b072073cd855956ecaee0cd57098bd5c18",
+    "acct": "0xb988…5c18",
     "health": 2.5141,
     "collUSD": 6517.79,
     "debtUSD": 2592.45,
@@ -6973,7 +6973,7 @@
     ]
   },
   {
-    "acct": "0x8a31994b9cc0c8daa1bd4d2856a462a0dbe1c1f3",
+    "acct": "0x8a31…c1f3",
     "health": 2.5147,
     "collUSD": 748.39,
     "debtUSD": 297.6,
@@ -6989,7 +6989,7 @@
     ]
   },
   {
-    "acct": "0x616074b04b2bd10fc306fa0832a3477b8d2eed03",
+    "acct": "0x6160…ed03",
     "health": 2.5163,
     "collUSD": 557.23,
     "debtUSD": 221.44,
@@ -7005,7 +7005,7 @@
     ]
   },
   {
-    "acct": "0xa6a03b3dfe58d6a18628f73f8852fc57e1ce4258",
+    "acct": "0xa6a0…4258",
     "health": 2.5188,
     "collUSD": 15570.61,
     "debtUSD": 6181.84,
@@ -7026,7 +7026,7 @@
     ]
   },
   {
-    "acct": "0x9ab9c104978bef81b98ea8c76812750c722bcf47",
+    "acct": "0x9ab9…cf47",
     "health": 2.5272,
     "collUSD": 63385.5,
     "debtUSD": 25081.69,
@@ -7047,7 +7047,7 @@
     ]
   },
   {
-    "acct": "0x6c5fbc0cea49e5b15b50515c25ae5913e50753ca",
+    "acct": "0x6c5f…53ca",
     "health": 2.5295,
     "collUSD": 4220.32,
     "debtUSD": 1668.43,
@@ -7068,7 +7068,7 @@
     ]
   },
   {
-    "acct": "0x7e4c1bc56af5cb0eeb8c35fab1107cd606852b05",
+    "acct": "0x7e4c…2b05",
     "health": 2.5401,
     "collUSD": 1625.05,
     "debtUSD": 639.76,
@@ -7084,7 +7084,7 @@
     ]
   },
   {
-    "acct": "0xedb94a7642b6c6843f30e183bcfe336efe0e0491",
+    "acct": "0xedb9…0491",
     "health": 2.5413,
     "collUSD": 14043.03,
     "debtUSD": 5525.95,
@@ -7105,7 +7105,7 @@
     ]
   },
   {
-    "acct": "0x3ed198551cf32f2f57fa9bc4fa317dba05571e84",
+    "acct": "0x3ed1…1e84",
     "health": 2.5451,
     "collUSD": 2139.03,
     "debtUSD": 840.43,
@@ -7121,7 +7121,7 @@
     ]
   },
   {
-    "acct": "0x4e5618d6a35f6b3abd0115823c6c39e2031a0d75",
+    "acct": "0x4e56…0d75",
     "health": 2.5534,
     "collUSD": 131289.27,
     "debtUSD": 51418.1,
@@ -7142,7 +7142,7 @@
     ]
   },
   {
-    "acct": "0x39a2cf73da71387d3efbe03d9c8ec56c40d65064",
+    "acct": "0x39a2…5064",
     "health": 2.5551,
     "collUSD": 3019.66,
     "debtUSD": 1181.83,
@@ -7163,7 +7163,7 @@
     ]
   },
   {
-    "acct": "0x3969e2e07aa9e404e6cc6a967476030ace4c08c7",
+    "acct": "0x3969…08c7",
     "health": 2.5983,
     "collUSD": 5903.22,
     "debtUSD": 2271.92,
@@ -7179,7 +7179,7 @@
     ]
   },
   {
-    "acct": "0x9d1ca1cb13b620f310430ba86ca005cbcb495718",
+    "acct": "0x9d1c…5718",
     "health": 2.6022,
     "collUSD": 5.67,
     "debtUSD": 2.18,
@@ -7195,7 +7195,7 @@
     ]
   },
   {
-    "acct": "0x2c385948d445f28374dccdfc6e026876893735bf",
+    "acct": "0x2c38…35bf",
     "health": 2.6157,
     "collUSD": 69.86,
     "debtUSD": 26.71,
@@ -7211,7 +7211,7 @@
     ]
   },
   {
-    "acct": "0x6f4c7a96b2ca2d79cecb48f76c6ed520ab743a90",
+    "acct": "0x6f4c…3a90",
     "health": 2.6165,
     "collUSD": 16691.18,
     "debtUSD": 6379.31,
@@ -7232,7 +7232,7 @@
     ]
   },
   {
-    "acct": "0xddfec8c2b76f2196228a129f4079ee8388a98c89",
+    "acct": "0xddfe…8c89",
     "health": 2.6265,
     "collUSD": 15058.49,
     "debtUSD": 5733.24,
@@ -7248,7 +7248,7 @@
     ]
   },
   {
-    "acct": "0xe56964bf81c314b919a1dbae86506e85bde9ff5b",
+    "acct": "0xe569…ff5b",
     "health": 2.6396,
     "collUSD": 517.39,
     "debtUSD": 196.01,
@@ -7264,7 +7264,7 @@
     ]
   },
   {
-    "acct": "0x86af43a2bce3ca76cd1cdd190c255c662498afb3",
+    "acct": "0x86af…afb3",
     "health": 2.6425,
     "collUSD": 1511.79,
     "debtUSD": 572.1,
@@ -7285,7 +7285,7 @@
     ]
   },
   {
-    "acct": "0x590111a1d7c62e8b8b93696ba36373e908c138d0",
+    "acct": "0x5901…38d0",
     "health": 2.6737,
     "collUSD": 3944.75,
     "debtUSD": 1475.37,
@@ -7306,7 +7306,7 @@
     ]
   },
   {
-    "acct": "0x6cdbdd7732bdfd618607419216880dca38c04836",
+    "acct": "0x6cdb…4836",
     "health": 2.6811,
     "collUSD": 836.05,
     "debtUSD": 311.83,
@@ -7327,7 +7327,7 @@
     ]
   },
   {
-    "acct": "0xf65ff19aed732e3ddd110299809ee039ccde9797",
+    "acct": "0xf65f…9797",
     "health": 2.7153,
     "collUSD": 10.06,
     "debtUSD": 3.71,
@@ -7343,7 +7343,7 @@
     ]
   },
   {
-    "acct": "0xf331cc2df5b6c6157bd17ed492c2b6989860bcc8",
+    "acct": "0xf331…bcc8",
     "health": 2.7358,
     "collUSD": 15.12,
     "debtUSD": 5.53,
@@ -7359,7 +7359,7 @@
     ]
   },
   {
-    "acct": "0xce8b515fab13267cab517ae9df04ad1dfa5cc79d",
+    "acct": "0xce8b…c79d",
     "health": 2.7408,
     "collUSD": 105672.54,
     "debtUSD": 38554.97,
@@ -7380,7 +7380,7 @@
     ]
   },
   {
-    "acct": "0x2a369eec2e9cc3027032fc9d8858ca12ec97669c",
+    "acct": "0x2a36…669c",
     "health": 2.7508,
     "collUSD": 1006.99,
     "debtUSD": 366.06,
@@ -7401,7 +7401,7 @@
     ]
   },
   {
-    "acct": "0x78651cef324cc910495d66adbd7b4ea53ed754d3",
+    "acct": "0x7865…54d3",
     "health": 2.7741,
     "collUSD": 8630.59,
     "debtUSD": 3111.16,
@@ -7422,7 +7422,7 @@
     ]
   },
   {
-    "acct": "0xb19732879f6a007d542f2006e7a8551ddb1d5fc1",
+    "acct": "0xb197…5fc1",
     "health": 2.7992,
     "collUSD": 755.74,
     "debtUSD": 269.99,
@@ -7438,7 +7438,7 @@
     ]
   },
   {
-    "acct": "0xad9c9d40e6623ba38890af0a1826f2f0ef60b3f9",
+    "acct": "0xad9c…b3f9",
     "health": 2.822,
     "collUSD": 35944.87,
     "debtUSD": 12737.47,
@@ -7459,7 +7459,7 @@
     ]
   },
   {
-    "acct": "0x87696086f2e22c955580f2ebe028370e0c80003e",
+    "acct": "0x8769…003e",
     "health": 2.822,
     "collUSD": 15117.74,
     "debtUSD": 5357.04,
@@ -7475,7 +7475,7 @@
     ]
   },
   {
-    "acct": "0xf9d58c2f882a70890b76283e6ecc6f16e7088450",
+    "acct": "0xf9d5…8450",
     "health": 2.8817,
     "collUSD": 5398.13,
     "debtUSD": 1873.24,
@@ -7496,7 +7496,7 @@
     ]
   },
   {
-    "acct": "0x231d786309f6b821da303a68f767dd0d9e5807d0",
+    "acct": "0x231d…07d0",
     "health": 2.9039,
     "collUSD": 629.99,
     "debtUSD": 216.94,
@@ -7517,7 +7517,7 @@
     ]
   },
   {
-    "acct": "0x5fd92ce96edceb1b2f03c4b303b2a7534173002d",
+    "acct": "0x5fd9…002d",
     "health": 2.9199,
     "collUSD": 294.16,
     "debtUSD": 100.74,
@@ -7538,7 +7538,7 @@
     ]
   },
   {
-    "acct": "0xdda2b787abc18b66bebba9090a47f38d4694c452",
+    "acct": "0xdda2…c452",
     "health": 2.9288,
     "collUSD": 7083.27,
     "debtUSD": 2418.47,
@@ -7559,7 +7559,7 @@
     ]
   },
   {
-    "acct": "0x5a10a69e78c1b64cf8ca5235cafdff298b280b6f",
+    "acct": "0x5a10…0b6f",
     "health": 2.9565,
     "collUSD": 4440.56,
     "debtUSD": 1501.95,
@@ -7580,7 +7580,7 @@
     ]
   },
   {
-    "acct": "0xdcb1d8fa2d6d792163266038f59ecd8c1db43a19",
+    "acct": "0xdcb1…3a19",
     "health": 3.0059,
     "collUSD": 219195.95,
     "debtUSD": 72922.73,
@@ -7601,7 +7601,7 @@
     ]
   },
   {
-    "acct": "0x67d94622873d2d4414f620452b9c43fb4c0a8bdb",
+    "acct": "0x67d9…8bdb",
     "health": 3.0359,
     "collUSD": 2037.43,
     "debtUSD": 671.1,
@@ -7622,7 +7622,7 @@
     ]
   },
   {
-    "acct": "0xfac8aa12baf9f22e05df26f0047a159cb6315771",
+    "acct": "0xfac8…5771",
     "health": 3.0535,
     "collUSD": 14280.66,
     "debtUSD": 4676.82,
@@ -7638,7 +7638,7 @@
     ]
   },
   {
-    "acct": "0xc36e070c309127ebba03ba1f2d5980e3c91dbcc7",
+    "acct": "0xc36e…bcc7",
     "health": 3.0766,
     "collUSD": 1887.56,
     "debtUSD": 613.52,
@@ -7659,7 +7659,7 @@
     ]
   },
   {
-    "acct": "0xecebd13444ef119e522301558917844c35f3985d",
+    "acct": "0xeceb…985d",
     "health": 3.1753,
     "collUSD": 6528.33,
     "debtUSD": 2055.97,
@@ -7680,7 +7680,7 @@
     ]
   },
   {
-    "acct": "0x99ef53e33112abed7e2fbf4b9b00440af75bf0fa",
+    "acct": "0x99ef…f0fa",
     "health": 3.1915,
     "collUSD": 1446.3,
     "debtUSD": 453.17,
@@ -7701,7 +7701,7 @@
     ]
   },
   {
-    "acct": "0x40421a39b0d0dc8fd2fb9eca8f94eeacf0b77a91",
+    "acct": "0x4042…7a91",
     "health": 3.2565,
     "collUSD": 3493.05,
     "debtUSD": 1072.63,
@@ -7727,7 +7727,7 @@
     ]
   },
   {
-    "acct": "0x59733fd55373f3c0990d70d80c2a3d6e50394acc",
+    "acct": "0x5973…4acc",
     "health": 3.2665,
     "collUSD": 38609.25,
     "debtUSD": 11819.6,
@@ -7748,7 +7748,7 @@
     ]
   },
   {
-    "acct": "0x53b53b6e59b3f88e18cedcb223f529e4da6d4078",
+    "acct": "0x53b5…4078",
     "health": 3.314,
     "collUSD": 194654.11,
     "debtUSD": 58736.7,
@@ -7769,7 +7769,7 @@
     ]
   },
   {
-    "acct": "0xed6d3fa8faee04893624dd13d3e9726f3898c0b6",
+    "acct": "0xed6d…c0b6",
     "health": 3.316,
     "collUSD": 1966.73,
     "debtUSD": 593.11,
@@ -7790,7 +7790,7 @@
     ]
   },
   {
-    "acct": "0xde9554d04ee85324c6530ffc4d0a0284e2a6521d",
+    "acct": "0xde95…521d",
     "health": 3.3482,
     "collUSD": 36.76,
     "debtUSD": 10.98,
@@ -7811,7 +7811,7 @@
     ]
   },
   {
-    "acct": "0x23ed49f7ecd7099e8688c5d4b2f4111edf8468dd",
+    "acct": "0x23ed…68dd",
     "health": 3.3671,
     "collUSD": 1312.33,
     "debtUSD": 389.75,
@@ -7832,7 +7832,7 @@
     ]
   },
   {
-    "acct": "0xabca8a8b5787860aa8f6c478747314bccb702e61",
+    "acct": "0xabca…2e61",
     "health": 3.3717,
     "collUSD": 21956.43,
     "debtUSD": 6511.99,
@@ -7853,7 +7853,7 @@
     ]
   },
   {
-    "acct": "0x4f867315118a8a01a710ff9afe516c9d04a2336d",
+    "acct": "0x4f86…336d",
     "health": 3.4113,
     "collUSD": 1273.27,
     "debtUSD": 373.25,
@@ -7874,7 +7874,7 @@
     ]
   },
   {
-    "acct": "0x736c29be1548e0c42ad69b99b04430d270ea2981",
+    "acct": "0x736c…2981",
     "health": 3.4197,
     "collUSD": 36.27,
     "debtUSD": 10.61,
@@ -7895,7 +7895,7 @@
     ]
   },
   {
-    "acct": "0x632d348c3ea580c1084d29743de3e2ac24f4ad59",
+    "acct": "0x632d…ad59",
     "health": 3.4596,
     "collUSD": 2703.4,
     "debtUSD": 781.41,
@@ -7916,7 +7916,7 @@
     ]
   },
   {
-    "acct": "0xb794ff71dd5eebb60595ade7611aaa9963e36105",
+    "acct": "0xb794…6105",
     "health": 3.4911,
     "collUSD": 755.88,
     "debtUSD": 216.52,
@@ -7932,7 +7932,7 @@
     ]
   },
   {
-    "acct": "0xfd25636391e484f758c139a528be1ec1c0a6347d",
+    "acct": "0xfd25…347d",
     "health": 3.4978,
     "collUSD": 378.67,
     "debtUSD": 108.26,
@@ -7948,7 +7948,7 @@
     ]
   },
   {
-    "acct": "0xbea117dce3292524d73ca74252d29df0cda2589f",
+    "acct": "0xbea1…589f",
     "health": 3.6005,
     "collUSD": 86542.39,
     "debtUSD": 24036.51,
@@ -7969,7 +7969,7 @@
     ]
   },
   {
-    "acct": "0x6a4ed6519c9d2ec0c776e4bbc0dbeac8907e3344",
+    "acct": "0x6a4e…3344",
     "health": 3.6996,
     "collUSD": 111.59,
     "debtUSD": 30.16,
@@ -7985,7 +7985,7 @@
     ]
   },
   {
-    "acct": "0xcedf88db649600cf702be7decc23f0b106ee7dec",
+    "acct": "0xcedf…7dec",
     "health": 3.7656,
     "collUSD": 167,
     "debtUSD": 44.35,
@@ -8006,7 +8006,7 @@
     ]
   },
   {
-    "acct": "0x93892c88bf01e7968f2f2cf7db06a72fedd130a1",
+    "acct": "0x9389…30a1",
     "health": 3.8172,
     "collUSD": 75.77,
     "debtUSD": 19.85,
@@ -8027,7 +8027,7 @@
     ]
   },
   {
-    "acct": "0x3521884bb802ef605082fe1da804b55082914a34",
+    "acct": "0x3521…4a34",
     "health": 3.828,
     "collUSD": 2963672.06,
     "debtUSD": 774206.02,
@@ -8048,7 +8048,7 @@
     ]
   },
   {
-    "acct": "0xc0e3f9da5777e89c1ac4a7ee6ec0dcb9c7049288",
+    "acct": "0xc0e3…9288",
     "health": 3.8978,
     "collUSD": 228.81,
     "debtUSD": 58.7,
@@ -8069,7 +8069,7 @@
     ]
   },
   {
-    "acct": "0x0d82f9b817ce74ddd2abee080206785a24a903db",
+    "acct": "0x0d82…03db",
     "health": 3.9272,
     "collUSD": 755.75,
     "debtUSD": 192.44,
@@ -8090,7 +8090,7 @@
     ]
   },
   {
-    "acct": "0x6dd229748b06cb6ae83e4dde6a7d6c159f7d2231",
+    "acct": "0x6dd2…2231",
     "health": 3.9429,
     "collUSD": 4231.43,
     "debtUSD": 1073.19,
@@ -8111,7 +8111,7 @@
     ]
   },
   {
-    "acct": "0x3420060da48fcc2d658ee5ab36a86d0f13055557",
+    "acct": "0x3420…5557",
     "health": 3.9512,
     "collUSD": 14667.28,
     "debtUSD": 3712.07,
@@ -8132,7 +8132,7 @@
     ]
   },
   {
-    "acct": "0xc82893f10de69894d9b6bfa2cbd2416e082fff39",
+    "acct": "0xc828…ff39",
     "health": 3.9784,
     "collUSD": 10.97,
     "debtUSD": 2.76,
@@ -8153,7 +8153,7 @@
     ]
   },
   {
-    "acct": "0x44d34a70291a2f2a834dc1ff5560c203f804ac74",
+    "acct": "0x44d3…ac74",
     "health": 4.002,
     "collUSD": 15611.53,
     "debtUSD": 3900.95,
@@ -8174,7 +8174,7 @@
     ]
   },
   {
-    "acct": "0x79ac01fe76e3a153d3a4163c50b6096466210510",
+    "acct": "0x79ac…0510",
     "health": 4.0255,
     "collUSD": 762.13,
     "debtUSD": 189.33,
@@ -8190,7 +8190,7 @@
     ]
   },
   {
-    "acct": "0xd1c9857c24ce2778fae9e46fbbf7ebea1e280fb8",
+    "acct": "0xd1c9…0fb8",
     "health": 4.0398,
     "collUSD": 108449.65,
     "debtUSD": 26845.03,
@@ -8206,7 +8206,7 @@
     ]
   },
   {
-    "acct": "0xe3c7bbd1dcae44e1c5a2304ded328254f0d3e041",
+    "acct": "0xe3c7…e041",
     "health": 4.0491,
     "collUSD": 1927.6,
     "debtUSD": 476.05,
@@ -8227,7 +8227,7 @@
     ]
   },
   {
-    "acct": "0xe27bb324e851c52e49dc8aae8e3a07cc770cac92",
+    "acct": "0xe27b…ac92",
     "health": 4.0977,
     "collUSD": 140.58,
     "debtUSD": 34.31,
@@ -8248,7 +8248,7 @@
     ]
   },
   {
-    "acct": "0xb4d2ca75db66beceeebf59a93d3bbec07e3bb035",
+    "acct": "0xb4d2…b035",
     "health": 4.1403,
     "collUSD": 10.15,
     "debtUSD": 2.45,
@@ -8269,7 +8269,7 @@
     ]
   },
   {
-    "acct": "0xf3484ff809d138d33ac6f8e7b80b3d6bcf67d662",
+    "acct": "0xf348…d662",
     "health": 4.2058,
     "collUSD": 9926.34,
     "debtUSD": 2360.13,
@@ -8290,7 +8290,7 @@
     ]
   },
   {
-    "acct": "0x474361291c87ab60c2a7c46505e722c807b05fa2",
+    "acct": "0x4743…5fa2",
     "health": 4.2151,
     "collUSD": 13932.82,
     "debtUSD": 3305.48,
@@ -8311,7 +8311,7 @@
     ]
   },
   {
-    "acct": "0x7a2d05feeb64a988a5b688e2656a33535f2d3e84",
+    "acct": "0x7a2d…3e84",
     "health": 4.2266,
     "collUSD": 914.76,
     "debtUSD": 216.43,
@@ -8337,7 +8337,7 @@
     ]
   },
   {
-    "acct": "0xf20a53b130e21661e7dc2dde7cc24d047efc5df3",
+    "acct": "0xf20a…5df3",
     "health": 4.2276,
     "collUSD": 190305.07,
     "debtUSD": 45014.48,
@@ -8358,7 +8358,7 @@
     ]
   },
   {
-    "acct": "0xe3eaa4ffd622295f55ba48b05d6d9685aaeacc01",
+    "acct": "0xe3ea…cc01",
     "health": 4.3145,
     "collUSD": 9252.04,
     "debtUSD": 2144.42,
@@ -8379,7 +8379,7 @@
     ]
   },
   {
-    "acct": "0xc601cdbf3d58accfe1c9fc97ba389aa03c7d8231",
+    "acct": "0xc601…8231",
     "health": 4.3223,
     "collUSD": 26776.84,
     "debtUSD": 6195.02,
@@ -8400,7 +8400,7 @@
     ]
   },
   {
-    "acct": "0x495eada875454c4dbb7e38bc7df0e1ec89412f46",
+    "acct": "0x495e…2f46",
     "health": 4.3725,
     "collUSD": 9.22,
     "debtUSD": 2.11,
@@ -8421,7 +8421,7 @@
     ]
   },
   {
-    "acct": "0x1aa9f1d63f6fb2f59b52ff4d14e35d554ea50774",
+    "acct": "0x1aa9…0774",
     "health": 4.4609,
     "collUSD": 170.09,
     "debtUSD": 38.13,
@@ -8437,7 +8437,7 @@
     ]
   },
   {
-    "acct": "0xb65f55c27be46d7824d114f42e35f8ad90dde11f",
+    "acct": "0xb65f…e11f",
     "health": 4.5342,
     "collUSD": 3709.48,
     "debtUSD": 818.11,
@@ -8463,7 +8463,7 @@
     ]
   },
   {
-    "acct": "0xd507b55a3c55d704375a93c24b7092c13c061e04",
+    "acct": "0xd507…1e04",
     "health": 4.7113,
     "collUSD": 574.5,
     "debtUSD": 121.94,
@@ -8484,7 +8484,7 @@
     ]
   },
   {
-    "acct": "0x7fbebfa30eb4fb6959dfab220ca089fae244107f",
+    "acct": "0x7fbe…107f",
     "health": 4.8648,
     "collUSD": 2065.66,
     "debtUSD": 424.61,
@@ -8505,7 +8505,7 @@
     ]
   },
   {
-    "acct": "0x90802d3727aaa2085bd59f956070e439a473e248",
+    "acct": "0x9080…e248",
     "health": 4.8826,
     "collUSD": 95891.38,
     "debtUSD": 19639.49,
@@ -8526,7 +8526,7 @@
     ]
   },
   {
-    "acct": "0xc116981e7aa8c07c555413697ac1f449e6a314a3",
+    "acct": "0xc116…14a3",
     "health": 5.0934,
     "collUSD": 6386.3,
     "debtUSD": 1253.84,
@@ -8542,7 +8542,7 @@
     ]
   },
   {
-    "acct": "0x1a4c1815bb3ad470ad5fed5885f4df4ce32224a1",
+    "acct": "0x1a4c…24a1",
     "health": 5.1676,
     "collUSD": 1499.3,
     "debtUSD": 290.14,
@@ -8563,7 +8563,7 @@
     ]
   },
   {
-    "acct": "0x219411a6d93d54adbc989906dd8b8a48ab8e45bc",
+    "acct": "0x2194…45bc",
     "health": 5.2417,
     "collUSD": 419.57,
     "debtUSD": 80.04,
@@ -8584,7 +8584,7 @@
     ]
   },
   {
-    "acct": "0x87f118d60507305baea4ecdfe8f9862126f72f3a",
+    "acct": "0x87f1…2f3a",
     "health": 5.261,
     "collUSD": 12982.91,
     "debtUSD": 2467.78,
@@ -8605,7 +8605,7 @@
     ]
   },
   {
-    "acct": "0x251818f4065d40b860fbd3e4bcff97139a1a11c8",
+    "acct": "0x2518…11c8",
     "health": 5.2793,
     "collUSD": 50285.57,
     "debtUSD": 9525,
@@ -8626,7 +8626,7 @@
     ]
   },
   {
-    "acct": "0x758ae64167b01b47d9dff73a26db5f618897cb4e",
+    "acct": "0x758a…cb4e",
     "health": 5.3484,
     "collUSD": 59344.71,
     "debtUSD": 11095.72,
@@ -8647,7 +8647,7 @@
     ]
   },
   {
-    "acct": "0xdff41a11b5ab610d44e9375fd2ded607f80047f0",
+    "acct": "0xdff4…47f0",
     "health": 5.9069,
     "collUSD": 13985.53,
     "debtUSD": 2367.68,
@@ -8668,7 +8668,7 @@
     ]
   },
   {
-    "acct": "0xfaf2ca038eb2a58280fd8b7f7b1d663bcc59528b",
+    "acct": "0xfaf2…528b",
     "health": 5.9106,
     "collUSD": 1511.57,
     "debtUSD": 255.74,
@@ -8689,7 +8689,7 @@
     ]
   },
   {
-    "acct": "0xda85c7f041fe1949213f08855b48a676420a8ed0",
+    "acct": "0xda85…8ed0",
     "health": 5.9948,
     "collUSD": 847.12,
     "debtUSD": 141.31,
@@ -8710,7 +8710,7 @@
     ]
   },
   {
-    "acct": "0x63327eeea5983156c41369face40b5b8009cd14a",
+    "acct": "0x6332…d14a",
     "health": 6.2369,
     "collUSD": 1600.11,
     "debtUSD": 256.56,
@@ -8731,7 +8731,7 @@
     ]
   },
   {
-    "acct": "0x27ca3d04db0ddf70a3dbe8ca00fbe18d94ab2b07",
+    "acct": "0x27ca…2b07",
     "health": 6.5343,
     "collUSD": 3026.22,
     "debtUSD": 463.13,
@@ -8752,7 +8752,7 @@
     ]
   },
   {
-    "acct": "0xbefc23d463731942962298b4f44f41b8bdd14196",
+    "acct": "0xbefc…4196",
     "health": 6.6043,
     "collUSD": 114.15,
     "debtUSD": 17.28,
@@ -8768,7 +8768,7 @@
     ]
   },
   {
-    "acct": "0xe9457f5fecdbde135a26c35faa5b33614753438e",
+    "acct": "0xe945…438e",
     "health": 6.8556,
     "collUSD": 7863,
     "debtUSD": 1146.94,
@@ -8789,7 +8789,7 @@
     ]
   },
   {
-    "acct": "0xf0814c0e02618335a35f466e9224c5ee6260b975",
+    "acct": "0xf081…b975",
     "health": 6.8638,
     "collUSD": 207465.48,
     "debtUSD": 30226.18,
@@ -8810,7 +8810,7 @@
     ]
   },
   {
-    "acct": "0x2da5803d64a526a775c4b4b51c1c3db90847b811",
+    "acct": "0x2da5…b811",
     "health": 6.965,
     "collUSD": 121.33,
     "debtUSD": 17.42,
@@ -8836,7 +8836,7 @@
     ]
   },
   {
-    "acct": "0x0a40357883962973e18c2e37466cba5accdf75cc",
+    "acct": "0x0a40…75cc",
     "health": 6.9708,
     "collUSD": 9041.25,
     "debtUSD": 1297.02,
@@ -8852,7 +8852,7 @@
     ]
   },
   {
-    "acct": "0xf0748b805d40def7e9b62d14be880e7e7a30882b",
+    "acct": "0xf074…882b",
     "health": 7.064,
     "collUSD": 18021.57,
     "debtUSD": 2551.17,
@@ -8873,7 +8873,7 @@
     ]
   },
   {
-    "acct": "0xfbefca70c206837aad793a930077161b1aec4107",
+    "acct": "0xfbef…4107",
     "health": 7.4816,
     "collUSD": 56222.8,
     "debtUSD": 7514.82,
@@ -8894,7 +8894,7 @@
     ]
   },
   {
-    "acct": "0x4c20f241a9cf8932ad9dab157660c7a5e856af91",
+    "acct": "0x4c20…af91",
     "health": 8.0205,
     "collUSD": 1882.54,
     "debtUSD": 234.72,
@@ -8915,7 +8915,7 @@
     ]
   },
   {
-    "acct": "0x55c430d61197c89f25fe99fb977370dc565abbe3",
+    "acct": "0x55c4…bbe3",
     "health": 8.022,
     "collUSD": 4489.14,
     "debtUSD": 559.6,
@@ -8931,7 +8931,7 @@
     ]
   },
   {
-    "acct": "0x8dff7106c0a590bcc18bbe80c46add67d6411384",
+    "acct": "0x8dff…1384",
     "health": 8.1368,
     "collUSD": 4223.8,
     "debtUSD": 519.1,
@@ -8952,7 +8952,7 @@
     ]
   },
   {
-    "acct": "0x9e27b6e99810da9481e8502580cb961d5c5ac7b0",
+    "acct": "0x9e27…c7b0",
     "health": 8.2231,
     "collUSD": 1757.74,
     "debtUSD": 213.76,
@@ -8978,7 +8978,7 @@
     ]
   },
   {
-    "acct": "0xb97e4c3ac33761eb325ba242de64c98ee74a9a71",
+    "acct": "0xb97e…9a71",
     "health": 8.2316,
     "collUSD": 8793.63,
     "debtUSD": 1068.28,
@@ -8999,7 +8999,7 @@
     ]
   },
   {
-    "acct": "0x7f94cc16ca7bbb173ddafe7b258f28e9f2bdce93",
+    "acct": "0x7f94…ce93",
     "health": 8.3769,
     "collUSD": 656.69,
     "debtUSD": 78.39,
@@ -9020,7 +9020,7 @@
     ]
   },
   {
-    "acct": "0x978aad73102bffad984510708b3ee2b45aed7ea7",
+    "acct": "0x978a…7ea7",
     "health": 8.6068,
     "collUSD": 27212.7,
     "debtUSD": 3161.77,
@@ -9041,7 +9041,7 @@
     ]
   },
   {
-    "acct": "0x177b7c4002f580cf7dfb3ba0f251acf0e055c7b1",
+    "acct": "0x177b…c7b1",
     "health": 8.8715,
     "collUSD": 1712.73,
     "debtUSD": 193.06,
@@ -9062,7 +9062,7 @@
     ]
   },
   {
-    "acct": "0x8650a28a4cac6030c95e809d3d27864f82aa6fc5",
+    "acct": "0x8650…6fc5",
     "health": 8.8886,
     "collUSD": 29924.49,
     "debtUSD": 3366.62,
@@ -9083,7 +9083,7 @@
     ]
   },
   {
-    "acct": "0x297af4eb19f3697d2105a1d85220edc473c09ffb",
+    "acct": "0x297a…9ffb",
     "health": 9.3304,
     "collUSD": 20.43,
     "debtUSD": 2.19,
@@ -9099,7 +9099,7 @@
     ]
   },
   {
-    "acct": "0xbba0302eaf471bb9f32d2b7c5f2cf5bb76a8100a",
+    "acct": "0xbba0…100a",
     "health": 9.5123,
     "collUSD": 2894.19,
     "debtUSD": 304.26,
@@ -9115,7 +9115,7 @@
     ]
   },
   {
-    "acct": "0xa47030bc817d342d73375476c14ad224c9936017",
+    "acct": "0xa470…6017",
     "health": 9.5292,
     "collUSD": 340.19,
     "debtUSD": 35.7,
@@ -9131,7 +9131,7 @@
     ]
   },
   {
-    "acct": "0x16bde8b27cee2dfb2b9d4e8dfa035ba7a8ec643d",
+    "acct": "0x16bd…643d",
     "health": 9.7901,
     "collUSD": 309.15,
     "debtUSD": 31.58,
@@ -9152,7 +9152,7 @@
     ]
   },
   {
-    "acct": "0x82fe59cfa0ee872721f092ff7755192eaaadb28e",
+    "acct": "0x82fe…b28e",
     "health": 10.1004,
     "collUSD": 2192.02,
     "debtUSD": 217.02,
@@ -9168,7 +9168,7 @@
     ]
   },
   {
-    "acct": "0x493a30766b7e9733e4060c7192a820f5e386029c",
+    "acct": "0x493a…029c",
     "health": 10.1739,
     "collUSD": 15120.26,
     "debtUSD": 1486.19,
@@ -9189,7 +9189,7 @@
     ]
   },
   {
-    "acct": "0x7d7acfaff466164d7d755cd5f7fb2d3d73dec518",
+    "acct": "0x7d7a…c518",
     "health": 10.5399,
     "collUSD": 33328.22,
     "debtUSD": 3162.1,
@@ -9210,7 +9210,7 @@
     ]
   },
   {
-    "acct": "0xb4274dfb2250647b600f9bd73a510ae7b36a3975",
+    "acct": "0xb427…3975",
     "health": 10.7059,
     "collUSD": 5321.47,
     "debtUSD": 497.06,
@@ -9231,7 +9231,7 @@
     ]
   },
   {
-    "acct": "0x65baeb2e29a2519115966182fe6867e80395357a",
+    "acct": "0x65ba…357a",
     "health": 10.9335,
     "collUSD": 6052.06,
     "debtUSD": 553.53,
@@ -9247,7 +9247,7 @@
     ]
   },
   {
-    "acct": "0xf3b381ccd99ff8ab19064777ccfdcfeefd1e4e88",
+    "acct": "0xf3b3…4e88",
     "health": 11.0266,
     "collUSD": 66659.51,
     "debtUSD": 6045.35,
@@ -9268,7 +9268,7 @@
     ]
   },
   {
-    "acct": "0x6819e50eefd7209aba335a86139a56ff7a0e6a01",
+    "acct": "0x6819…6a01",
     "health": 11.4383,
     "collUSD": 3564.5,
     "debtUSD": 311.63,
@@ -9284,7 +9284,7 @@
     ]
   },
   {
-    "acct": "0x1083ea03d0cc6eb3bca18be9cff3e5cd71a27d08",
+    "acct": "0x1083…7d08",
     "health": 11.5929,
     "collUSD": 1124.95,
     "debtUSD": 97.04,
@@ -9310,7 +9310,7 @@
     ]
   },
   {
-    "acct": "0x8258aaf1081a82a67dfeb4952e7cf36577e90d0c",
+    "acct": "0x8258…0d0c",
     "health": 11.9036,
     "collUSD": 793.07,
     "debtUSD": 66.62,
@@ -9326,7 +9326,7 @@
     ]
   },
   {
-    "acct": "0x451a24842e3b6886c3582b381a1a67a3af069ce5",
+    "acct": "0x451a…9ce5",
     "health": 14.8793,
     "collUSD": 16282.93,
     "debtUSD": 1094.34,
@@ -9347,7 +9347,7 @@
     ]
   },
   {
-    "acct": "0x263dcd4a8ef19b2bb5a6c17dbccb680f08bbc89a",
+    "acct": "0x263d…c89a",
     "health": 15.0327,
     "collUSD": 1890,
     "debtUSD": 125.73,
@@ -9363,7 +9363,7 @@
     ]
   },
   {
-    "acct": "0x1fa134d12f68ab86e1e4feccd1737a6b4a211cbd",
+    "acct": "0x1fa1…1cbd",
     "health": 15.6268,
     "collUSD": 33954.54,
     "debtUSD": 2172.84,
@@ -9379,7 +9379,7 @@
     ]
   },
   {
-    "acct": "0x636a53ebcd83066b71daab01043ce21c9210479d",
+    "acct": "0x636a…479d",
     "health": 16.0913,
     "collUSD": 696.16,
     "debtUSD": 43.26,
@@ -9395,7 +9395,7 @@
     ]
   },
   {
-    "acct": "0xe89f713d571bcb2c700a70343bc2b4a0019ce713",
+    "acct": "0xe89f…e713",
     "health": 20.1109,
     "collUSD": 921.98,
     "debtUSD": 45.84,
@@ -9416,7 +9416,7 @@
     ]
   },
   {
-    "acct": "0x59dd53f5cb97e21c9efdf3525ee6e87a721cbb16",
+    "acct": "0x59dd…bb16",
     "health": 21.4279,
     "collUSD": 70.31,
     "debtUSD": 3.28,
@@ -9432,7 +9432,7 @@
     ]
   },
   {
-    "acct": "0x8f7238fdc127a1cd57a4964dca16170785399b2b",
+    "acct": "0x8f72…9b2b",
     "health": 21.9212,
     "collUSD": 68642.91,
     "debtUSD": 3131.35,
@@ -9453,7 +9453,7 @@
     ]
   },
   {
-    "acct": "0xa5848899443980b8f6eab07b4cb79d2106fd69d3",
+    "acct": "0xa584…69d3",
     "health": 22.1557,
     "collUSD": 5557.34,
     "debtUSD": 250.83,
@@ -9474,7 +9474,7 @@
     ]
   },
   {
-    "acct": "0x160b1a66ac729680467a35105f59a8938309923c",
+    "acct": "0x160b…923c",
     "health": 25.5159,
     "collUSD": 38.88,
     "debtUSD": 1.52,
@@ -9495,7 +9495,7 @@
     ]
   },
   {
-    "acct": "0x7908ca545012e709194394041996e911d0476159",
+    "acct": "0x7908…6159",
     "health": 33.8435,
     "collUSD": 740.12,
     "debtUSD": 21.87,
@@ -9511,7 +9511,7 @@
     ]
   },
   {
-    "acct": "0xab01b61c1d8060100f6f11bec9cd4fd967bcfd22",
+    "acct": "0xab01…fd22",
     "health": 34.3611,
     "collUSD": 26479.43,
     "debtUSD": 770.62,
@@ -9532,7 +9532,7 @@
     ]
   },
   {
-    "acct": "0x222ace0ba71deb4d7a73a7befdd36c5ecb66d37a",
+    "acct": "0x222a…d37a",
     "health": 36.0127,
     "collUSD": 326.39,
     "debtUSD": 9.06,
@@ -9548,7 +9548,7 @@
     ]
   },
   {
-    "acct": "0xb9193d4a565eb2f751f8149271afc4e4bda7808b",
+    "acct": "0xb919…808b",
     "health": 1309.6548,
     "collUSD": 7557.32,
     "debtUSD": 5.77,
@@ -9569,7 +9569,7 @@
     ]
   },
   {
-    "acct": "0x142cab6cd0a9aee328cb10fc11530f6c7ff9afdd",
+    "acct": "0x142c…afdd",
     "health": 3975.049,
     "collUSD": 4339.54,
     "debtUSD": 1.09,

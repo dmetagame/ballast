@@ -257,7 +257,7 @@
 
   <footer>
     <div>Health is computed with Morpho's own share accounting, so 1.00 is exactly the seizure line. Penalty estimates use each venue's real parameters: Enosys at a 10% incentive with a 0.5 close factor, Morpho at ~7.4% with full liquidation.</div>
-    <div>Positions with debt below $1 are excluded. stFLR-collateralised Morpho positions are excluded because they are not XRP-linked. Regenerate with <code>node dashboard/build.mjs</code>.</div>
+    <div>Borrower addresses are truncated. The underlying positions are public on-chain state and can be recomputed with the scanners in <code>monitor/</code>; this page does not republish a ranked, directly actionable list of them. Positions with debt below $1 are excluded. stFLR-collateralised Morpho positions are excluded because they are not XRP-linked. Regenerate with <code>node dashboard/build.mjs</code>.</div>
   </footer>
 </div>
 
@@ -269,7 +269,7 @@ const fmtUsd = (n, dp = 0) =>
   "$" + n.toLocaleString("en-US", { minimumFractionDigits: dp, maximumFractionDigits: dp });
 const fmtCompact = (n) =>
   n >= 1e6 ? "$" + (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? "$" + Math.round(n / 1e3) + "K" : "$" + Math.round(n);
-const short = (a) => a.slice(0, 6) + "…" + a.slice(-4);
+const short = (a) => (/^0x[a-fA-F0-9]{40}$/.test(a) ? a.slice(0, 6) + "…" + a.slice(-4) : a);
 const sum = (a, f) => a.reduce((s, x) => s + f(x), 0);
 
 const BUCKETS = [
@@ -449,7 +449,7 @@ function renderTable(rows) {
     .map((p) => {
       const b = bucketOf(p.h);
       return `<tr>
-        <td class="addr" title="${p.a}">${short(p.a)}</td>
+        <td class="addr">${short(p.a)}</td>
         <td><span class="venue">${p.v}</span></td>
         <td class="num"><span class="sev"><span class="g" style="background:${b.color}"></span>${p.h.toFixed(3)}</span></td>
         <td class="num">${p.k === null ? "—" : "−" + p.k.toFixed(1) + "%"}</td>

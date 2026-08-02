@@ -208,8 +208,16 @@ drawdown-sensitivity curve, and the positions closest to liquidation. No runtime
 it works from a `file://` URL or any static host.
 
 ```bash
-node dashboard/build.mjs        # regenerate from monitor/data/*.json
+node monitor/redact.mjs         # truncate borrower addresses in the data snapshot
+node dashboard/build.mjs        # regenerate the page from monitor/data/*.json
 ```
+
+Borrower addresses in the committed snapshot and on the page are truncated. The scanners
+need full addresses at runtime and will write them locally; `monitor/redact.mjs` truncates
+them before anything is published, and errors rather than collapsing two distinct addresses
+onto one label, so counts of unique addresses stay exact. These positions are public
+on-chain state that anyone can recompute — the point is not to also hand out a ranked,
+directly actionable list of who is closest to being liquidated.
 
 ## Try it
 
