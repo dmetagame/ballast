@@ -12,3 +12,8 @@ fs_permissions = [{ access = "read", path = "./" }]
 [rpc_endpoints]
 flare = "https://flare-api.flare.network/ext/C/rpc"
 coston2 = "https://coston2-api.flare.network/ext/C/rpc"
+
+# Source verification on Flare's Blockscout instance. Blockscout needs no API key,
+# but forge requires the field to be present, so it is a placeholder.
+[etherscan]
+flare = { key = "blockscout", url = "https://flare-explorer.flare.network/api", chain = 14 }
