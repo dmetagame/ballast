@@ -118,6 +118,16 @@ contract ConfidentialTriggerTest is Test {
 
     // ------------------------------------------------------------------ tests
 
+    /// @dev The other half of `fce/extension/commitment_test.go`. If Go and Solidity ever hash
+    ///      a policy differently, every enrollment is rejected as "policy does not match
+    ///      published commitment" and nothing in that error says why. Pin both ends.
+    function testCommitmentMatchesTheGoExtension() public view {
+        assertEq(
+            trigger.commitmentFor(TRIGGER_HEALTH, TARGET_HEALTH, SALT),
+            0x164ab6ff7d824a82cd45bc5202021b6c3e717b8b2ad68b66a689ecb46fa84d87
+        );
+    }
+
     function testCommitmentHidesTheTrigger() public view {
         // The only thing on-chain is a hash. Recomputing it needs the salt.
         bytes32 stored = trigger.commitmentOf(borrower, MARKET);
