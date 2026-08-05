@@ -2,6 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {ITeeMachineRegistry} from "./interfaces/ITeeMachineRegistry.sol";
+import {TeeResultHash} from "./libraries/TeeResultHash.sol";
 import {Id} from "./interfaces/IMorpho.sol";
 
 /// @notice What Ballast needs from a protection manager for the confidential path to work.
@@ -58,8 +59,17 @@ contract ConfidentialTrigger {
     /// @notice keccak256(triggerHealth, targetHealth, salt), per borrower per market.
     mapping(address => mapping(Id => bytes32)) public commitmentOf;
 
-    /// @notice Consumed verdict IDs, so a keeper cannot replay a favourable verdict.
+    /// @notice Consumed verdict digests, so a keeper cannot replay a favourable verdict.
     mapping(bytes32 => bool) public verdictUsed;
+
+    /// @notice The parts of the TEE's result envelope that the signature commits to.
+    /// @dev These are not Ballast's data, they belong to the tee-node protocol, but they are
+    ///      inside the signed preimage so the contract has to be given them to recover.
+    struct TeeEnvelope {
+        bytes32 actionId;
+        string submissionTag;
+        uint8 status;
+    }
 
     /// @notice A signed instruction from the enclave to act on a position.
     /// @dev `targetHealth` and the bounds are revealed only here, at the moment of action.
@@ -89,6 +99,7 @@ contract ConfidentialTrigger {
     error EvaluationTooOld(uint256 evaluatedAtBlock, uint256 currentBlock);
     error EvaluationInFuture(uint256 evaluatedAtBlock, uint256 currentBlock);
     error BadSignature();
+    error HandlerFailed(bytes32 actionId);
 
     constructor(address teeRegistry, address ballast, uint256 extensionId) {
         TEE_REGISTRY = ITeeMachineRegistry(teeRegistry);
@@ -117,10 +128,12 @@ contract ConfidentialTrigger {
     /// @notice Act on a position because the enclave says its secret trigger was crossed.
     /// @dev Permissionless to call, but useless to forge: the verdict must carry a signature
     ///      from a machine the Flare registry says is running our extension in production.
-    function execute(Verdict calldata v, bytes calldata signature)
+    function execute(Verdict calldata v, TeeEnvelope calldata env, bytes calldata signature)
         external
         returns (uint256 repaid, uint256 collateralSold)
     {
+        if (env.status == 0) revert HandlerFailed(env.actionId);
+
         bytes32 stored = commitmentOf[v.borrower][v.id];
         if (stored == bytes32(0)) revert NoCommitment(v.borrower);
         if (stored != v.commitment) revert CommitmentMismatch(stored, v.commitment);
@@ -132,11 +145,15 @@ contract ConfidentialTrigger {
             revert EvaluationTooOld(v.evaluatedAtBlock, block.number);
         }
 
-        bytes32 verdictId = keccak256(abi.encode(v));
-        if (verdictUsed[verdictId]) revert VerdictAlreadyUsed(verdictId);
-        verdictUsed[verdictId] = true;
+        // The enclave's result payload is the verdict itself, ABI-encoded. `block.chainid`
+        // binds the signature to this chain, which is the whole point of the domain separator.
+        bytes32 digest =
+            TeeResultHash.digest(abi.encode(v), env.actionId, env.submissionTag, env.status, block.chainid);
 
-        address teeId = _recoverAttestedMachine(verdictId, signature);
+        if (verdictUsed[digest]) revert VerdictAlreadyUsed(digest);
+        verdictUsed[digest] = true;
+
+        address teeId = _recoverAttestedMachine(digest, signature);
 
         (repaid, collateralSold) = BALLAST.protectFor(v.borrower, v.id, v.targetHealth, v.maxSlippageBps);
         emit VerdictExecuted(v.borrower, v.id, teeId, repaid, collateralSold);

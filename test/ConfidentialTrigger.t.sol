@@ -3,6 +3,7 @@ pragma solidity ^0.8.26;
 
 import {Test} from "forge-std/Test.sol";
 import {ConfidentialTrigger, IGatedProtect} from "../src/ConfidentialTrigger.sol";
+import {TeeResultHash} from "../src/libraries/TeeResultHash.sol";
 import {ITeeMachineRegistry} from "../src/interfaces/ITeeMachineRegistry.sol";
 import {Id} from "../src/interfaces/IMorpho.sol";
 
@@ -99,9 +100,19 @@ contract ConfidentialTriggerTest is Test {
         });
     }
 
-    function _sign(ConfidentialTrigger.Verdict memory v, uint256 key) internal pure returns (bytes memory) {
-        bytes32 digest = keccak256(abi.encode(v));
-        (uint8 sv, bytes32 r, bytes32 s) = vm.sign(key, digest);
+    /// @dev The envelope the tee-node wraps a result in. Its fields are inside the signed
+    ///      preimage, so they have to be supplied to the contract alongside the verdict.
+    function _envelope() internal pure returns (ConfidentialTrigger.TeeEnvelope memory) {
+        return ConfidentialTrigger.TeeEnvelope({actionId: bytes32(uint256(0xAC7)), submissionTag: "submit", status: 1});
+    }
+
+    function _digest(ConfidentialTrigger.Verdict memory v) internal view returns (bytes32) {
+        ConfidentialTrigger.TeeEnvelope memory env = _envelope();
+        return TeeResultHash.digest(abi.encode(v), env.actionId, env.submissionTag, env.status, block.chainid);
+    }
+
+    function _sign(ConfidentialTrigger.Verdict memory v, uint256 key) internal view returns (bytes memory) {
+        (uint8 sv, bytes32 r, bytes32 s) = vm.sign(key, _digest(v));
         return abi.encodePacked(r, s, sv);
     }
 
@@ -117,7 +128,7 @@ contract ConfidentialTriggerTest is Test {
 
     function testAttestedMachineVerdictExecutes() public {
         ConfidentialTrigger.Verdict memory v = _verdict();
-        (uint256 repaid, uint256 sold) = trigger.execute(v, _sign(v, teeKey));
+        (uint256 repaid, uint256 sold) = trigger.execute(v, _envelope(), _sign(v, teeKey));
 
         assertEq(repaid, 1234);
         assertEq(sold, 5678);
@@ -129,14 +140,14 @@ contract ConfidentialTriggerTest is Test {
     function testUnregisteredSignerIsRejected() public {
         ConfidentialTrigger.Verdict memory v = _verdict();
         vm.expectRevert(abi.encodeWithSelector(ConfidentialTrigger.NotAttestedMachine.selector, rogueId));
-        trigger.execute(v, _sign(v, rogueKey));
+        trigger.execute(v, _envelope(), _sign(v, rogueKey));
     }
 
     function testMachineFromAnotherExtensionIsRejected() public {
         registry.set(rogueId, 0x10002, 2);
         ConfidentialTrigger.Verdict memory v = _verdict();
         vm.expectRevert(abi.encodeWithSelector(ConfidentialTrigger.WrongExtension.selector, rogueId, 0x10002));
-        trigger.execute(v, _sign(v, rogueKey));
+        trigger.execute(v, _envelope(), _sign(v, rogueKey));
     }
 
     function testMachineNotYetInProductionIsRejected() public {
@@ -144,7 +155,7 @@ contract ConfidentialTriggerTest is Test {
         registry.set(rogueId, EXTENSION_ID, 1);
         ConfidentialTrigger.Verdict memory v = _verdict();
         vm.expectRevert(abi.encodeWithSelector(ConfidentialTrigger.MachineNotInProduction.selector, rogueId, 1));
-        trigger.execute(v, _sign(v, rogueKey));
+        trigger.execute(v, _envelope(), _sign(v, rogueKey));
     }
 
     function testTamperedTargetBreaksTheSignature() public {
@@ -154,17 +165,32 @@ contract ConfidentialTriggerTest is Test {
         // A keeper raising the target to sell more collateral than the enclave decided.
         v.targetHealth = 2e18;
         vm.expectRevert(abi.encodeWithSelector(ConfidentialTrigger.NotAttestedMachine.selector, _wrongSigner(v, sig)));
-        trigger.execute(v, sig);
+        trigger.execute(v, _envelope(), sig);
     }
 
     function testVerdictCannotBeReplayed() public {
         ConfidentialTrigger.Verdict memory v = _verdict();
         bytes memory sig = _sign(v, teeKey);
-        trigger.execute(v, sig);
+        trigger.execute(v, _envelope(), sig);
 
-        bytes32 verdictId = keccak256(abi.encode(v));
+        bytes32 verdictId = _digest(v);
         vm.expectRevert(abi.encodeWithSelector(ConfidentialTrigger.VerdictAlreadyUsed.selector, verdictId));
-        trigger.execute(v, sig);
+        trigger.execute(v, _envelope(), sig);
+    }
+
+    /// @dev tee-node signals handler failure through `status`, not through HTTP or a missing
+    ///      signature, so a failed evaluation still arrives correctly signed. Acting on one
+    ///      would mean deleveraging on the strength of an error.
+    function testHandlerFailureIsRejected() public {
+        ConfidentialTrigger.Verdict memory v = _verdict();
+        ConfidentialTrigger.TeeEnvelope memory env = _envelope();
+        env.status = 0;
+
+        bytes32 digest = TeeResultHash.digest(abi.encode(v), env.actionId, env.submissionTag, 0, block.chainid);
+        (uint8 sv, bytes32 r, bytes32 s) = vm.sign(teeKey, digest);
+
+        vm.expectRevert(abi.encodeWithSelector(ConfidentialTrigger.HandlerFailed.selector, env.actionId));
+        trigger.execute(v, env, abi.encodePacked(r, s, sv));
     }
 
     function testStaleEvaluationIsRejected() public {
@@ -175,7 +201,7 @@ contract ConfidentialTriggerTest is Test {
         vm.expectRevert(
             abi.encodeWithSelector(ConfidentialTrigger.EvaluationTooOld.selector, v.evaluatedAtBlock, block.number)
         );
-        trigger.execute(v, sig);
+        trigger.execute(v, _envelope(), sig);
     }
 
     function testVerdictForUncommittedPositionIsRejected() public {
@@ -184,7 +210,7 @@ contract ConfidentialTriggerTest is Test {
         v.id = other;
 
         vm.expectRevert(abi.encodeWithSelector(ConfidentialTrigger.NoCommitment.selector, borrower));
-        trigger.execute(v, _sign(v, teeKey));
+        trigger.execute(v, _envelope(), _sign(v, teeKey));
     }
 
     function testCommitmentMismatchIsRejected() public {
@@ -194,13 +220,13 @@ contract ConfidentialTriggerTest is Test {
         vm.expectRevert(
             abi.encodeWithSelector(ConfidentialTrigger.CommitmentMismatch.selector, _commitment(), v.commitment)
         );
-        trigger.execute(v, _sign(v, teeKey));
+        trigger.execute(v, _envelope(), _sign(v, teeKey));
     }
 
     /// @dev Recovers whatever address a tampered verdict resolves to, so the expected revert
     ///      can name it. Tampering changes the digest, so ecrecover yields a junk address.
-    function _wrongSigner(ConfidentialTrigger.Verdict memory v, bytes memory sig) internal pure returns (address) {
-        bytes32 digest = keccak256(abi.encode(v));
+    function _wrongSigner(ConfidentialTrigger.Verdict memory v, bytes memory sig) internal view returns (address) {
+        bytes32 digest = _digest(v);
         bytes32 r;
         bytes32 s;
         uint8 sv;
