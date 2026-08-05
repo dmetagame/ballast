@@ -129,10 +129,32 @@ sale into the cheap part of the curve and repair the position in steps.
 
 ---
 
+## Deployed on Flare mainnet
+
+Live at chain 14, source verified on Blockscout.
+
+| Contract | Address |
+|---|---|
+| `BallastManager` | [`0x379e5B8Cf31fC5D46aEc2fc17F17708951015571`](https://flare-explorer.flare.network/address/0x379e5B8Cf31fC5D46aEc2fc17F17708951015571) |
+| `SparkDexAdapter` | [`0x62a7Efa10134E3F9fB7Af1fD7400Db0ea913E8b1`](https://flare-explorer.flare.network/address/0x62a7Efa10134E3F9fB7Af1fD7400Db0ea913E8b1) |
+
+Wired to the live market it was measured against: Morpho Blue
+`0xF4346F5132e810f80a28487a79c7559d9797E8B0`, selling FXRP
+`0xAd552A648C74D49E10027AB8a618A3ad4901c5bE` into USD₮0
+`0xe7cd86e13AC4309349F30B3435a9d337750fC82D` through the SparkDEX Algebra pool
+`0x927485d88a66253c63Af9163dca5f21c25A57393`.
+
+**Owner powers, stated plainly.** Both contracts have an `owner`, currently the deployer.
+The owner can repoint `BallastManager` at a different swap adapter and can register pools on
+the adapter. Borrower funds are never held by Ballast and a protective action is bounded by
+the borrower's own `maxCollateralPerAction` and `maxSlippageBps`, but a malicious adapter
+could keep collateral routed through it during a `protect()` call. Anyone enrolling should
+treat the owner as trusted, or wait for ownership to be renounced or moved behind a timelock.
+
 ## Status
 
 Fork-tested against **live Flare mainnet state, real borrower positions, and real SparkDEX
-liquidity**. Contracts are not deployed and not audited.
+liquidity**. Not audited.
 
 ```
 $ forge test -vv                                    # 14 passed, 0 failed
@@ -274,8 +296,12 @@ NODE_OPTIONS=--dns-result-order=ipv4first npm run scan:morpho
 To deploy against a real network:
 
 ```bash
-forge script script/Deploy.s.sol --rpc-url $RPC --broadcast --private-key $PRIVATE_KEY
+forge script script/Deploy.s.sol --rpc-url flare --broadcast --account $KEYSTORE --verify
 ```
+
+That is exactly how the mainnet deployment above was made. The whole sequence cost 3.17 FLR.
+Override `MORPHO`, `COLLATERAL_TOKEN`, `LOAN_TOKEN` and `SWAP_POOL` in the environment to
+target a different market.
 
 Two things that will waste your time otherwise:
 
@@ -288,10 +314,11 @@ Two things that will waste your time otherwise:
 
 ## Known gaps
 
-- **Not deployed to a public network.** Morpho Blue exists only on Flare mainnet, so there is
-  no testnet to deploy against without also deploying a Morpho instance. `demo.sh` runs the
-  full system on a forked local node instead; `script/Deploy.s.sol` targets mainnet when
-  someone is ready to spend real gas.
+- **No testnet deployment.** Morpho Blue exists only on Flare mainnet, so a Coston2 deployment
+  would mean standing up a Morpho instance, a loan token and a swap venue alongside Ballast.
+  The contracts are live on mainnet instead, and `demo.sh` runs the full system on a forked
+  local node for anyone who wants to reproduce it without spending gas.
+- **Owner is an EOA.** See the owner powers noted above. Not renounced, not behind a timelock.
 - **The keeper is hypothetical.** `protect()` is permissionless, but nobody is running one.
 - **Single-venue routing.** The adapter swaps against one registered pool per pair. Splitting
   across the Algebra and UniV3 pools would add roughly 20% more depth.

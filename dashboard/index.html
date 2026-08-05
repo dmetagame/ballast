@@ -78,6 +78,14 @@
     font-family: var(--mono); font-size: 12px; color: var(--ink-muted);
     display: flex; flex-wrap: wrap; gap: 4px 14px;
   }
+  .provenance .live { color: var(--ink); }
+  .provenance .live::before {
+    content: ""; display: inline-block; vertical-align: 1px;
+    width: 6px; height: 6px; margin-right: 6px; border-radius: 50%;
+    background: currentColor;
+  }
+  .deployed { display: flex; flex-wrap: wrap; gap: 4px 18px; font-family: var(--mono); }
+  .deployed a { color: inherit; }
 
   /* ------------------------------------------------------------ hero + kpi */
   .hero {
@@ -188,6 +196,7 @@
       <span>block 66,470,000</span>
       <span>2026-08-02</span>
       <span>XRP $1.0795 (FTSO)</span>
+      <span class="live">contracts live on Flare mainnet</span>
     </div>
   </header>
 
@@ -256,6 +265,11 @@
   </section>
 
   <footer>
+    <div class="deployed">
+      <span>BallastManager <a href="https://flare-explorer.flare.network/address/0x379e5B8Cf31fC5D46aEc2fc17F17708951015571">0x379e…5571</a></span>
+      <span>SparkDexAdapter <a href="https://flare-explorer.flare.network/address/0x62a7Efa10134E3F9fB7Af1fD7400Db0ea913E8b1">0x62a7…E8b1</a></span>
+      <span>source verified on Blockscout</span>
+    </div>
     <div>Health is computed with Morpho's own share accounting, so 1.00 is exactly the seizure line. Penalty estimates use each venue's real parameters: Enosys at a 10% incentive with a 0.5 close factor, Morpho at ~7.4% with full liquidation.</div>
     <div>Borrower addresses are truncated. The underlying positions are public on-chain state and can be recomputed with the scanners in <code>monitor/</code>; this page does not republish a ranked, directly actionable list of them. Positions with debt below $1 are excluded. stFLR-collateralised Morpho positions are excluded because they are not XRP-linked. Regenerate with <code>node dashboard/build.mjs</code>.</div>
   </footer>
