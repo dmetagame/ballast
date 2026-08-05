@@ -84,6 +84,36 @@ rather than assertions about behaviour:
   hash a policy identically. If they diverge, every enrollment is rejected as "policy does not
   match published commitment" and nothing in that error says why.
 
+## Live on Coston2
+
+| What | Address |
+|---|---|
+| `BallastInstructionSender` | [`0x2E9F7A5E62068CAbfafBE83d142cD4b1deeEfdFE`](https://coston2-explorer.flare.network/address/0x2E9F7A5E62068CAbfafBE83d142cD4b1deeEfdFE) |
+| `ConfidentialTrigger` | [`0x966410b0834089A09CcB6E6DE9cB59e9D653598F`](https://coston2-explorer.flare.network/address/0x966410b0834089A09CcB6E6DE9cB59e9D653598F) |
+| `VerdictRecorder` | [`0xB9Eecc16120D18E075eb52198decE2aC22BfD5f6`](https://coston2-explorer.flare.network/address/0xB9Eecc16120D18E075eb52198decE2aC22BfD5f6) |
+| **Extension ID** | **65962** (`0x101aa`) |
+
+Registered against the live `FlareTeeManager` at
+`0x1a9C4A0f9D76c0b1D91d22E24E573a9b377618aE`. Confirm it yourself:
+
+```bash
+cast call 0x1a9C4A0f9D76c0b1D91d22E24E573a9b377618aE \
+  "getTeeExtensionInstructionsSender(uint256)(address)" 65962 \
+  --rpc-url https://coston2-api.flare.network/ext/C/rpc
+# -> 0x2E9F7A5E62068CAbfafBE83d142cD4b1deeEfdFE
+```
+
+**Why Coston2 and not mainnet.** Flare put the two halves on different chains. Morpho Blue,
+FXRP and the SparkDEX pools are on Flare mainnet; `FlareTeeManager` holds no code there and
+`FlareContractRegistry` returns the zero address for it. Confidential Compute exists only on
+Coston2, which has no lending market. A contract that verifies TEE signatures has to be where
+the registry is, so the confidential path is demonstrated on Coston2 and the protection itself
+on mainnet, where `BallastManager` is deployed and exercised against real borrower positions.
+
+`VerdictRecorder` is the honest consequence of that split: it records verdicts that
+`ConfidentialTrigger` accepted and does not pretend to deleverage, because there is nothing on
+Coston2 to deleverage against. It returns zeros rather than inventing plausible numbers.
+
 ## Verified end to end (locally)
 
 Run inside a clone of the scaffold with a mock sign sidecar, against **live Flare mainnet
