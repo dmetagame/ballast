@@ -35,12 +35,9 @@ type chainReader struct {
 	morpho common.Address
 }
 
-func newChainReader(rpcURL string) *chainReader {
-	return &chainReader{rpcURL: rpcURL}
+func newChainReader(rpcURL, morpho string) *chainReader {
+	return &chainReader{rpcURL: rpcURL, morpho: common.HexToAddress(morpho)}
 }
-
-// SetMorpho points the reader at a Morpho Blue deployment.
-func (c *chainReader) SetMorpho(addr common.Address) { c.morpho = addr }
 
 // healthAt returns the position's health factor in WAD, read at a pinned block.
 func (c *chainReader) healthAt(borrower common.Address, market common.Hash, blockNumber uint64) (*big.Int, error) {

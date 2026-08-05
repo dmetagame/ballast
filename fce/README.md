@@ -84,7 +84,40 @@ rather than assertions about behaviour:
   hash a policy identically. If they diverge, every enrollment is rejected as "policy does not
   match published commitment" and nothing in that error says why.
 
+## Verified end to end (locally)
+
+Run inside a clone of the scaffold with a mock sign sidecar, against **live Flare mainnet
+state**, on the real ~$83k borrower position:
+
+```
+[200] ENROLL:   ok            encrypted policy decrypted, commitment matched, held in memory
+[200] EVALUATE: status=1 ok   position read at block 66732912, verdict issued
+state: {"enrolledPositions":1,"evaluations":1,"verdictsIssued":1}
+```
+
+The verdict ABI-decodes to exactly `ConfidentialTrigger.Verdict`.
+
+**The health computation was bracketed against the chain.** `BallastManager.healthOf` reported
+`1150998153316783502` for that position. A secret trigger of `1.150e18` produced no verdict; a
+trigger of `1.152e18` produced one. So the Go reimplementation of Morpho's share accounting
+agrees with the deployed Solidity, which is the thing that would otherwise be wrong silently.
+
+Three bugs this run found, all of which unit tests had missed:
+
+- `decodeTuple` round-tripped through JSON. geth decodes `bytes32` to `[32]byte`, which
+  marshals as an array of numbers, so every instruction failed with
+  "cannot unmarshal non-string into Go struct field ... of type common.Hash".
+- Struct fields must be named the way geth's `abi.ToCamelCase` produces them. `MarketID` does
+  not bind to `marketId`; `MarketId` does.
+- The chain reader's Morpho address was never set, so every read would have gone to the zero
+  address. Now wired through `MORPHO_ADDRESS`.
+
 ## Not done yet
 
-The end-to-end `SIMULATED_TEE` run against the scaffold. Everything above compiles and its
-tests pass, but the handlers have not yet executed inside a real tee-node.
+The run inside a real `tee-node` with `SIMULATED_TEE=true`, which is what produces a genuine
+machine signature. Everything up to that point works; the signature path itself is still
+exercised only by the Solidity fixture in `test/TeeResultHash.t.sol`.
+
+Note that the scaffold's `main` pins `tee-node v0.0.21-0.2026…`, below the **v0.0.22 minimum**
+the Flare team specifies. On that version every data-provider vote is rejected and the queue
+silently stays empty. Bump it before doing anything else.

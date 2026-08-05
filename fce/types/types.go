@@ -15,11 +15,15 @@ import (
 // public TeeInstructionsSent event, so anything not encrypted here is world-readable and the
 // whole design collapses. The commitment travels in the clear on purpose, so the enclave can
 // check the plaintext it decrypts is the one the borrower published on-chain.
+// Field names and types must match what geth's ABI decoder produces, not what reads nicely.
+// bytes32 decodes to [32]byte (never common.Hash), and geth capitalises only the first letter,
+// so the field for `marketId` must be `MarketId` and not `MarketID`. Both mistakes fail at
+// runtime with a decode error that does not mention either cause.
 type EnrollRequest struct {
-	Borrower   common.Address `json:"borrower"`
-	MarketID   common.Hash    `json:"marketId"`
-	Commitment common.Hash    `json:"commitment"`
-	Ciphertext []byte         `json:"ciphertext"`
+	Borrower   common.Address
+	MarketId   [32]byte
+	Commitment [32]byte
+	Ciphertext []byte
 }
 
 // SecretPolicy is what the ciphertext decrypts to. It never leaves the enclave.
@@ -35,9 +39,9 @@ type SecretPolicy struct {
 // evaluating a moving market produce different result bytes, and the TEE stack requires
 // result data to be byte-exact for a signature to be usable.
 type EvaluateRequest struct {
-	Borrower    common.Address `json:"borrower"`
-	MarketID    common.Hash    `json:"marketId"`
-	BlockNumber uint64         `json:"blockNumber"`
+	Borrower    common.Address
+	MarketId    [32]byte
+	BlockNumber uint64
 }
 
 // Verdict mirrors ConfidentialTrigger.Verdict in Solidity, field for field and in order.

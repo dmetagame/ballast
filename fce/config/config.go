@@ -36,6 +36,11 @@ var (
 	// the same chain the InstructionSender lives on, or evaluations describe a different world
 	// than the one the verdict will be executed against.
 	RPCURL = "https://coston2-api.flare.network/ext/C/rpc"
+
+	// MorphoAddress is the Morpho Blue singleton the enclave reads positions from. It must
+	// match the deployment ConfidentialTrigger's BallastManagerV2 acts on, or the enclave
+	// judges a position that is not the one being protected.
+	MorphoAddress = "0xF4346F5132e810f80a28487a79c7559d9797E8B0" // Flare mainnet
 )
 
 func init() {
@@ -47,5 +52,8 @@ func init() {
 	}
 	if u := os.Getenv("RPC_URL"); u != "" {
 		RPCURL = u
+	}
+	if m := os.Getenv("MORPHO_ADDRESS"); m != "" {
+		MorphoAddress = m
 	}
 }

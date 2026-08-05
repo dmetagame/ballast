@@ -11,7 +11,6 @@
 package extension
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"math/big"
@@ -62,7 +61,7 @@ type Extension struct {
 func New(extensionPort, signPort int) *Extension {
 	e := &Extension{
 		secrets: make(map[secretKey]types.SecretPolicy),
-		chain:   newChainReader(config.RPCURL),
+		chain:   newChainReader(config.RPCURL, config.MorphoAddress),
 		signer:  newSignClient(signPort),
 	}
 
@@ -150,13 +149,13 @@ func (e *Extension) processEnroll(action teetypes.Action, df *instruction.DataFi
 		return buildResult(action, df, nil, 0, fmt.Errorf("policy missing trigger or target"))
 	}
 
-	if got := commitmentOf(policy); got != req.Commitment {
+	if got := commitmentOf(policy); got != common.Hash(req.Commitment) {
 		return buildResult(action, df, nil, 0,
 			fmt.Errorf("policy does not match published commitment"))
 	}
 
 	e.mu.Lock()
-	k := secretKey{borrower: req.Borrower, market: req.MarketID}
+	k := secretKey{borrower: req.Borrower, market: common.Hash(req.MarketId)}
 	if _, existed := e.secrets[k]; !existed {
 		e.enrolled++
 	}
@@ -180,13 +179,13 @@ func (e *Extension) processEvaluate(action teetypes.Action, df *instruction.Data
 	}
 
 	e.mu.RLock()
-	policy, known := e.secrets[secretKey{borrower: req.Borrower, market: req.MarketID}]
+	policy, known := e.secrets[secretKey{borrower: req.Borrower, market: common.Hash(req.MarketId)}]
 	e.mu.RUnlock()
 	if !known {
 		return buildResult(action, df, nil, 0, fmt.Errorf("position not enrolled"))
 	}
 
-	health, err := e.chain.healthAt(req.Borrower, req.MarketID, req.BlockNumber)
+	health, err := e.chain.healthAt(req.Borrower, common.Hash(req.MarketId), req.BlockNumber)
 	if err != nil {
 		return buildResult(action, df, nil, 0, fmt.Errorf("reading position: %w", err))
 	}
@@ -204,7 +203,7 @@ func (e *Extension) processEvaluate(action teetypes.Action, df *instruction.Data
 
 	verdict := types.Verdict{
 		Borrower:         req.Borrower,
-		ID:               req.MarketID,
+		ID:               req.MarketId,
 		Commitment:       commitmentOf(policy),
 		TargetHealth:     policy.TargetHealth,
 		MaxSlippageBps:   defaultSlippageBps,
@@ -238,6 +237,12 @@ func commitmentOf(p types.SecretPolicy) common.Hash {
 	return crypto.Keccak256Hash(buf)
 }
 
+// decodeTuple unpacks a single ABI tuple into `out`.
+//
+// Do not be tempted to round-trip through JSON here. geth decodes bytes32 to [32]byte, which
+// marshals as an array of numbers rather than a hex string, so the JSON path fails with
+// "cannot unmarshal non-string into Go struct field ... of type common.Hash". abi.ConvertType
+// maps the decoder's anonymous struct onto ours directly, matching fields by name.
 func decodeTuple(arg abi.Argument, data []byte, out any) error {
 	values, err := abi.Arguments{arg}.Unpack(data)
 	if err != nil {
@@ -246,9 +251,9 @@ func decodeTuple(arg abi.Argument, data []byte, out any) error {
 	if len(values) != 1 {
 		return fmt.Errorf("expected 1 tuple, got %d", len(values))
 	}
-	encoded, err := json.Marshal(values[0])
-	if err != nil {
-		return err
+	converted := abi.ConvertType(values[0], out)
+	if converted == nil {
+		return fmt.Errorf("converting decoded tuple to %T", out)
 	}
-	return json.NewDecoder(bytes.NewReader(encoded)).Decode(out)
+	return nil
 }
