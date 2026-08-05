@@ -86,12 +86,62 @@ rather than assertions about behaviour:
 
 ## Live on Coston2
 
+A **real leveraged position under confidential protection**, health 1.1528 at deployment.
+
 | What | Address |
 |---|---|
-| `BallastInstructionSender` | [`0x2E9F7A5E62068CAbfafBE83d142cD4b1deeEfdFE`](https://coston2-explorer.flare.network/address/0x2E9F7A5E62068CAbfafBE83d142cD4b1deeEfdFE) |
-| `ConfidentialTrigger` | [`0x966410b0834089A09CcB6E6DE9cB59e9D653598F`](https://coston2-explorer.flare.network/address/0x966410b0834089A09CcB6E6DE9cB59e9D653598F) |
-| `VerdictRecorder` | [`0xB9Eecc16120D18E075eb52198decE2aC22BfD5f6`](https://coston2-explorer.flare.network/address/0xB9Eecc16120D18E075eb52198decE2aC22BfD5f6) |
+| `BallastInstructionSender` | `0x2E9F7A5E62068CAbfafBE83d142cD4b1deeEfdFE` |
+| `ConfidentialTrigger` | `0x2Ab8F9aac70923DBd375904560e4385e2a2857D7` |
+| `BallastManagerV2` | `0x2cC2d9aB9Fca74958C404749C2b9e88C47C6AA70` |
+| Morpho Blue | `0x5711398A701B9D2BD47Ac8248Cba3A8cA72D053E` |
+| `FtsoMorphoOracle` | `0x3C6379C847Af48e1e33C280Ee00f5D84ae6c02cc` |
+| Collateral / loan | `0x5226DBE5d3Bab718dCb890f726b1dC7C87B5AC02` / `0x40CEC379b12916bc9CDFAbAd59FE112f317A3247` |
+| Market id | `0x545a91465e438930cf9a0173bac3ba354bbd0bb2b38c3965cc5528b40c4ca45d` |
 | **Extension ID** | **65962** (`0x101aa`) |
+
+### The claim, and how to check it yourself
+
+**The borrower's liquidation trigger is not on-chain.** Read the policy and you get a public
+*ceiling* of 1.10 and a commitment hash. The real trigger sits below that ceiling, inside the
+enclave, and the commitment is salted so it cannot be brute-forced from the small set of round
+numbers people actually pick.
+
+```bash
+C2=https://coston2-api.flare.network/ext/C/rpc
+cast call 0x2cC2d9aB9Fca74958C404749C2b9e88C47C6AA70 \
+  "policyOf(address,bytes32)((uint128,uint128,uint64,uint32,uint32,uint32,uint64,bool,address))" \
+  0x3029E055c21Ba9e97837050082Fffd6836FEec8D \
+  0x545a91465e438930cf9a0173bac3ba354bbd0bb2b38c3965cc5528b40c4ca45d --rpc-url $C2
+# -> (1.10e18 ceiling, 1.35e18 target, ..., keeper 0x2Ab8...57D7)
+```
+
+**And a searcher cannot act around the enclave.** Calling `protect()` from any address other
+than the keeper reverts with `NotKeeper` (`0xcf7d3ecf`):
+
+```bash
+cast call 0x2cC2d9aB9Fca74958C404749C2b9e88C47C6AA70 "protect(address,bytes32)" \
+  0x3029E055c21Ba9e97837050082Fffd6836FEec8D \
+  0x545a91465e438930cf9a0173bac3ba354bbd0bb2b38c3965cc5528b40c4ca45d \
+  --rpc-url $C2 --from 0x000000000000000000000000000000000000dEaD
+# -> reverts 0xcf7d3ecf NotKeeper(0xdead, 0x2Ab8...57D7)
+```
+
+### What is real here and what is scaffolding
+
+Being precise, because the distinction matters more than the demo does:
+
+- **Real:** Morpho Blue's own unmodified code, and the **live FTSOv2 XRP/USD block-latency
+  feed** as the oracle. `price()` returned `1.062995e36` from that feed at deployment. The
+  position, the borrow, the health arithmetic and the keeper gate are all genuine.
+- **Scaffolding:** the two ERC20s and `OracleQuotedVenue`, which fills at the oracle price
+  minus a fee from its own inventory. It has no liquidity curve, so **no slippage claim rests
+  on it**. Every slippage number in this project comes from the mainnet fork tests against
+  real SparkDEX pools.
+
+`VerdictRecorder` (`0xB9Eecc16120D18E075eb52198decE2aC22BfD5f6`) and the first
+`ConfidentialTrigger` (`0x966410b0834089A09CcB6E6DE9cB59e9D653598F`) were the earlier
+market-less deployment, kept because they are referenced in commit history. The trigger above
+supersedes them and points at a real manager.
 
 Registered against the live `FlareTeeManager` at
 `0x1a9C4A0f9D76c0b1D91d22E24E573a9b377618aE`. Confirm it yourself:
