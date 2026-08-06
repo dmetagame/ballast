@@ -28,22 +28,15 @@ contract DeployCoston2Ballast is Script {
 
     /// @dev Public ceiling on when the enclave may act. The real trigger is below this and
     ///      never appears on-chain. Target must exceed it, or protection re-arms forever.
-    uint128 constant PUBLIC_CEILING = 1.10e18;
+    uint128 constant PUBLIC_CEILING = 1.1e18;
     uint128 constant POLICY_TARGET = 1.35e18;
-
-    /// @dev keccak256(abi.encode(trigger, target, salt)) for the secret policy held by the
-    ///      enclave. The preimage is not in this repository.
-    bytes32 constant COMMITMENT = 0x164ab6ff7d824a82cd45bc5202021b6c3e717b8b2ad68b66a689ecb46fa84d87;
 
     function run() external {
         address borrower = msg.sender;
-        MarketParams memory mp = MarketParams({
-            loanToken: LOAN,
-            collateralToken: COLLATERAL,
-            oracle: ORACLE,
-            irm: IRM,
-            lltv: LLTV
-        });
+        bytes32 commitment = vm.envBytes32("POLICY_COMMITMENT");
+        require(commitment != bytes32(0), "POLICY_COMMITMENT is zero");
+        MarketParams memory mp =
+            MarketParams({loanToken: LOAN, collateralToken: COLLATERAL, oracle: ORACLE, irm: IRM, lltv: LLTV});
 
         vm.startBroadcast();
 
@@ -58,7 +51,7 @@ contract DeployCoston2Ballast is Script {
         ballast.setPolicy(MARKET, PUBLIC_CEILING, POLICY_TARGET, 60_000e6, 200, 25, 0, address(trigger));
 
         // Publish only the hash. The trigger itself goes to the enclave, encrypted.
-        trigger.commit(MARKET, COMMITMENT);
+        trigger.commit(MARKET, commitment);
 
         vm.stopBroadcast();
 

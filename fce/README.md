@@ -19,7 +19,7 @@ borrower                    chain                     enclave
    │                          │                          │
    ├─ commit(hash) ──────────►│  ConfidentialTrigger      │
    │                          │                          │
-   ├─ enroll(ciphertext) ────►│  InstructionSender ──────►│ decrypt via sign sidecar,
+   ├─ enroll(teeId, ciphertext)►  InstructionSender ──────►│ decrypt via sign sidecar,
    │   encrypted to the       │  (event is public!)       │ check hash matches, hold
    │   machine's pubkey       │                          │ plaintext in memory only
    │                          │                          │
@@ -44,6 +44,9 @@ the docs:
    proxy", so a keeper relays the signed verdict.
 3. **Evaluation must be pinned to a block.** Machines reading at different heights produce
    different result bytes, and the stack requires them to be byte-exact.
+4. **Enrollment and evaluation must reach the same machine.** The ciphertext is encrypted to
+   one machine key and enclave state is local to that machine. The sender stores the selected
+   `teeId` per position and routes every recent, monotonic evaluation back to it.
 
 ## Layout
 
@@ -88,6 +91,12 @@ rather than assertions about behaviour:
 
 A **real leveraged position under confidential protection**, health 1.1528 at deployment.
 
+> **Deployment warning:** the commitment on the deployment below reused the public
+> cross-language test fixture. Its trigger, target, and salt are therefore recoverable from
+> this repository, so this specific deployment must not be presented as confidential. The
+> contracts and keeper gate remain useful integration evidence, but a new commitment, enclave
+> enrollment, and trigger/manager deployment are required for the confidentiality claim.
+
 | What | Address |
 |---|---|
 | `BallastInstructionSender` | `0x2E9F7A5E62068CAbfafBE83d142cD4b1deeEfdFE` |
@@ -101,10 +110,9 @@ A **real leveraged position under confidential protection**, health 1.1528 at de
 
 ### The claim, and how to check it yourself
 
-**The borrower's liquidation trigger is not on-chain.** Read the policy and you get a public
-*ceiling* of 1.10 and a commitment hash. The real trigger sits below that ceiling, inside the
-enclave, and the commitment is salted so it cannot be brute-forced from the small set of round
-numbers people actually pick.
+The intended deployment exposes only a public *ceiling* and a salted commitment. The listed
+deployment demonstrates that storage shape, but its fixture preimage is public as warned
+above and must be rotated before submission.
 
 ```bash
 C2=https://coston2-api.flare.network/ext/C/rpc
@@ -201,3 +209,41 @@ exercised only by the Solidity fixture in `test/TeeResultHash.t.sol`.
 Note that the scaffold's `main` pins `tee-node v0.0.21-0.2026…`, below the **v0.0.22 minimum**
 the Flare team specifies. On that version every data-provider vote is rejected and the queue
 silently stays empty. Bump it before doing anything else.
+
+## Coston2 FCC deployment checklist
+
+The current Coston2 `FlareTeeManager` is
+`0x1a9C4A0f9D76c0b1D91d22E24E573a9b377618aE`. The deployment at
+`0x004224fa...5d41F` has been dead since July 22 and must not appear in scaffold configuration.
+
+After rebasing onto the latest scaffold, use `tee-node` and `tee-proxy` from `develop` with
+`tee-node >= v0.0.22`. Re-run pre-build for a fresh extension ID, then post-build and
+`register-tee -command rRap`. Use a named Cloudflare tunnel or reserved ngrok domain: quick
+tunnel hostnames change and leave the machine's on-chain URL unreachable. `SIMULATED_TEE=true`
+is supported on Coston2 for judging.
+
+The checked-in Go defaults target the Ballast Coston2 Morpho deployment. Override `RPC_URL`
+and `MORPHO_ADDRESS` together when targeting another chain; mixing a Coston2 RPC with the
+Flare-mainnet Morpho address makes every evaluation fail.
+
+Never put a live policy preimage or salt in this repository. `DeployCoston2Ballast.s.sol`
+requires `POLICY_COMMITMENT` from the environment so deployment commitments cannot silently
+reuse the public cross-language test fixture.
+
+### Fresh deployment sequence
+
+The hardening changes alter the instruction sender, verdict, and `protectFor` ABIs. Existing
+Coston2 contracts cannot be upgraded in place.
+
+1. Generate a random 32-byte salt outside source control and compute
+   `keccak256(abi.encode(triggerHealth, targetHealth, salt))`.
+2. Export only the resulting hash as `POLICY_COMMITMENT`; keep the preimage for encrypted
+   enrollment and never commit it.
+3. Rebase the extension onto the latest scaffold and deploy a fresh instruction sender with
+   `tee-node >= v0.0.22`.
+4. Run pre-build for a new extension ID, then post-build and `register-tee -command rRap` using
+   a stable tunnel URL.
+5. Deploy the updated `BallastManagerV2` and `ConfidentialTrigger` with that extension ID.
+6. Fetch a PRODUCTION machine and its public key, encrypt the policy to that key, and call
+   `enroll(teeId, marketId, commitment, ciphertext)`. Evaluations are then pinned to that
+   machine and accepted only for recent, strictly increasing block numbers.

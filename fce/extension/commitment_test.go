@@ -33,3 +33,46 @@ func TestCommitmentMatchesSolidity(t *testing.T) {
 		t.Fatalf("commitment mismatch:\n  go       = %s\n  expected = %s", got.Hex(), want)
 	}
 }
+
+func TestValidatePolicy(t *testing.T) {
+	valid := types.SecretPolicy{
+		TriggerHealth: new(big.Int).Set(wad),
+		TargetHealth:  new(big.Int).Add(new(big.Int).Set(wad), big.NewInt(1)),
+	}
+	if err := validatePolicy(valid); err != nil {
+		t.Fatalf("valid policy rejected: %v", err)
+	}
+
+	tests := []struct {
+		name    string
+		trigger *big.Int
+		target  *big.Int
+	}{
+		{"trigger below liquidation", new(big.Int).Sub(new(big.Int).Set(wad), big.NewInt(1)), new(big.Int).Mul(wad, big.NewInt(2))},
+		{"target equals trigger", new(big.Int).Set(wad), new(big.Int).Set(wad)},
+		{"negative trigger", big.NewInt(-1), new(big.Int).Set(wad)},
+		{"trigger exceeds uint128", new(big.Int).Lsh(big.NewInt(1), 128), new(big.Int).Lsh(big.NewInt(1), 129)},
+		{"target exceeds uint128", new(big.Int).Set(wad), new(big.Int).Lsh(big.NewInt(1), 128)},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := validatePolicy(types.SecretPolicy{TriggerHealth: tt.trigger, TargetHealth: tt.target}); err == nil {
+				t.Fatal("invalid policy accepted")
+			}
+		})
+	}
+}
+
+func TestAccrueBorrowAssetsMatchesMorphoTaylorTerms(t *testing.T) {
+	assets := big.NewInt(1_000_000_000)
+	rate := big.NewInt(1_000_000_000_000) // 1e-6 per second, WAD-scaled.
+	elapsed := big.NewInt(1_000)
+
+	got := accrueBorrowAssets(assets, rate, elapsed)
+	// x*n = 1e15, second = 5e11, third = 1.66666666e8.
+	want := big.NewInt(1_001_000_500)
+	if got.Cmp(want) != 0 {
+		t.Fatalf("accrued assets mismatch: got %s, want %s", got, want)
+	}
+}

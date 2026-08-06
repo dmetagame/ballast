@@ -4,6 +4,7 @@ pragma solidity ^0.8.26;
 import {Test, console2} from "forge-std/Test.sol";
 import {BallastManagerV2} from "../src/BallastManagerV2.sol";
 import {IMorpho, IOracle, Id} from "../src/interfaces/IMorpho.sol";
+import {IERC20} from "../src/interfaces/ISwapAdapter.sol";
 import {MockSwapAdapter} from "./mocks/MockSwapAdapter.sol";
 
 /// @notice Proves the two properties v2 exists for, against real mainnet state.
@@ -28,8 +29,9 @@ contract KeeperGateForkTest is Test {
 
     address trigger = makeAddr("confidentialTrigger");
     address searcher = makeAddr("searcher");
+    address relayer = makeAddr("relayer");
 
-    uint128 constant PUBLIC_BOUND = 1.10e18; // ceiling on when the enclave may act
+    uint128 constant PUBLIC_BOUND = 1.1e18; // ceiling on when the enclave may act
     uint128 constant BASELINE_HEALTH = 1.167e18; // this borrower, unstressed, at the pinned block
     uint128 constant POLICY_TARGET = 1.35e18; // must exceed the bound, or protection re-triggers forever
     uint32 constant POLICY_SLIPPAGE_BPS = 100; // 1%
@@ -77,7 +79,7 @@ contract KeeperGateForkTest is Test {
 
         vm.prank(searcher);
         vm.expectRevert(abi.encodeWithSelector(BallastManagerV2.NotKeeper.selector, searcher, trigger));
-        ballast.protectFor(BORROWER, MARKET_ID, POLICY_TARGET, POLICY_SLIPPAGE_BPS);
+        ballast.protectFor(BORROWER, MARKET_ID, POLICY_TARGET, POLICY_SLIPPAGE_BPS, searcher);
     }
 
     function testNamedKeeperCanAct() public {
@@ -86,7 +88,8 @@ contract KeeperGateForkTest is Test {
 
         uint256 healthBefore = ballast.healthOf(BORROWER, MARKET_ID);
         vm.prank(trigger);
-        (uint256 repaid, uint256 sold) = ballast.protectFor(BORROWER, MARKET_ID, POLICY_TARGET, POLICY_SLIPPAGE_BPS);
+        (uint256 repaid, uint256 sold) =
+            ballast.protectFor(BORROWER, MARKET_ID, POLICY_TARGET, POLICY_SLIPPAGE_BPS, relayer);
         uint256 healthAfter = ballast.healthOf(BORROWER, MARKET_ID);
 
         console2.log("health before :", healthBefore);
@@ -97,6 +100,8 @@ contract KeeperGateForkTest is Test {
         assertLt(healthBefore, PUBLIC_BOUND);
         assertGt(healthAfter, healthBefore, "keeper action must improve health");
         assertGt(repaid, 0);
+        assertGt(IERC20(USDT0).balanceOf(relayer), 0, "the verdict relayer receives the keeper fee");
+        assertEq(IERC20(USDT0).balanceOf(trigger), 0, "the trigger contract must not strand keeper fees");
     }
 
     /// @dev With no keeper named, v2 keeps v1's permissionless behaviour.
@@ -119,7 +124,7 @@ contract KeeperGateForkTest is Test {
         _dropPrice(1000);
 
         vm.prank(trigger);
-        (uint256 repaidGreedy,) = ballast.protectFor(BORROWER, MARKET_ID, 3e18, POLICY_SLIPPAGE_BPS);
+        (uint256 repaidGreedy,) = ballast.protectFor(BORROWER, MARKET_ID, 3e18, POLICY_SLIPPAGE_BPS, trigger);
 
         // Re-run from a clean fork asking for exactly the policy target.
         setUp();
@@ -127,7 +132,7 @@ contract KeeperGateForkTest is Test {
         _dropPrice(1000);
 
         vm.prank(trigger);
-        (uint256 repaidHonest,) = ballast.protectFor(BORROWER, MARKET_ID, POLICY_TARGET, POLICY_SLIPPAGE_BPS);
+        (uint256 repaidHonest,) = ballast.protectFor(BORROWER, MARKET_ID, POLICY_TARGET, POLICY_SLIPPAGE_BPS, trigger);
 
         assertEq(repaidGreedy, repaidHonest, "a greedy target must buy the keeper nothing");
     }
@@ -139,14 +144,14 @@ contract KeeperGateForkTest is Test {
         _dropPrice(1000);
 
         vm.prank(trigger);
-        (uint256 repaidWide,) = ballast.protectFor(BORROWER, MARKET_ID, POLICY_TARGET, 9_000);
+        (uint256 repaidWide,) = ballast.protectFor(BORROWER, MARKET_ID, POLICY_TARGET, 9_000, trigger);
 
         setUp();
         _enroll(trigger);
         _dropPrice(1000);
 
         vm.prank(trigger);
-        (uint256 repaidBounded,) = ballast.protectFor(BORROWER, MARKET_ID, POLICY_TARGET, POLICY_SLIPPAGE_BPS);
+        (uint256 repaidBounded,) = ballast.protectFor(BORROWER, MARKET_ID, POLICY_TARGET, POLICY_SLIPPAGE_BPS, trigger);
 
         assertEq(repaidWide, repaidBounded, "a wide slippage bound must buy the keeper nothing");
     }
@@ -158,14 +163,14 @@ contract KeeperGateForkTest is Test {
         _dropPrice(1000);
 
         vm.prank(trigger);
-        (uint256 repaidSmall,) = ballast.protectFor(BORROWER, MARKET_ID, 1.15e18, POLICY_SLIPPAGE_BPS);
+        (uint256 repaidSmall,) = ballast.protectFor(BORROWER, MARKET_ID, 1.15e18, POLICY_SLIPPAGE_BPS, trigger);
 
         setUp();
         _enroll(trigger);
         _dropPrice(1000);
 
         vm.prank(trigger);
-        (uint256 repaidFull,) = ballast.protectFor(BORROWER, MARKET_ID, POLICY_TARGET, POLICY_SLIPPAGE_BPS);
+        (uint256 repaidFull,) = ballast.protectFor(BORROWER, MARKET_ID, POLICY_TARGET, POLICY_SLIPPAGE_BPS, trigger);
 
         assertLt(repaidSmall, repaidFull, "a lower target should repay less");
         assertGt(repaidSmall, 0);
@@ -183,6 +188,6 @@ contract KeeperGateForkTest is Test {
         // selector rather than the exact arguments.
         vm.prank(trigger);
         vm.expectPartialRevert(BallastManagerV2.NotAtRisk.selector);
-        ballast.protectFor(BORROWER, MARKET_ID, POLICY_TARGET, POLICY_SLIPPAGE_BPS);
+        ballast.protectFor(BORROWER, MARKET_ID, POLICY_TARGET, POLICY_SLIPPAGE_BPS, trigger);
     }
 }

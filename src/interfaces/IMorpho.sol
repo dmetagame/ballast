@@ -12,6 +12,22 @@ struct MarketParams {
     uint256 lltv;
 }
 
+struct MorphoMarket {
+    uint128 totalSupplyAssets;
+    uint128 totalSupplyShares;
+    uint128 totalBorrowAssets;
+    uint128 totalBorrowShares;
+    uint128 lastUpdate;
+    uint128 fee;
+}
+
+interface IIrm {
+    function borrowRateView(MarketParams memory marketParams, MorphoMarket memory market)
+        external
+        view
+        returns (uint256);
+}
+
 /// @dev Minimal Morpho Blue surface used by Ballast.
 /// Deployed on Flare mainnet at 0xF4346F5132e810f80a28487a79c7559d9797E8B0.
 interface IMorpho {

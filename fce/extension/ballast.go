@@ -70,7 +70,7 @@ func New(extensionPort, signPort int) *Extension {
 	mux.HandleFunc("POST /action", e.actionHandler)
 
 	e.Server = &http.Server{
-		Addr:              fmt.Sprintf(":%d", extensionPort),
+		Addr:              fmt.Sprintf("127.0.0.1:%d", extensionPort),
 		Handler:           mux,
 		ReadHeaderTimeout: 10 * time.Second,
 	}
@@ -148,6 +148,9 @@ func (e *Extension) processEnroll(action teetypes.Action, df *instruction.DataFi
 	if policy.TriggerHealth == nil || policy.TargetHealth == nil {
 		return buildResult(action, df, nil, 0, fmt.Errorf("policy missing trigger or target"))
 	}
+	if err := validatePolicy(policy); err != nil {
+		return buildResult(action, df, nil, 0, err)
+	}
 
 	if got := commitmentOf(policy); got != common.Hash(req.Commitment) {
 		return buildResult(action, df, nil, 0,
@@ -208,7 +211,6 @@ func (e *Extension) processEvaluate(action teetypes.Action, df *instruction.Data
 		TargetHealth:     policy.TargetHealth,
 		MaxSlippageBps:   defaultSlippageBps,
 		EvaluatedAtBlock: req.BlockNumber,
-		Salt:             policy.Salt,
 	}
 
 	encoded, err := abi.Arguments{types.VerdictArg}.Pack(verdict)
@@ -235,6 +237,23 @@ func commitmentOf(p types.SecretPolicy) common.Hash {
 	buf = append(buf, common.LeftPadBytes(p.TargetHealth.Bytes(), 32)...)
 	buf = append(buf, p.Salt[:]...)
 	return crypto.Keccak256Hash(buf)
+}
+
+func validatePolicy(p types.SecretPolicy) error {
+	maxUint128 := new(big.Int).Sub(new(big.Int).Lsh(big.NewInt(1), 128), big.NewInt(1))
+	if p.TriggerHealth.Sign() < 0 || p.TargetHealth.Sign() < 0 {
+		return fmt.Errorf("policy health values must not be negative")
+	}
+	if p.TriggerHealth.Cmp(wad) < 0 {
+		return fmt.Errorf("trigger health must be at least 1e18")
+	}
+	if p.TargetHealth.Cmp(p.TriggerHealth) <= 0 {
+		return fmt.Errorf("target health must exceed trigger health")
+	}
+	if p.TriggerHealth.Cmp(maxUint128) > 0 || p.TargetHealth.Cmp(maxUint128) > 0 {
+		return fmt.Errorf("policy health values exceed uint128")
+	}
+	return nil
 }
 
 // decodeTuple unpacks a single ABI tuple into `out`.

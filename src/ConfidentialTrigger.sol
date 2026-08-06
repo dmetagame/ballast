@@ -12,7 +12,7 @@ import {Id} from "./interfaces/IMorpho.sol";
 ///      directly. The confidential path therefore requires a manager whose policy names a
 ///      single permitted caller. v1 stays live and untouched.
 interface IGatedProtect {
-    function protectFor(address borrower, Id id, uint128 targetHealth, uint32 maxSlippageBps)
+    function protectFor(address borrower, Id id, uint128 targetHealth, uint32 maxSlippageBps, address feeRecipient)
         external
         returns (uint256 repaid, uint256 collateralSold);
 }
@@ -81,7 +81,6 @@ contract ConfidentialTrigger {
         uint128 targetHealth;
         uint32 maxSlippageBps;
         uint64 evaluatedAtBlock;
-        bytes32 salt;
     }
 
     event Committed(address indexed borrower, Id indexed id, bytes32 commitment);
@@ -100,6 +99,7 @@ contract ConfidentialTrigger {
     error EvaluationInFuture(uint256 evaluatedAtBlock, uint256 currentBlock);
     error BadSignature();
     error HandlerFailed(bytes32 actionId);
+    error ResultNotFinal(bytes32 actionId, uint8 status);
 
     constructor(address teeRegistry, address ballast, uint256 extensionId) {
         TEE_REGISTRY = ITeeMachineRegistry(teeRegistry);
@@ -133,6 +133,7 @@ contract ConfidentialTrigger {
         returns (uint256 repaid, uint256 collateralSold)
     {
         if (env.status == 0) revert HandlerFailed(env.actionId);
+        if (env.status != 1) revert ResultNotFinal(env.actionId, env.status);
 
         bytes32 stored = commitmentOf[v.borrower][v.id];
         if (stored == bytes32(0)) revert NoCommitment(v.borrower);
@@ -147,26 +148,21 @@ contract ConfidentialTrigger {
 
         // The enclave's result payload is the verdict itself, ABI-encoded. `block.chainid`
         // binds the signature to this chain, which is the whole point of the domain separator.
-        bytes32 digest =
-            TeeResultHash.digest(abi.encode(v), env.actionId, env.submissionTag, env.status, block.chainid);
+        bytes32 digest = TeeResultHash.digest(abi.encode(v), env.actionId, env.submissionTag, env.status, block.chainid);
 
         if (verdictUsed[digest]) revert VerdictAlreadyUsed(digest);
         verdictUsed[digest] = true;
 
         address teeId = _recoverAttestedMachine(digest, signature);
 
-        (repaid, collateralSold) = BALLAST.protectFor(v.borrower, v.id, v.targetHealth, v.maxSlippageBps);
+        (repaid, collateralSold) = BALLAST.protectFor(v.borrower, v.id, v.targetHealth, v.maxSlippageBps, msg.sender);
         emit VerdictExecuted(v.borrower, v.id, teeId, repaid, collateralSold);
     }
 
     // ------------------------------------------------------------------ views
 
     /// @notice Recompute a commitment, so a borrower can check theirs before publishing it.
-    function commitmentFor(uint128 triggerHealth, uint128 targetHealth, bytes32 salt)
-        external
-        pure
-        returns (bytes32)
-    {
+    function commitmentFor(uint128 triggerHealth, uint128 targetHealth, bytes32 salt) external pure returns (bytes32) {
         return keccak256(abi.encode(triggerHealth, targetHealth, salt));
     }
 

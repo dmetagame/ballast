@@ -314,10 +314,9 @@ Two things that will waste your time otherwise:
 
 ## Known gaps
 
-- **No testnet deployment.** Morpho Blue exists only on Flare mainnet, so a Coston2 deployment
-  would mean standing up a Morpho instance, a loan token and a swap venue alongside Ballast.
-  The contracts are live on mainnet instead, and `demo.sh` runs the full system on a forked
-  local node for anyone who wants to reproduce it without spending gas.
+- **Coston2 uses a test market.** The FCC integration has a Coston2 Morpho deployment backed by
+  the live FTSOv2 XRP/USD feed, but its collateral, loan token and oracle-quoted swap venue are
+  scaffolding. Mainnet execution and liquidity claims remain grounded in the fork tests.
 - **Owner is an EOA.** See the owner powers noted above. Not renounced, not behind a timelock.
 - **The keeper is hypothetical.** `protect()` is permissionless, but nobody is running one.
 - **Single-venue routing.** The adapter swaps against one registered pool per pair. Splitting
@@ -328,9 +327,11 @@ Two things that will waste your time otherwise:
   correspondingly optimistic. Reality sits between them.
 - **Surplus is returned as loan token,** not re-supplied as collateral. Value is preserved but
   the borrower ends up holding USD₮0 rather than a larger position.
-- **No confidential trigger yet.** Policies are public on-chain, so a searcher can read a
-  borrower's trigger level and push price into it. Moving the trigger decision into a Flare
-  Compute Extension is the planned next step and the Bounty 2 entry.
+- **FCC requires a fresh deployment.** The confidential-trigger implementation is complete,
+  but the advertised Coston2 commitment reused a public test fixture. Rotate it with a private
+  random salt and redeploy the changed sender/v2/trigger ABIs before making a confidentiality
+  claim. The new sender pins each enrollment to one production TEE and rejects historical or
+  repeated evaluation blocks.
 
 ## Licence
 

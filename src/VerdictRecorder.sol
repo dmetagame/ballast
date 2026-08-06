@@ -58,7 +58,7 @@ contract VerdictRecorder is IGatedProtect {
     /// @inheritdoc IGatedProtect
     /// @dev Returns zeros for `repaid` and `collateralSold`. Nothing was repaid and nothing was
     ///      sold: there is no market on this chain. Reporting anything else would be fiction.
-    function protectFor(address borrower, Id id, uint128 targetHealth, uint32 maxSlippageBps)
+    function protectFor(address borrower, Id id, uint128 targetHealth, uint32 maxSlippageBps, address)
         external
         returns (uint256 repaid, uint256 collateralSold)
     {

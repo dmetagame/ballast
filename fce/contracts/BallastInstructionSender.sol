@@ -28,7 +28,12 @@ contract BallastInstructionSender {
     ITeeMachineRegistry public immutable TEE_MACHINE_REGISTRY;
 
     uint256 private constant FIRST_PUBLIC_EXTENSION_ID = 0x10000;
+    uint256 public constant MAX_EVALUATION_AGE_BLOCKS = 10;
+    uint8 private constant STATUS_PRODUCTION = 2;
     uint256 private _extensionId;
+
+    mapping(address => mapping(bytes32 => address)) public teeFor;
+    mapping(address => mapping(bytes32 => uint64)) public lastEvaluationBlock;
 
     /// @notice Carries a borrower's encrypted policy to the enclave.
     /// @dev `commitment` travels in the clear on purpose so the enclave can check the plaintext
@@ -51,6 +56,11 @@ contract BallastInstructionSender {
 
     error CiphertextRequired();
     error BlockInFuture(uint64 requested, uint256 current);
+    error BlockTooOld(uint64 requested, uint256 current);
+    error EvaluationNotMonotonic(uint64 requested, uint64 previous);
+    error PositionNotRouted(address borrower, bytes32 marketId);
+    error WrongExtension(address teeId, uint256 extensionId);
+    error MachineNotInProduction(address teeId, uint8 status);
 
     constructor(ITeeExtensionRegistry _extensionRegistry, ITeeMachineRegistry _machineRegistry) {
         require(address(_extensionRegistry).code.length > 0, "TeeExtensionRegistry has no code");
@@ -74,16 +84,22 @@ contract BallastInstructionSender {
     }
 
     /// @notice Enroll a position by handing the enclave an encrypted policy.
-    function enroll(bytes32 marketId, bytes32 commitment, bytes calldata ciphertext) external payable {
+    function enroll(address teeId, bytes32 marketId, bytes32 commitment, bytes calldata ciphertext) external payable {
         if (ciphertext.length == 0) revert CiphertextRequired();
+        uint256 extensionId = _getExtensionId();
+        uint256 machineExtension = TEE_MACHINE_REGISTRY.getExtensionId(teeId);
+        if (machineExtension != extensionId) revert WrongExtension(teeId, machineExtension);
+        uint8 status = TEE_MACHINE_REGISTRY.getTeeMachineStatus(teeId);
+        if (status != STATUS_PRODUCTION) revert MachineNotInProduction(teeId, status);
+
+        teeFor[msg.sender][marketId] = teeId;
+        lastEvaluationBlock[msg.sender][marketId] = 0;
         _send(
+            teeId,
             OP_COMMAND_ENROLL,
             abi.encode(
                 EnrollMessage({
-                    borrower: msg.sender,
-                    marketId: marketId,
-                    commitment: commitment,
-                    ciphertext: ciphertext
+                    borrower: msg.sender, marketId: marketId, commitment: commitment, ciphertext: ciphertext
                 })
             )
         );
@@ -94,14 +110,28 @@ contract BallastInstructionSender {
     ///      enrolled, and reveals nothing when no action is warranted.
     function evaluate(address borrower, bytes32 marketId, uint64 blockNumber) external payable {
         if (blockNumber > block.number) revert BlockInFuture(blockNumber, block.number);
+        if (block.number - blockNumber > MAX_EVALUATION_AGE_BLOCKS) {
+            revert BlockTooOld(blockNumber, block.number);
+        }
+
+        address teeId = teeFor[borrower][marketId];
+        if (teeId == address(0)) revert PositionNotRouted(borrower, marketId);
+        uint8 status = TEE_MACHINE_REGISTRY.getTeeMachineStatus(teeId);
+        if (status != STATUS_PRODUCTION) revert MachineNotInProduction(teeId, status);
+        uint64 previous = lastEvaluationBlock[borrower][marketId];
+        if (blockNumber <= previous) revert EvaluationNotMonotonic(blockNumber, previous);
+        lastEvaluationBlock[borrower][marketId] = blockNumber;
+
         _send(
+            teeId,
             OP_COMMAND_EVALUATE,
             abi.encode(EvaluateMessage({borrower: borrower, marketId: marketId, blockNumber: blockNumber}))
         );
     }
 
-    function _send(bytes32 opCommand, bytes memory message) internal {
-        address[] memory teeIds = TEE_MACHINE_REGISTRY.getRandomTeeIds(_getExtensionId(), 1);
+    function _send(address teeId, bytes32 opCommand, bytes memory message) internal {
+        address[] memory teeIds = new address[](1);
+        teeIds[0] = teeId;
 
         ITeeExtensionRegistry.TeeInstructionParams memory params = ITeeExtensionRegistry.TeeInstructionParams({
             opType: OP_TYPE_BALLAST,

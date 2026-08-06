@@ -38,11 +38,16 @@ contract MockGatedBallast is IGatedProtect {
     uint256 public calls;
     address public lastBorrower;
     uint128 public lastTarget;
+    address public lastFeeRecipient;
 
-    function protectFor(address borrower, Id, uint128 targetHealth, uint32) external returns (uint256, uint256) {
+    function protectFor(address borrower, Id, uint128 targetHealth, uint32, address feeRecipient)
+        external
+        returns (uint256, uint256)
+    {
         calls++;
         lastBorrower = borrower;
         lastTarget = targetHealth;
+        lastFeeRecipient = feeRecipient;
         return (1234, 5678);
     }
 }
@@ -95,8 +100,7 @@ contract ConfidentialTriggerTest is Test {
             commitment: _commitment(),
             targetHealth: TARGET_HEALTH,
             maxSlippageBps: 100,
-            evaluatedAtBlock: uint64(block.number),
-            salt: SALT
+            evaluatedAtBlock: uint64(block.number)
         });
     }
 
@@ -145,6 +149,7 @@ contract ConfidentialTriggerTest is Test {
         assertEq(ballast.calls(), 1);
         assertEq(ballast.lastBorrower(), borrower);
         assertEq(ballast.lastTarget(), TARGET_HEALTH);
+        assertEq(ballast.lastFeeRecipient(), address(this));
     }
 
     function testUnregisteredSignerIsRejected() public {
@@ -200,6 +205,18 @@ contract ConfidentialTriggerTest is Test {
         (uint8 sv, bytes32 r, bytes32 s) = vm.sign(teeKey, digest);
 
         vm.expectRevert(abi.encodeWithSelector(ConfidentialTrigger.HandlerFailed.selector, env.actionId));
+        trigger.execute(v, env, abi.encodePacked(r, s, sv));
+    }
+
+    function testPendingResultIsRejected() public {
+        ConfidentialTrigger.Verdict memory v = _verdict();
+        ConfidentialTrigger.TeeEnvelope memory env = _envelope();
+        env.status = 2;
+
+        bytes32 digest = TeeResultHash.digest(abi.encode(v), env.actionId, env.submissionTag, 2, block.chainid);
+        (uint8 sv, bytes32 r, bytes32 s) = vm.sign(teeKey, digest);
+
+        vm.expectRevert(abi.encodeWithSelector(ConfidentialTrigger.ResultNotFinal.selector, env.actionId, env.status));
         trigger.execute(v, env, abi.encodePacked(r, s, sv));
     }
 

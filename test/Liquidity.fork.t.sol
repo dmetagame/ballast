@@ -28,11 +28,14 @@ contract LiquidityForkTest is Test {
     address constant FXRP_WHALE = 0x4C18Ff3C89632c3Dd62E796c0aFA5c07c4c1B2b3;
 
     SparkDexAdapter adapter;
+    address manager = makeAddr("manager");
 
     function setUp() public {
         vm.createSelectFork(vm.rpcUrl("flare"), FORK_BLOCK);
         adapter = new SparkDexAdapter();
         adapter.setPool(FXRP, USDT0, POOL_ALGEBRA);
+        vm.etch(manager, hex"00");
+        adapter.setManager(manager);
     }
 
     /// @dev Sell `amountIn` FXRP and report the effective price against the Morpho oracle.
@@ -44,6 +47,7 @@ contract LiquidityForkTest is Test {
         uint256 fair = (amountIn * oraclePrice) / 1e36;
 
         uint256 before = IERC20(USDT0).balanceOf(address(this));
+        vm.prank(manager);
         out = adapter.swapExactIn(FXRP, USDT0, amountIn, 0, address(this));
         assertEq(IERC20(USDT0).balanceOf(address(this)) - before, out, "output must land on recipient");
 
@@ -129,7 +133,18 @@ contract LiquidityForkTest is Test {
         adapter.setPool(FXRP, USDT0, POOL_ALGEBRA);
         _fundFxrp(address(adapter), amountIn);
         uint256 fair = (amountIn * IOracle(ORACLE).price()) / 1e36;
+        vm.prank(manager);
         vm.expectRevert();
         adapter.swapExactIn(FXRP, USDT0, amountIn, fair, address(this)); // demand the full oracle price
+    }
+
+    function testUnrelatedCallerCannotConsumeAdapterDust() public {
+        uint256 amountIn = 1_000e6;
+        _fundFxrp(address(adapter), amountIn);
+
+        address attacker = makeAddr("attacker");
+        vm.prank(attacker);
+        vm.expectRevert(abi.encodeWithSelector(SparkDexAdapter.NotManager.selector, attacker));
+        adapter.swapExactIn(FXRP, USDT0, amountIn, 0, attacker);
     }
 }

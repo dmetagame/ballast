@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
+import {IIrm, MarketParams, MorphoMarket} from "../interfaces/IMorpho.sol";
+
 /// @title HealthMath
 /// @notice Morpho Blue position health and deleverage sizing.
 /// @dev Mirrors Morpho's own accounting so that a health factor computed here is
@@ -29,6 +31,25 @@ library HealthMath {
     /// @notice Convert borrow shares to assets, rounding up exactly as Morpho does for debt.
     function toAssetsUp(uint256 shares, uint256 totalAssets, uint256 totalShares) internal pure returns (uint256) {
         return mulDivUp(shares, totalAssets + VIRTUAL_ASSETS, totalShares + VIRTUAL_SHARES);
+    }
+
+    /// @notice Expected borrow assets after accruing interest through the current timestamp.
+    /// @dev Mirrors Morpho's MathLib and MorphoBalancesLib exactly.
+    function expectedTotalBorrowAssets(MarketParams memory mp, MorphoMarket memory market)
+        internal
+        view
+        returns (uint256 totalBorrowAssets)
+    {
+        totalBorrowAssets = market.totalBorrowAssets;
+        uint256 elapsed = block.timestamp - market.lastUpdate;
+        if (elapsed == 0 || totalBorrowAssets == 0 || mp.irm == address(0)) return totalBorrowAssets;
+
+        uint256 rate = IIrm(mp.irm).borrowRateView(mp, market);
+        uint256 firstTerm = rate * elapsed;
+        uint256 secondTerm = mulDivDown(firstTerm, firstTerm, 2 * WAD);
+        uint256 thirdTerm = mulDivDown(secondTerm, firstTerm, 3 * WAD);
+        uint256 compounded = firstTerm + secondTerm + thirdTerm;
+        return totalBorrowAssets + mulDivDown(totalBorrowAssets, compounded, WAD);
     }
 
     /// @notice Value of `collateral` expressed in loan-token units.

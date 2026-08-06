@@ -53,12 +53,11 @@ type Verdict struct {
 	TargetHealth     *big.Int       `abi:"targetHealth"`
 	MaxSlippageBps   uint32         `abi:"maxSlippageBps"`
 	EvaluatedAtBlock uint64         `abi:"evaluatedAtBlock"`
-	Salt             [32]byte       `abi:"salt"`
 }
 
 // VerdictArg is the abi.Argument matching ConfidentialTrigger.Verdict.
 //
-// Every member is static, so the tuple packs inline as seven words with no offset header,
+// Every member is static, so the tuple packs inline with no offset header,
 // which is exactly what Solidity's abi.encode(v) produces for the same struct.
 var VerdictArg abi.Argument
 
@@ -77,7 +76,6 @@ func init() {
 		{Name: "targetHealth", Type: "uint128"},
 		{Name: "maxSlippageBps", Type: "uint32"},
 		{Name: "evaluatedAtBlock", Type: "uint64"},
-		{Name: "salt", Type: "bytes32"},
 	})
 	if err != nil {
 		panic(err)

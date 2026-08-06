@@ -6,13 +6,9 @@ import {SafeTransfer} from "../libraries/SafeTransfer.sol";
 
 interface IConcentratedPool {
     /// @dev Algebra Integral and Uniswap V3 share this signature; only the callback name differs.
-    function swap(
-        address recipient,
-        bool zeroToOne,
-        int256 amountRequired,
-        uint160 limitSqrtPrice,
-        bytes calldata data
-    ) external returns (int256 amount0, int256 amount1);
+    function swap(address recipient, bool zeroToOne, int256 amountRequired, uint160 limitSqrtPrice, bytes calldata data)
+        external
+        returns (int256 amount0, int256 amount1);
 
     function token0() external view returns (address);
     function token1() external view returns (address);
@@ -38,6 +34,7 @@ contract SparkDexAdapter is ISwapAdapter {
     uint160 internal constant MAX_SQRT_RATIO = 1461446703485210103287273052203988822378723970342;
 
     address public owner;
+    address public manager;
 
     /// @dev keccak256(tokenIn, tokenOut) => pool
     mapping(bytes32 => address) public poolFor;
@@ -49,6 +46,9 @@ contract SparkDexAdapter is ISwapAdapter {
     event Swapped(address indexed tokenIn, address indexed tokenOut, uint256 amountIn, uint256 amountOut);
 
     error NotOwner();
+    error NotManager(address caller);
+    error ManagerAlreadySet();
+    error InvalidManager();
     error NoPool(address tokenIn, address tokenOut);
     error UnexpectedCallback(address caller);
     error InsufficientOutput(uint256 got, uint256 minWanted);
@@ -67,6 +67,14 @@ contract SparkDexAdapter is ISwapAdapter {
         owner = newOwner;
     }
 
+    /// @notice Permanently authorize the manager that may consume prefunded swap inputs.
+    /// @dev Set once after deployment because the adapter is deployed before its manager.
+    function setManager(address manager_) external onlyOwner {
+        if (manager != address(0)) revert ManagerAlreadySet();
+        if (manager_ == address(0) || manager_.code.length == 0) revert InvalidManager();
+        manager = manager_;
+    }
+
     /// @notice Register the pool to use when selling `tokenIn` for `tokenOut`.
     function setPool(address tokenIn, address tokenOut, address pool) external onlyOwner {
         poolFor[_key(tokenIn, tokenOut)] = pool;
@@ -80,6 +88,7 @@ contract SparkDexAdapter is ISwapAdapter {
         override
         returns (uint256 amountOut)
     {
+        if (msg.sender != manager) revert NotManager(msg.sender);
         if (amountIn == 0) revert ZeroAmount();
         address pool = poolFor[_key(tokenIn, tokenOut)];
         if (pool == address(0)) revert NoPool(tokenIn, tokenOut);
@@ -87,13 +96,14 @@ contract SparkDexAdapter is ISwapAdapter {
         bool zeroForOne = tokenIn == IConcentratedPool(pool).token0();
 
         _activePool = pool;
-        (int256 amount0, int256 amount1) = IConcentratedPool(pool).swap(
-            to,
-            zeroForOne,
-            int256(amountIn), // positive => exact input
-            zeroForOne ? MIN_SQRT_RATIO + 1 : MAX_SQRT_RATIO - 1,
-            abi.encode(tokenIn, pool)
-        );
+        (int256 amount0, int256 amount1) = IConcentratedPool(pool)
+            .swap(
+                to,
+                zeroForOne,
+                int256(amountIn), // positive => exact input
+                zeroForOne ? MIN_SQRT_RATIO + 1 : MAX_SQRT_RATIO - 1,
+                abi.encode(tokenIn, pool)
+            );
         _activePool = address(0);
 
         // The pool reports what it paid out as a negative delta on the output side.

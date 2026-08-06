@@ -30,6 +30,7 @@ contract Deploy is Script {
         adapter = new SparkDexAdapter();
         adapter.setPool(collateral, loan, pool);
         ballast = new BallastManager(morpho, address(adapter));
+        adapter.setManager(address(ballast));
 
         vm.stopBroadcast();
 

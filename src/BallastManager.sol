@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import {IMorpho, IMorphoFlashLoanCallback, IOracle, Id, MarketParams} from "./interfaces/IMorpho.sol";
+import {IMorpho, IMorphoFlashLoanCallback, IOracle, Id, MarketParams, MorphoMarket} from "./interfaces/IMorpho.sol";
 import {ISwapAdapter, IERC20} from "./interfaces/ISwapAdapter.sol";
 import {HealthMath} from "./libraries/HealthMath.sol";
 import {SafeTransfer} from "./libraries/SafeTransfer.sol";
@@ -165,9 +165,11 @@ contract BallastManager is IMorphoFlashLoanCallback {
     function healthOf(address borrower, Id id) public view returns (uint256) {
         MarketParams memory mp = _marketParams(id);
         (, uint128 borrowShares, uint128 collateral) = MORPHO.position(id, borrower);
-        (,, uint128 totalBorrowAssets, uint128 totalBorrowShares,,) = MORPHO.market(id);
+        MorphoMarket memory market = _market(id);
 
-        uint256 debt = HealthMath.toAssetsUp(borrowShares, totalBorrowAssets, totalBorrowShares);
+        uint256 debt = HealthMath.toAssetsUp(
+            borrowShares, HealthMath.expectedTotalBorrowAssets(mp, market), market.totalBorrowShares
+        );
         uint256 cv = HealthMath.collateralValue(collateral, IOracle(mp.oracle).price());
         return HealthMath.healthFactor(cv, debt, mp.lltv);
     }
@@ -185,10 +187,12 @@ contract BallastManager is IMorphoFlashLoanCallback {
 
         MarketParams memory mp = _marketParams(id);
         (, uint128 borrowShares, uint128 collateral) = MORPHO.position(id, borrower);
-        (,, uint128 totalBorrowAssets, uint128 totalBorrowShares,,) = MORPHO.market(id);
+        MorphoMarket memory market = _market(id);
 
         uint256 price = IOracle(mp.oracle).price();
-        uint256 debt = HealthMath.toAssetsUp(borrowShares, totalBorrowAssets, totalBorrowShares);
+        uint256 debt = HealthMath.toAssetsUp(
+            borrowShares, HealthMath.expectedTotalBorrowAssets(mp, market), market.totalBorrowShares
+        );
         uint256 cv = HealthMath.collateralValue(collateral, price);
         health = HealthMath.healthFactor(cv, debt, mp.lltv);
         if (health >= p.triggerHealth) return (false, health, 0, 0);
@@ -209,6 +213,7 @@ contract BallastManager is IMorphoFlashLoanCallback {
         uint256 collateralOut;
         uint256 minAmountOut;
         uint256 keeperFeeBps;
+        uint256 balanceBefore;
     }
 
     /// @notice Deleverage `borrower`'s position back toward their target health.
@@ -242,6 +247,7 @@ contract BallastManager is IMorphoFlashLoanCallback {
         if (collateralOut > collateral) collateralOut = collateral;
 
         p.lastAction = uint64(block.timestamp);
+        uint256 balanceBefore = IERC20(mp.loanToken).balanceOf(address(this));
 
         MORPHO.flashLoan(
             mp.loanToken,
@@ -254,7 +260,8 @@ contract BallastManager is IMorphoFlashLoanCallback {
                     repayAssets: repayAssets,
                     collateralOut: collateralOut,
                     minAmountOut: repayAssets,
-                    keeperFeeBps: p.keeperFeeBps
+                    keeperFeeBps: p.keeperFeeBps,
+                    balanceBefore: balanceBefore
                 })
             )
         );
@@ -297,7 +304,8 @@ contract BallastManager is IMorphoFlashLoanCallback {
 
         // 4. settle: flash loan first, then keeper fee, then refund the borrower
         uint256 balance = IERC20(mp.loanToken).balanceOf(address(this));
-        uint256 surplus = balance > assets ? balance - assets : 0;
+        uint256 requiredBalance = f.balanceBefore + assets;
+        uint256 surplus = balance > requiredBalance ? balance - requiredBalance : 0;
 
         uint256 fee = (f.repayAssets * f.keeperFeeBps) / MAX_BPS;
         if (fee > surplus) fee = surplus;
@@ -318,6 +326,17 @@ contract BallastManager is IMorphoFlashLoanCallback {
         (address loanToken, address collateralToken, address oracle, address irm, uint256 lltv) =
             MORPHO.idToMarketParams(id);
         mp = MarketParams(loanToken, collateralToken, oracle, irm, lltv);
+    }
+
+    function _market(Id id) internal view returns (MorphoMarket memory market) {
+        (
+            market.totalSupplyAssets,
+            market.totalSupplyShares,
+            market.totalBorrowAssets,
+            market.totalBorrowShares,
+            market.lastUpdate,
+            market.fee
+        ) = MORPHO.market(id);
     }
 
     function _approve(address token, address spender, uint256 amount) internal {

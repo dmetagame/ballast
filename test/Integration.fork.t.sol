@@ -40,6 +40,7 @@ contract IntegrationForkTest is Test {
         adapter = new SparkDexAdapter();
         adapter.setPool(FXRP, USDT0, POOL_ALGEBRA);
         ballast = new BallastManager(MORPHO, address(adapter));
+        adapter.setManager(address(ballast));
         pusher = new PoolPusher();
         vm.prank(FXRP_WHALE);
         IERC20(FXRP).transfer(address(pusher), 3_000_000e6);
@@ -50,8 +51,10 @@ contract IntegrationForkTest is Test {
     function _dropMarket(uint256 dropBps, uint256 sqrtFactorE9) internal {
         uint256 pusherBefore = IERC20(FXRP).balanceOf(address(pusher));
         pusher.pushDown(POOL_ALGEBRA, sqrtFactorE9);
-        console2.log("  [drawdown] FXRP dumped into pool to move price:",
-            (pusherBefore - IERC20(FXRP).balanceOf(address(pusher))) / 1e6);
+        console2.log(
+            "  [drawdown] FXRP dumped into pool to move price:",
+            (pusherBefore - IERC20(FXRP).balanceOf(address(pusher))) / 1e6
+        );
         uint256 p = IOracle(ORACLE).price();
         vm.mockCall(
             ORACLE, abi.encodeWithSelector(IOracle.price.selector), abi.encode((p * (10_000 - dropBps)) / 10_000)
@@ -97,6 +100,27 @@ contract IntegrationForkTest is Test {
         assertGt(IERC20(USDT0).balanceOf(keeper), 0, "keeper is paid");
         assertEq(IERC20(FXRP).balanceOf(address(ballast)), 0, "no collateral retained");
         assertEq(IERC20(USDT0).balanceOf(address(ballast)), 0, "no loan token retained");
+    }
+
+    function testProtectionDoesNotDistributePreExistingManagerBalance() public {
+        _enroll(600);
+        _dropMarket(1000, 948683298);
+
+        uint256 existingBalance = 1_000e6;
+        deal(USDT0, address(ballast), existingBalance);
+        uint256 borrowerBefore = IERC20(USDT0).balanceOf(BORROWER_MID);
+
+        vm.prank(keeper);
+        ballast.protect(BORROWER_MID, MARKET_ID);
+
+        assertEq(
+            IERC20(USDT0).balanceOf(address(ballast)), existingBalance, "unrelated manager funds must be preserved"
+        );
+        assertLt(
+            IERC20(USDT0).balanceOf(BORROWER_MID) - borrowerBefore,
+            existingBalance,
+            "the borrower must receive only this action's swap surplus"
+        );
     }
 
     /// @notice Under stress, a bound calibrated to calm markets makes Ballast refuse to act.

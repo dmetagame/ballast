@@ -13,7 +13,7 @@ import (
 
 const (
 	// Version is reported by GET /state. Bump it whenever the state shape changes.
-	Version = "0.1.0"
+	Version = "0.2.0"
 
 	// OPTypeBallast is the single operation type this extension serves.
 	OPTypeBallast = "BALLAST"
@@ -40,7 +40,7 @@ var (
 	// MorphoAddress is the Morpho Blue singleton the enclave reads positions from. It must
 	// match the deployment ConfidentialTrigger's BallastManagerV2 acts on, or the enclave
 	// judges a position that is not the one being protected.
-	MorphoAddress = "0xF4346F5132e810f80a28487a79c7559d9797E8B0" // Flare mainnet
+	MorphoAddress = "0x5711398A701B9D2BD47Ac8248Cba3A8cA72D053E" // Ballast Coston2 deployment
 )
 
 func init() {
