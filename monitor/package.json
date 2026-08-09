@@ -5,7 +5,14 @@
   "description": "Risk scanners for FXRP-collateralised leverage on Flare (Morpho Blue + Enosys isolated markets).",
   "scripts": {
     "scan:morpho": "node scan-morpho-markets.mjs && node scan-morpho-health.mjs",
-    "scan:enosys": "node scan-enosys-borrowers.mjs && node scan-enosys-health.mjs"
+    "scan:enosys": "node scan-enosys-borrowers.mjs && node scan-enosys-health.mjs",
+    "keeper:dry-run": "RUN_ONCE=true node keeper.mjs",
+    "keeper:execute": "EXECUTE=true RUN_ONCE=true node keeper.mjs",
+    "keeper:watch": "node keeper.mjs",
+    "keeper:execute-watch": "EXECUTE=true node keeper.mjs",
+    "test": "node --test keeper.test.mjs"
   },
-  "dependencies": { "viem": "^2.21.0" }
+  "dependencies": {
+    "viem": "^2.21.0"
+  }
 }

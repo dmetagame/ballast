@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Ballast borrower enrollment for Morpho positions on Flare." />
+    <title>Ballast · Enroll protection</title>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <a class="brand" href="./">BALLAST <span>/ ENROLLMENT</span></a>
+        <div class="network"><span class="dot"></span><span id="networkLabel">Flare mainnet · read-only manager</span></div>
+        <button id="connectButton" class="button button-dark">Connect wallet</button>
+      </header>
+
+      <section class="intro">
+        <p class="eyebrow">Borrower control panel</p>
+        <h1>Put a guardrail around your Morpho position.</h1>
+        <p class="lede">Ballast can repay part of an FXRP-collateralised borrow before liquidation. You choose the limits. The keeper only acts within them.</p>
+        <div class="notice notice-amber"><strong>Read-only production manager.</strong> The published mainnet manager is available here for verification only. Enrollment writes are disabled until a future manager is explicitly configured for this app.</div>
+      </section>
+
+      <section class="grid">
+        <article class="card status-card">
+          <div class="card-heading"><div><p class="eyebrow">01 / Position</p><h2>Connected account</h2></div><span id="walletBadge" class="badge">Not connected</span></div>
+          <dl class="facts">
+            <div><dt>Wallet</dt><dd id="walletAddress">Connect a wallet</dd></div>
+            <div><dt>Chain</dt><dd id="chainStatus">—</dd></div>
+            <div><dt>Ballast manager</dt><dd><a id="managerLink" target="_blank" rel="noreferrer">—</a></dd></div>
+            <div><dt>Morpho authorization</dt><dd id="authorizationStatus">—</dd></div>
+            <div><dt>Policy status</dt><dd id="policyStatus">—</dd></div>
+          </dl>
+          <button id="refreshButton" class="button button-light" disabled>Refresh position</button>
+        </article>
+
+        <article class="card flow-card">
+          <div class="card-heading"><div><p class="eyebrow">02 / Authorization</p><h2>Allow Ballast to act</h2></div><span class="step">Wallet transaction</span></div>
+          <p class="body-copy">Morpho authorization lets the manager operate on your position. Ballast does not receive custody of your collateral; Morpho records this permission against your account.</p>
+          <div class="callout"><span class="check">✓</span><span>Revocable at any time through Morpho’s authorization control.</span></div>
+          <button id="authorizeButton" class="button button-primary" disabled>Authorize Ballast on Morpho</button>
+          <p id="authorizationHint" class="hint">Connect your wallet to inspect authorization.</p>
+        </article>
+      </section>
+
+      <section class="card policy-card">
+        <div class="card-heading"><div><p class="eyebrow">03 / Policy</p><h2>Set your protection limits</h2></div><span class="step">Wallet transaction</span></div>
+        <p class="body-copy policy-intro">The policy is the hard boundary for every protective action. Values are encoded onchain and apply to the configured Morpho market.</p>
+        <form id="policyForm" novalidate>
+          <div class="form-grid">
+            <label><span>Trigger health</span><small>Act below this factor · minimum 1.00</small><div class="input-wrap"><input id="triggerHealth" name="triggerHealth" value="1.50" inputmode="decimal" required /><span>×</span></div><em data-error-for="triggerHealth"></em></label>
+            <label><span>Target health</span><small>Restore at least this factor</small><div class="input-wrap"><input id="targetHealth" name="targetHealth" value="1.80" inputmode="decimal" required /><span>×</span></div><em data-error-for="targetHealth"></em></label>
+            <label><span>Max collateral per action</span><small>FXRP units · caps each sale</small><div class="input-wrap"><input id="maxCollateral" name="maxCollateral" value="25000" inputmode="decimal" required /><span>FXRP</span></div><em data-error-for="maxCollateral"></em></label>
+            <label><span>Max slippage</span><small>Hard contract ceiling: 10%</small><div class="input-wrap"><input id="maxSlippage" name="maxSlippage" value="2" inputmode="decimal" required /><span>%</span></div><em data-error-for="maxSlippage"></em></label>
+            <label><span>Keeper fee</span><small>Paid from recovered surplus · max 5%</small><div class="input-wrap"><input id="keeperFee" name="keeperFee" value="0.25" inputmode="decimal" required /><span>%</span></div><em data-error-for="keeperFee"></em></label>
+            <label><span>Cooldown</span><small>Minimum time between actions</small><div class="input-wrap"><input id="cooldown" name="cooldown" value="3600" inputmode="numeric" required /><span>seconds</span></div><em data-error-for="cooldown"></em></label>
+            <label><span>Keeper address</span><small>Dedicated operator allowed to protect this position</small><div class="input-wrap"><input id="keeperAddress" name="keeperAddress" placeholder="0x…" autocomplete="off" required /></div><em data-error-for="keeperAddress"></em></label>
+          </div>
+          <div class="policy-summary" id="policySummary">Set limits to preview the onchain policy.</div>
+          <button class="button button-primary" id="policyButton" type="submit" disabled>Save protection policy</button>
+          <p id="policyHint" class="hint">This production manager is read-only in the enrollment app.</p>
+        </form>
+      </section>
+
+      <section class="trust-grid">
+        <article class="card trust-card"><p class="eyebrow">Security model</p><h2>What Ballast can and cannot do</h2><ul><li>Ballast never holds your collateral outside a single atomic protection transaction.</li><li>Keepers can call protection, but cannot choose values outside your policy.</li><li>Your policy caps trigger, target, collateral sold, slippage, keeper fee, and cooldown.</li><li>Authorization is separate from policy setup and can be revoked on Morpho.</li></ul></article>
+        <article class="card trust-card"><p class="eyebrow">Trust assumptions</p><h2>Read this before enrolling</h2><ul><li>The deployed manager owner can change the swap adapter; treat that owner as trusted until governance or a timelock is in place.</li><li>The contracts are not audited. Start with small exposure and conservative limits.</li><li>Protection depends on Morpho state, oracle updates, keeper uptime, and available Flare liquidity.</li><li>A policy is not a guarantee against liquidation or adverse execution.</li></ul></article>
+      </section>
+
+      <footer><span id="statusMessage">Connect a wallet to inspect your account.</span><span>Ballast · Flare mainnet · Morpho Blue FXRP / USD₮0</span></footer>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

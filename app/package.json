@@ -1,0 +1,17 @@
+{
+  "name": "ballast-enrollment-app",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "check": "node --check src/main.js"
+  },
+  "dependencies": {
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

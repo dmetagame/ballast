@@ -249,6 +249,45 @@ One command, no testnet, no keys, no faucet:
 ./demo.sh
 ```
 
+## Run the keeper
+
+The permissionless keeper discovers `PolicySet` events, reads each borrower's current policy,
+calls `previewProtect`, and reports only positions that are actionable. It is dry-run by default:
+
+```bash
+cd monitor
+npm run keeper:dry-run
+```
+
+After reviewing the output, an operator can opt into execution with a funded Flare account. The
+keeper simulates each transaction before submitting it and never overrides a borrower's policy:
+
+```bash
+RPC_URL=https://flare-api.flare.network/ext/C/rpc \
+PRIVATE_KEY=0x... \
+EXECUTE=true \
+npm run keeper:execute
+```
+
+Useful controls are `BALLAST`, `FROM_BLOCK`, `EXPLORER_URL`, and `MAX_POSITIONS`. The default
+start block is the published mainnet deployment. Keep the private key outside shell history and
+use a dedicated keeper account. A failed simulation is skipped rather than broadcast.
+
+For hardened production operation, set `MANAGER_VERSION=v3` and point `BALLAST` at the fresh
+`BallastManagerV3` deployment. V3 requires each borrower to name the keeper that may act on their
+policy; the keeper refuses to execute a V3 policy configured for another operator.
+
+The borrower enrollment app lives in `app/`. It remains read-only against the published legacy
+manager by default. Enable writes only after deploying and finalizing V3:
+
+```bash
+cd app
+VITE_BALLAST_MANAGER=0x... \
+VITE_ENABLE_ENROLLMENT_WRITES=true \
+VITE_MANAGER_VERSION=v3 \
+npm run build
+```
+
 It forks Flare mainnet into a local anvil node, funds a demo borrower with real FXRP by
 impersonating a real holder, deploys Ballast, opens a leveraged position, and has a keeper
 rescue it. Morpho, FXRP, USD₮0, the oracle and the SparkDEX pool are all the live mainnet
@@ -312,13 +351,17 @@ Two things that will waste your time otherwise:
   writing the raw balance slot leaves inconsistent state and the next transfer panics with an
   arithmetic underflow. Fund tests by `vm.prank`-ing a real holder instead.
 
-## Known gaps
+## Production status and remaining operational work
 
 - **Coston2 uses a test market.** The FCC integration has a Coston2 Morpho deployment backed by
   the live FTSOv2 XRP/USD feed, but its collateral, loan token and oracle-quoted swap venue are
   scaffolding. Mainnet execution and liquidity claims remain grounded in the fork tests.
-- **Owner is an EOA.** See the owner powers noted above. Not renounced, not behind a timelock.
-- **The keeper is hypothetical.** `protect()` is permissionless, but nobody is running one.
+- **Legacy owner is an EOA.** The published V1 deployment remains unchanged for compatibility;
+  production enrollment should target the fresh V3 deployment, whose manager and adapter admin
+  changes are delayed and whose protection can be guardian-paused.
+- **The keeper is operator software.** `monitor/keeper.mjs` provides a dry-run-first loop and an
+  explicit execution mode; no borrower has enrolled on the published manager yet, and this is
+  not a hosted service or uptime guarantee.
 - **Single-venue routing.** The adapter swaps against one registered pool per pair. Splitting
   across the Algebra and UniV3 pools would add roughly 20% more depth.
 - **The drawdown simulation is a worst case.** `PoolPusher` moves the price by dumping into a
@@ -332,6 +375,9 @@ Two things that will waste your time otherwise:
   random salt and redeploy the changed sender/v2/trigger ABIs before making a confidentiality
   claim. The new sender pins each enrollment to one production TEE and rejects historical or
   repeated evaluation blocks.
+
+The complete deployment runbook, role separation, finalization sequence, and pre-enrollment
+checks are in `docs/PRODUCTION_DEPLOYMENT.md`.
 
 ## Licence
 
