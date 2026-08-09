@@ -17,9 +17,19 @@ require_distinct() {
     exit 1
   fi
 }
+decimal_lt() {
+  local left="${1#${1%%[!0]*}}" right="${2#${2%%[!0]*}}"
+  [ -n "$left" ] || left=0
+  [ -n "$right" ] || right=0
+  if [ "${#left}" -ne "${#right}" ]; then
+    [ "${#left}" -lt "${#right}" ]
+  else
+    [[ "$left" < "$right" ]]
+  fi
+}
 
 for role in DEPLOYER_ADDRESS OWNER GUARDIAN KEEPER; do
-  cast to-check-sum "${!role}" >/dev/null
+  cast to-checksum "${!role}" >/dev/null
 done
 require_distinct deployer "$DEPLOYER_ADDRESS" owner "$OWNER"
 require_distinct deployer "$DEPLOYER_ADDRESS" guardian "$GUARDIAN"
@@ -30,11 +40,11 @@ require_distinct guardian "$GUARDIAN" keeper "$KEEPER"
 
 deployer_balance=$(cast balance "$DEPLOYER_ADDRESS" --rpc-url "$RPC_URL")
 keeper_balance=$(cast balance "$KEEPER" --rpc-url "$RPC_URL")
-if [ "$deployer_balance" -lt "$MIN_DEPLOYER_FLR_WEI" ]; then
+if decimal_lt "$deployer_balance" "$MIN_DEPLOYER_FLR_WEI"; then
   printf 'deployer balance %s wei is below required %s wei\n' "$deployer_balance" "$MIN_DEPLOYER_FLR_WEI" >&2
   exit 1
 fi
-if [ "$keeper_balance" -lt "$MIN_KEEPER_FLR_WEI" ]; then
+if decimal_lt "$keeper_balance" "$MIN_KEEPER_FLR_WEI"; then
   printf 'keeper balance %s wei is below required %s wei\n' "$keeper_balance" "$MIN_KEEPER_FLR_WEI" >&2
   exit 1
 fi
