@@ -277,7 +277,8 @@ For hardened production operation, set `MANAGER_VERSION=v3` and point `BALLAST` 
 `BallastManagerV3` deployment. V3 requires each borrower to name the keeper that may act on their
 policy; the keeper refuses to execute a V3 policy configured for another operator.
 
-The borrower enrollment app lives in `app/`. It remains read-only against the published legacy
+The borrower enrollment app lives in `app/` and is publicly deployed at
+`https://app-dmetagames-projects.vercel.app`. It remains read-only against the published legacy
 manager by default. Enable writes only after deploying and finalizing V3:
 
 ```bash
