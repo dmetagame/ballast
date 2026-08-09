@@ -72,6 +72,18 @@ MIN_PROFIT_FLR_WEI=<minimum net profit>
 
 Run the keeper under a process supervisor with log collection and restart policy. Confirm the keeper address shown in the enrollment app matches the operator account.
 
+The repository includes a hardened user-level systemd unit:
+
+```bash
+./scripts/install-keeper-service.sh
+$EDITOR ~/.config/ballast/keeper.env
+systemctl --user enable --now ballast-keeper
+journalctl --user -u ballast-keeper -f
+```
+
+The installer creates the environment file with mode `0600` and does not start the service until
+the operator explicitly enables it.
+
 ## Pre-enrollment checks
 
 1. Verified source is visible for both contracts.

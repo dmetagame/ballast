@@ -14,17 +14,18 @@ contract FinalizeV3 is Script {
     function run() external {
         BallastManagerV3 ballast = BallastManagerV3(vm.envAddress("BALLAST_V3"));
         SparkDexAdapterV2 adapter = SparkDexAdapterV2(vm.envAddress("ADAPTER_V2"));
+        bool acceptOwnership = vm.envOr("ACCEPT_OWNERSHIP", false);
 
         vm.startBroadcast();
         if (adapter.pendingPool(keccak256(abi.encodePacked(FXRP, USDT0))) != address(0)) {
             adapter.acceptPool(FXRP, USDT0);
             console2.log("Accepted FXRP -> USD0 pool");
         }
-        if (ballast.pendingOwner() == msg.sender) {
+        if (acceptOwnership && ballast.pendingOwner() != address(0)) {
             ballast.acceptOwnership();
             console2.log("Accepted Ballast V3 ownership");
         }
-        if (adapter.pendingOwner() == msg.sender) {
+        if (acceptOwnership && adapter.pendingOwner() != address(0)) {
             adapter.acceptOwnership();
             console2.log("Accepted adapter ownership");
         }

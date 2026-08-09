@@ -29,10 +29,8 @@ contract DeployV3 is Script {
         adapter.proposePool(collateral, loan, pool);
         ballast = new BallastManagerV3(morpho, address(adapter), guardian, adminDelay);
         adapter.setManager(address(ballast));
-        if (finalOwner != msg.sender) {
-            ballast.proposeOwnership(finalOwner);
-            adapter.proposeOwnership(finalOwner);
-        }
+        ballast.proposeOwnership(finalOwner);
+        adapter.proposeOwnership(finalOwner);
 
         vm.stopBroadcast();
 
@@ -42,8 +40,6 @@ contract DeployV3 is Script {
         console2.log("  Guardian        :", guardian);
         console2.log("  Admin delay     :", adminDelay);
         console2.log("  Final owner     :", finalOwner);
-        if (finalOwner != msg.sender) {
-            console2.log("  Ownership acceptance available after:", ballast.ownershipTransferEta());
-        }
+        console2.log("  Ownership acceptance available after:", ballast.ownershipTransferEta());
     }
 }

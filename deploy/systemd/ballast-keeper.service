@@ -1,0 +1,21 @@
+[Unit]
+Description=Ballast V3 protection keeper
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/ballast/monitor
+EnvironmentFile=%h/.config/ballast/keeper.env
+ExecStart=/usr/bin/env npm run keeper:execute-watch
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.config/ballast
+
+[Install]
+WantedBy=default.target
