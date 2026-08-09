@@ -52,7 +52,16 @@ async function refresh() {
   $("policyStatus").className = policy.enabled ? "good" : "muted";
   $("authorizeButton").disabled = !ENABLE_WRITES || !isFlare() || authorized;
   $("policyButton").disabled = !ENABLE_WRITES || !isFlare();
+  $("disablePolicyButton").disabled = !ENABLE_WRITES || !isFlare() || !policy.enabled;
+  $("revokeAuthorizationButton").disabled = !ENABLE_WRITES || !isFlare() || !authorized || policy.enabled;
   $("authorizationHint").textContent = authorized ? "Authorization is already active for this wallet." : ENABLE_WRITES ? "The next step asks Morpho to authorize the configured manager." : "Writes are disabled for the published manager.";
+  $("exitHint").textContent = !ENABLE_WRITES
+    ? "Exit writes are disabled for the published manager."
+    : policy.enabled
+      ? "Disable the policy before revoking Morpho authorization."
+      : authorized
+        ? "Policy disabled. Revoking authorization is now available."
+        : "Protection is disabled and Morpho authorization is revoked.";
 }
 
 function numberField(id, label, decimals = 6) {
@@ -95,6 +104,34 @@ async function sendAuthorization() {
   catch (error) { setStatus(error.shortMessage || error.message, "error"); }
 }
 
+async function disablePolicy() {
+  if (!ENABLE_WRITES) return setStatus("Enrollment writes are disabled for the published manager.", "warning");
+  if (!isFlare()) return switchToFlare();
+  if (!window.confirm("Disable Ballast protection for this Morpho market? Keepers will no longer be able to act.")) return;
+  try {
+    setStatus("Waiting for policy-disable confirmation…");
+    const hash = await walletClient.writeContract({ address: MANAGER, abi: managerAbi, functionName: "disablePolicy", args: [MARKET_ID], account, chain: flare });
+    setStatus(`Policy disable submitted: ${short(hash)} · ${explorer(hash)}`);
+    await publicClient.waitForTransactionReceipt({ hash });
+    await refresh();
+    setStatus("Ballast policy disabled. You can now revoke Morpho authorization.", "success");
+  } catch (error) { setStatus(error.shortMessage || error.message, "error"); }
+}
+
+async function revokeAuthorization() {
+  if (!ENABLE_WRITES) return setStatus("Enrollment writes are disabled for the published manager.", "warning");
+  if (!isFlare()) return switchToFlare();
+  if (!window.confirm("Revoke Ballast's Morpho authorization for this wallet?")) return;
+  try {
+    setStatus("Waiting for authorization-revocation confirmation…");
+    const hash = await walletClient.writeContract({ address: MORPHO, abi: morphoAbi, functionName: "setAuthorization", args: [MANAGER, false], account, chain: flare });
+    setStatus(`Authorization revoke submitted: ${short(hash)} · ${explorer(hash)}`);
+    await publicClient.waitForTransactionReceipt({ hash });
+    await refresh();
+    setStatus("Morpho authorization revoked.", "success");
+  } catch (error) { setStatus(error.shortMessage || error.message, "error"); }
+}
+
 async function submitPolicy(event) {
   event.preventDefault(); updateSummary();
   if (!ENABLE_WRITES) return setStatus("Enrollment writes are disabled for the published manager.", "warning");
@@ -106,6 +143,8 @@ async function submitPolicy(event) {
 $("connectButton").addEventListener("click", connect);
 $("refreshButton").addEventListener("click", refresh);
 $("authorizeButton").addEventListener("click", sendAuthorization);
+$("disablePolicyButton").addEventListener("click", disablePolicy);
+$("revokeAuthorizationButton").addEventListener("click", revokeAuthorization);
 $("policyForm").addEventListener("submit", submitPolicy);
 [...document.querySelectorAll("input")].forEach((input) => input.addEventListener("input", updateSummary));
 if (window.ethereum) window.ethereum.on?.("chainChanged", (chainId) => { currentChainId = Number.parseInt(chainId, 16); refresh().catch((error) => setStatus(error.message, "error")); });

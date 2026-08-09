@@ -62,6 +62,16 @@
         </form>
       </section>
 
+      <section class="card exit-card">
+        <div class="card-heading"><div><p class="eyebrow">04 / Exit</p><h2>Disable or revoke protection</h2></div><span class="step">Borrower escape hatch</span></div>
+        <p class="body-copy">Exit in two steps. Disable the Ballast policy first so keepers can no longer act, then revoke the manager's Morpho authorization.</p>
+        <div class="exit-actions">
+          <button id="disablePolicyButton" class="button button-danger" disabled>Disable Ballast policy</button>
+          <button id="revokeAuthorizationButton" class="button button-light" disabled>Revoke Morpho authorization</button>
+        </div>
+        <p id="exitHint" class="hint">Connect your wallet to inspect exit controls.</p>
+      </section>
+
       <section class="trust-grid">
         <article class="card trust-card"><p class="eyebrow">Security model</p><h2>What Ballast can and cannot do</h2><ul><li>Ballast never holds your collateral outside a single atomic protection transaction.</li><li>Keepers can call protection, but cannot choose values outside your policy.</li><li>Your policy caps trigger, target, collateral sold, slippage, keeper fee, and cooldown.</li><li>Authorization is separate from policy setup and can be revoked on Morpho.</li></ul></article>
         <article class="card trust-card"><p class="eyebrow">Trust assumptions</p><h2>Read this before enrolling</h2><ul><li>The deployed manager owner can change the swap adapter; treat that owner as trusted until governance or a timelock is in place.</li><li>The contracts are not audited. Start with small exposure and conservative limits.</li><li>Protection depends on Morpho state, oracle updates, keeper uptime, and available Flare liquidity.</li><li>A policy is not a guarantee against liquidation or adverse execution.</li></ul></article>

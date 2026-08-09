@@ -23,12 +23,14 @@ export const managerAbiV1 = [
   { type: "function", name: "MORPHO", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
   { type: "function", name: "policyOf", stateMutability: "view", inputs: [{ name: "borrower", type: "address" }, { name: "id", type: "bytes32" }], outputs: [{ type: "tuple", components: policyComponentsV1 }] },
   { type: "function", name: "setPolicy", stateMutability: "nonpayable", inputs: [{ name: "id", type: "bytes32" }, { name: "triggerHealth", type: "uint128" }, { name: "targetHealth", type: "uint128" }, { name: "maxCollateralPerAction", type: "uint64" }, { name: "maxSlippageBps", type: "uint32" }, { name: "keeperFeeBps", type: "uint32" }, { name: "cooldown", type: "uint32" }], outputs: [] },
+  { type: "function", name: "disablePolicy", stateMutability: "nonpayable", inputs: [{ name: "id", type: "bytes32" }], outputs: [] },
 ];
 
 export const managerAbiV3 = [
   { type: "function", name: "MORPHO", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
   { type: "function", name: "policyOf", stateMutability: "view", inputs: [{ name: "borrower", type: "address" }, { name: "id", type: "bytes32" }], outputs: [{ type: "tuple", components: policyComponentsV3 }] },
   { type: "function", name: "setPolicy", stateMutability: "nonpayable", inputs: [{ name: "id", type: "bytes32" }, { name: "triggerHealth", type: "uint128" }, { name: "targetHealth", type: "uint128" }, { name: "maxCollateralPerAction", type: "uint64" }, { name: "maxSlippageBps", type: "uint32" }, { name: "keeperFeeBps", type: "uint32" }, { name: "cooldown", type: "uint32" }, { name: "keeper", type: "address" }], outputs: [] },
+  { type: "function", name: "disablePolicy", stateMutability: "nonpayable", inputs: [{ name: "id", type: "bytes32" }], outputs: [] },
 ];
 
 export const managerAbi = MANAGER_VERSION === "v3" ? managerAbiV3 : managerAbiV1;
