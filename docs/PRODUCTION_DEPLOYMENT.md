@@ -101,19 +101,36 @@ Completed and verified:
 
 - GitHub `main` contains the productionization changes.
 - Enrollment app is publicly available at `https://ballast-enrollment.vercel.app`.
-- App is intentionally read-only because the legacy manager is still the configured address.
-- V3 deployment simulation succeeds and estimates approximately `9.61 FLR` for phase one at the current RPC gas estimate.
+- V3 phase one is mined on Flare mainnet. `BallastManagerV3` is
+  `0x746066ACe5dc89a3692137b8cdE3c31328629d09` and `SparkDexAdapterV2` is
+  `0xA3B9822228b6d0DE77089B0C67Ec0A73A9A9C202`.
+- The deployment was mined in block `67019411` (`0x3fea293`), and both contracts are
+  source verified on Flare Explorer.
+- The proposed FXRP/USD₮0 pool is `0x927485d88a66253c63Af9163dca5f21c25A57393`.
+- The pool and ownership timelocks expire at Unix time `1786464298`, approximately
+  **August 11, 2026 at 16:04:58 UTC (17:04:58 WAT)**. Until then, the pool is inactive
+  and ownership remains with the temporary deployer.
+- The app may point at V3 in read-only mode while the timelock runs. Enrollment writes must
+  remain disabled until pool activation, ownership acceptance, and final state verification.
 - V3 unit tests, V3 fork tests, existing live Flare suites, app build, keeper tests, and FCC tests pass.
 
 Still required before enabling production writes:
 
-1. Fund the deployer with at least the simulated gas amount plus operating reserve.
-2. Provide a production multisig or owner address.
-3. Provide a separate guardian address.
-4. Provide a separate keeper address and fund it with FLR for gas.
-5. Broadcast `DeployV3.s.sol`.
-6. Wait the configured admin delay.
-7. Run `FinalizeV3.s.sol` with the correct owner/deployer signers.
-8. Verify both contracts on Flare Explorer.
-9. Rebuild/redeploy the app with `VITE_MANAGER_VERSION=v3`, the new manager address, and writes enabled.
-10. Run keeper dry-run, enroll a controlled test position, and verify one real protection receipt before broad enrollment.
+1. Wait until the configured admin delay expires.
+2. Run `FinalizeV3.s.sol` with the deployer to activate the pool, then with the owner to accept both ownership handoffs.
+3. Verify the live pool, manager binding, owners, guardian, and paused status.
+4. Rebuild/redeploy the app with V3 writes enabled.
+5. Configure the dedicated keeper with `FROM_BLOCK=67019411`, run a dry-run, and confirm its signer matches enrolled policies.
+6. Enroll a controlled test position and verify one real protection receipt before broad enrollment.
+
+Phase-one transaction hashes remain in the ignored Foundry broadcast artifact at
+`broadcast/DeployV3.s.sol/14/run-latest.json` on the deployment host.
+
+| Action | Transaction |
+|---|---|
+| Deploy `SparkDexAdapterV2` | `0xd9b010cceb32a0298ecd7a943ab49fa134cd4571d990550b2298038ec4cbf39b` |
+| Propose FXRP/USD₮0 pool | `0x5d81a73d00313d4182ab89215bffeddb3029a4dc4bc155caf86c0cb34136c4a6` |
+| Deploy `BallastManagerV3` | `0x8637d727e2790cbbee03ae1a103dd89fbc83eab47ee9bc4d7611f38b86d3c0ce` |
+| Bind adapter manager | `0x213b91c327b55fa3c2bbcd2ffb333f9e56245aaf3147962d8c25a26083964c17` |
+| Propose manager ownership | `0xd4aa220b9ba1262ef02e1bfc46cbd5850ad83438603a3fd0677c2a44394a0369` |
+| Propose adapter ownership | `0x5da52dacbe7bea3c3049407ad8cb0349a14e1b265d5d660096c48df8adfadf1a` |

@@ -137,6 +137,12 @@ Live at chain 14, source verified on Blockscout.
 |---|---|
 | `BallastManager` | [`0x379e5B8Cf31fC5D46aEc2fc17F17708951015571`](https://flare-explorer.flare.network/address/0x379e5B8Cf31fC5D46aEc2fc17F17708951015571) |
 | `SparkDexAdapter` | [`0x62a7Efa10134E3F9fB7Af1fD7400Db0ea913E8b1`](https://flare-explorer.flare.network/address/0x62a7Efa10134E3F9fB7Af1fD7400Db0ea913E8b1) |
+| `BallastManagerV3` | [`0x746066ACe5dc89a3692137b8cdE3c31328629d09`](https://flare-explorer.flare.network/address/0x746066ACe5dc89a3692137b8cdE3c31328629d09) |
+| `SparkDexAdapterV2` | [`0xA3B9822228b6d0DE77089B0C67Ec0A73A9A9C202`](https://flare-explorer.flare.network/address/0xA3B9822228b6d0DE77089B0C67Ec0A73A9A9C202) |
+
+The V3 contracts were deployed in block `67019411` on August 9, 2026 and are source verified.
+Their pool and ownership timelocks expire at Unix time `1786464298`, approximately August 11,
+2026 at 16:04:58 UTC. V3 is therefore live but not production-active until finalization succeeds.
 
 Wired to the live market it was measured against: Morpho Blue
 `0xF4346F5132e810f80a28487a79c7559d9797E8B0`, selling FXRP
@@ -273,17 +279,17 @@ Useful controls are `BALLAST`, `FROM_BLOCK`, `EXPLORER_URL`, and `MAX_POSITIONS`
 start block is the published mainnet deployment. Keep the private key outside shell history and
 use a dedicated keeper account. A failed simulation is skipped rather than broadcast.
 
-For hardened production operation, set `MANAGER_VERSION=v3` and point `BALLAST` at the fresh
-`BallastManagerV3` deployment. V3 requires each borrower to name the keeper that may act on their
+For hardened production operation, set `MANAGER_VERSION=v3` and point `BALLAST` at
+`0x746066ACe5dc89a3692137b8cdE3c31328629d09`. V3 requires each borrower to name the keeper that may act on their
 policy; the keeper refuses to execute a V3 policy configured for another operator.
 
 The borrower enrollment app lives in `app/` and is publicly deployed at
-`https://ballast-enrollment.vercel.app`. It remains read-only against the published legacy
-manager by default. Enable writes only after deploying and finalizing V3:
+`https://ballast-enrollment.vercel.app`. Keep it read-only until V3 pool activation and ownership
+handoff are verified. Enable writes only after finalizing V3:
 
 ```bash
 cd app
-VITE_BALLAST_MANAGER=0x... \
+VITE_BALLAST_MANAGER=0x746066ACe5dc89a3692137b8cdE3c31328629d09 \
 VITE_ENABLE_ENROLLMENT_WRITES=true \
 VITE_MANAGER_VERSION=v3 \
 npm run build
@@ -358,8 +364,9 @@ Two things that will waste your time otherwise:
   the live FTSOv2 XRP/USD feed, but its collateral, loan token and oracle-quoted swap venue are
   scaffolding. Mainnet execution and liquidity claims remain grounded in the fork tests.
 - **Legacy owner is an EOA.** The published V1 deployment remains unchanged for compatibility;
-  production enrollment should target the fresh V3 deployment, whose manager and adapter admin
-  changes are delayed and whose protection can be guardian-paused.
+  production enrollment should target V3. Its manager and adapter admin changes are delayed,
+  protection can be guardian-paused, and delayed ownership transfer is pending until August 11,
+  2026 at approximately 16:04:58 UTC.
 - **The keeper is operator software.** `monitor/keeper.mjs` provides a dry-run-first loop and an
   explicit execution mode; no borrower has enrolled on the published manager yet, and this is
   not a hosted service or uptime guarantee.

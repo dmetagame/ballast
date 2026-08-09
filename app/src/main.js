@@ -98,14 +98,14 @@ function updateSummary() {
 }
 
 async function sendAuthorization() {
-  if (!ENABLE_WRITES) return setStatus("Enrollment writes are disabled for the published manager.", "warning");
+  if (!ENABLE_WRITES) return setStatus("Enrollment writes are disabled until V3 finalization is verified.", "warning");
   if (!isFlare()) return switchToFlare();
   try { setStatus("Waiting for Morpho authorization confirmation…"); const hash = await walletClient.writeContract({ address: MORPHO, abi: morphoAbi, functionName: "setAuthorization", args: [MANAGER, true], account, chain: flare }); setStatus(`Authorization submitted: ${short(hash)} · ${explorer(hash)}`); await publicClient.waitForTransactionReceipt({ hash }); await refresh(); setStatus("Morpho authorization confirmed.", "success"); }
   catch (error) { setStatus(error.shortMessage || error.message, "error"); }
 }
 
 async function disablePolicy() {
-  if (!ENABLE_WRITES) return setStatus("Enrollment writes are disabled for the published manager.", "warning");
+  if (!ENABLE_WRITES) return setStatus("Enrollment writes are disabled until V3 finalization is verified.", "warning");
   if (!isFlare()) return switchToFlare();
   if (!window.confirm("Disable Ballast protection for this Morpho market? Keepers will no longer be able to act.")) return;
   try {
@@ -119,7 +119,7 @@ async function disablePolicy() {
 }
 
 async function revokeAuthorization() {
-  if (!ENABLE_WRITES) return setStatus("Enrollment writes are disabled for the published manager.", "warning");
+  if (!ENABLE_WRITES) return setStatus("Enrollment writes are disabled until V3 finalization is verified.", "warning");
   if (!isFlare()) return switchToFlare();
   if (!window.confirm("Revoke Ballast's Morpho authorization for this wallet?")) return;
   try {
@@ -134,7 +134,7 @@ async function revokeAuthorization() {
 
 async function submitPolicy(event) {
   event.preventDefault(); updateSummary();
-  if (!ENABLE_WRITES) return setStatus("Enrollment writes are disabled for the published manager.", "warning");
+  if (!ENABLE_WRITES) return setStatus("Enrollment writes are disabled until V3 finalization is verified.", "warning");
   if (!isFlare()) return switchToFlare();
   try { const args = validatePolicy(); if (MANAGER_VERSION !== "v3") throw new Error("Enrollment writes require VITE_MANAGER_VERSION=v3."); setStatus("Waiting for policy confirmation…"); const hash = await walletClient.writeContract({ address: MANAGER, abi: managerAbi, functionName: "setPolicy", args, account, chain: flare }); setStatus(`Policy submitted: ${short(hash)} · ${explorer(hash)}`); await publicClient.waitForTransactionReceipt({ hash }); await refresh(); setStatus("Protection policy confirmed onchain.", "success"); }
   catch (error) { setStatus(error.shortMessage || error.message, "error"); }
