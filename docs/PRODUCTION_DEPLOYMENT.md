@@ -82,3 +82,26 @@ Run the keeper under a process supervisor with log collection and restart policy
 6. Guardian is a distinct address and pause/unpause has been rehearsed on a fork.
 7. Keeper dry run reports no errors.
 8. A controlled small position completes authorization, policy enrollment, preview, and protection.
+
+## Current delivery state — August 9, 2026
+
+Completed and verified:
+
+- GitHub `main` contains the productionization changes.
+- Enrollment app is publicly available at `https://ballast-enrollment.vercel.app`.
+- App is intentionally read-only because the legacy manager is still the configured address.
+- V3 deployment simulation succeeds and estimates approximately `9.61 FLR` for phase one at the current RPC gas estimate.
+- V3 unit tests, V3 fork tests, existing live Flare suites, app build, keeper tests, and FCC tests pass.
+
+Still required before enabling production writes:
+
+1. Fund the deployer with at least the simulated gas amount plus operating reserve.
+2. Provide a production multisig or owner address.
+3. Provide a separate guardian address.
+4. Provide a separate keeper address and fund it with FLR for gas.
+5. Broadcast `DeployV3.s.sol`.
+6. Wait the configured admin delay.
+7. Run `FinalizeV3.s.sol` with the correct owner/deployer signers.
+8. Verify both contracts on Flare Explorer.
+9. Rebuild/redeploy the app with `VITE_MANAGER_VERSION=v3`, the new manager address, and writes enabled.
+10. Run keeper dry-run, enroll a controlled test position, and verify one real protection receipt before broad enrollment.

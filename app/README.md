@@ -18,4 +18,4 @@ and finalize the hardened V3 manager first, then configure `VITE_BALLAST_MANAGER
 V3 requires a nonzero keeper address in every policy. Use a dedicated keeper operator and do not
 reuse the owner or guardian identity.
 
-Public app: https://app-dmetagames-projects.vercel.app
+Public app: https://ballast-enrollment.vercel.app
