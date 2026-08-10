@@ -63,7 +63,7 @@ MANAGER_VERSION=v3
 FROM_BLOCK=<deployment block>
 EXECUTE=true
 RUN_ONCE=false
-PRIVATE_KEY=<dedicated keeper key>
+PRIVATE_KEY_FILE=<protected credential path when running outside systemd>
 MAX_GAS_FLR_WEI=<hard ceiling>
 MIN_KEEPER_FEE_UNITS=<USD₮0 base units>
 LOAN_TOKEN_UNITS_PER_FLR=<USD₮0 base units per FLR>
@@ -83,6 +83,11 @@ journalctl --user -u ballast-keeper -f
 
 The installer creates the environment file with mode `0600` and does not start the service until
 the operator explicitly enables it.
+
+The systemd unit loads the keeper key from `~/.config/ballast/keeper.private-key` through
+`LoadCredential`; the key is not placed in `keeper.env` or exported directly by the service.
+Write the dedicated keeper key to that file with mode `0600` only after dry-run validation, and
+never configure both `PRIVATE_KEY` and `PRIVATE_KEY_FILE`.
 
 ## Pre-enrollment checks
 

@@ -49,7 +49,7 @@ Leveraged FXRP borrowers can lose approximately 7.4% of position value when a Mo
 - Solidity test suite: `forge test --match-path 'test/*'` with fork tests requiring network access.
 - FCC unit and cross-language tests: `cd fce && go test ./...`.
 - Keeper dry run: `cd monitor && node keeper.mjs`.
-- Keeper execution is explicit: `EXECUTE=true PRIVATE_KEY=... node keeper.mjs`.
+- Keeper execution is explicit: `EXECUTE=true PRIVATE_KEY_FILE=... node keeper.mjs`.
 
 ## Judge-facing metrics
 

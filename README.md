@@ -270,7 +270,7 @@ keeper simulates each transaction before submitting it and never overrides a bor
 
 ```bash
 RPC_URL=https://flare-api.flare.network/ext/C/rpc \
-PRIVATE_KEY=0x... \
+PRIVATE_KEY_FILE=/run/secrets/ballast-keeper-key \
 EXECUTE=true \
 npm run keeper:execute
 ```

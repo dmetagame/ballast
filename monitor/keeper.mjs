@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   createPublicClient,
   createWalletClient,
@@ -18,7 +20,7 @@ const DEFAULT_DEPLOYMENT_BLOCK = 66714351n;
 const FROM_BLOCK = BigInt(process.env.FROM_BLOCK || DEFAULT_DEPLOYMENT_BLOCK);
 const EXECUTE = process.env.EXECUTE === "true";
 const RUN_ONCE = process.env.RUN_ONCE === "true";
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const PRIVATE_KEY = loadPrivateKey();
 const MAX_POSITIONS = positiveInteger("MAX_POSITIONS", 100);
 const MAX_CONCURRENCY = positiveInteger("MAX_CONCURRENCY", 4);
 const POLL_INTERVAL_MS = positiveInteger("POLL_INTERVAL_MS", 30_000);
@@ -37,7 +39,7 @@ const chain = {
 };
 const publicClient = createPublicClient({ chain, transport: http(RPC_URL) });
 const account = EXECUTE
-  ? privateKeyToAccount(PRIVATE_KEY || (() => { throw new Error("PRIVATE_KEY is required with EXECUTE=true"); })())
+  ? privateKeyToAccount(PRIVATE_KEY || (() => { throw new Error("PRIVATE_KEY or PRIVATE_KEY_FILE is required with EXECUTE=true"); })())
   : null;
 const walletClient = account ? createWalletClient({ account, chain, transport: http(RPC_URL) }) : null;
 
@@ -51,6 +53,20 @@ const abi = parseAbi([
   "function protect(address borrower, bytes32 id)",
 ]);
 const POLICY_SET_TOPIC = toEventSelector("PolicySet(address,bytes32,uint128,uint128,uint64,uint32)");
+
+export function loadPrivateKey({
+  privateKey = process.env.PRIVATE_KEY,
+  privateKeyFile = process.env.PRIVATE_KEY_FILE
+    || (process.env.CREDENTIALS_DIRECTORY ? join(process.env.CREDENTIALS_DIRECTORY, "keeper_private_key") : undefined),
+} = {}) {
+  const inlineKey = privateKey?.trim();
+  const filePath = privateKeyFile?.trim();
+  if (inlineKey && filePath) throw new Error("set only one of PRIVATE_KEY or PRIVATE_KEY_FILE");
+  if (inlineKey) return inlineKey;
+  if (!filePath) return undefined;
+  const fileKey = readFileSync(filePath, "utf8").trim();
+  return fileKey || undefined;
+}
 
 function positiveInteger(name, fallback) {
   const value = Number(process.env[name] || fallback);
