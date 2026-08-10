@@ -62,6 +62,20 @@ The sender pins subsequent evaluations to that machine and rejects stale or repe
 
 ## Current Status
 
-The source, scaffold integration, Docker image, fresh local policy commitment, and funded
-dedicated deployer are prepared. Coston2 preflight passes. Registration remains blocked only
-until the official indexer configuration and stable tunnel credentials are available.
+Fresh FCC registration completed on August 9, 2026 against the live Coston2 deployment:
+
+```text
+EXTENSION_ID=0x000000000000000000000000000000000000000000000000000000000001020b
+INSTRUCTION_SENDER=0x9195fCf9eE60993E22aBaE680301D750e59ca5fC
+TEE_ID=0x5d596b7038657d2C0141a55Ae33929fDF7731aD4
+EXT_PROXY_URL=https://desktop-kv22766.tail68d34f.ts.net
+```
+
+Registration used the current scaffold, `tee-node v0.0.24`, `tee-proxy v0.0.18`,
+`SIMULATED_TEE=true`, and `register-tee -command rRap`. The live manager returned status
+`2 = PRODUCTION`, and its stored machine URL matched the stable Funnel hostname exactly.
+
+The current host is a workstation-backed deployment, not an uptime-guaranteed production
+service. On-chain status alone is insufficient: run `../scripts/verify-fcc-production.sh`
+to check both the manager record and the public `/info` endpoint. Move the stack to an
+always-on VPS and re-register the machine URL before relying on it operationally.
