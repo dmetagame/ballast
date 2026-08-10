@@ -387,6 +387,8 @@ Two things that will waste your time otherwise:
 The complete deployment runbook, role separation, finalization sequence, and pre-enrollment
 checks are in `docs/PRODUCTION_DEPLOYMENT.md`.
 
+The always-on FCC and keeper migration procedure is in `docs/VPS_DEPLOYMENT.md`.
+
 ## Licence
 
 MIT
