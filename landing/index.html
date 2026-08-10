@@ -3,43 +3,153 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Ballast: automated deleveraging for XRP-collateralised borrow positions on Flare." />
+    <meta name="description" content="Ballast: automated, non-custodial deleveraging for XRP-collateralised borrow positions on Flare." />
     <title>Ballast · Deleverage before liquidation</title>
+    <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
+    <a class="skip" href="#stakes">Skip to the numbers</a>
+
     <main>
-      <h1>Ballast</h1>
-      <p>Automated, non-custodial deleveraging for XRP-collateralised borrow positions on Flare.</p>
+      <!-- Beat 1: the product in one gesture. Scroll drives a health factor toward the
+           liquidation line and pulls it back. -->
+      <section class="hero" id="hero">
+        <p class="eyebrow">Ballast · Flare mainnet</p>
+        <h1>Liquidation is a penalty.<br />Deleveraging is a fee.</h1>
+        <p class="lede">
+          If XRP falls far enough, leveraged FXRP positions get liquidated and the borrower
+          pays the penalty. Ballast repays part of the debt out of the collateral first,
+          spending a swap fee to avoid one.
+        </p>
 
-      <!--
-        Scaffold only. The narrative sections (hero, stakes, drawdown, mechanism, binding
-        constraint) are written in step 2, with every figure read from monitor/data at build
-        time rather than typed here.
-      -->
+        <figure class="gauge" aria-labelledby="gaugeCaption">
+          <div class="gauge-track">
+            <div class="gauge-line" data-role="liquidation-line"><span>1.00 · liquidation</span></div>
+            <div class="gauge-marker" data-role="health-marker"><span data-role="health-value">1.15</span></div>
+          </div>
+          <figcaption id="gaugeCaption">
+            A health factor of 1.00 is the seizure line. Ballast acts above it, on the
+            borrower's terms, and never holds the collateral outside a single transaction.
+          </figcaption>
+        </figure>
+      </section>
 
-      <!--
-        These qualifications are static markup on purpose. They are never wrapped in a
-        ScrollTrigger, never faded in, and never revealed on scrub. They must be legible at
-        first paint and with JavaScript disabled. Claims may animate; caveats may not.
-      -->
-      <footer>
-        <ul>
-          <li>The contracts are <strong>not audited</strong>.</li>
+      <!-- Beat 2: the stakes. Every figure below is derived from monitor/data at build time. -->
+      <section class="stakes" id="stakes">
+        <h2>What is actually at risk on Flare today</h2>
+        <p class="section-lede">
+          Measured by scanning contract events and reading protocol state, not estimated.
+        </p>
+
+        <ul class="figures">
           <li>
-            The manager owner can change the swap adapter. Treat that owner as trusted until
-            governance or a timelock is in place.
+            <span class="figure">
+              <span class="figure-anim" aria-hidden="true">{{positions}}</span>
+              <span class="sr-only">{{positions}}</span>
+            </span>
+            <span class="figure-label">XRP-collateralised borrow positions across {{addresses}} addresses</span>
           </li>
           <li>
-            Liquidity is the binding constraint. Deleveraging beats liquidation only up to
-            roughly 300k FXRP in a single sale.
+            <span class="figure">
+              <span class="figure-anim" aria-hidden="true">{{debt}}</span>
+              <span class="sr-only">{{debtExact}}</span>
+            </span>
+            <span class="figure-label">of debt against {{collateral}} of collateral</span>
           </li>
           <li>
-            Protection depends on Morpho state, oracle updates, keeper uptime, and available
-            Flare liquidity. A policy is not a guarantee against liquidation.
+            <span class="figure">
+              <span class="figure-anim" aria-hidden="true">{{nearPositions}}</span>
+              <span class="sr-only">{{nearPositions}}</span>
+            </span>
+            <span class="figure-label">positions at health 1.00 to 1.25, carrying {{nearDebt}} of debt</span>
           </li>
         </ul>
-      </footer>
+      </section>
+
+      <!-- Beat 3: the drawdown. The -20% row is the pitch. -->
+      <section class="drawdown" id="drawdown">
+        <h2>What a routine XRP move costs borrowers</h2>
+        <table>
+          <caption class="sr-only">Positions liquidated, debt, and penalties paid by XRP drawdown</caption>
+          <thead>
+            <tr><th scope="col">XRP drop</th><th scope="col">Liquidated</th><th scope="col">Debt</th><th scope="col">Penalties paid</th></tr>
+          </thead>
+          <tbody>
+            <tr data-row="10"><th scope="row">−10%</th><td>{{d10Positions}}</td><td>{{d10Debt}}</td><td>{{d10Penalties}}</td></tr>
+            <tr data-row="20" class="is-key"><th scope="row">−20%</th><td>{{d20Positions}}</td><td>{{d20Debt}}</td><td>{{d20Penalties}}</td></tr>
+            <tr data-row="30"><th scope="row">−30%</th><td>{{d30Positions}}</td><td>{{d30Debt}}</td><td>{{d30Penalties}}</td></tr>
+          </tbody>
+        </table>
+        <p class="pull">
+          A 20% move hands liquidators <strong>{{d20PenaltiesExact}}</strong> that borrowers
+          could have kept. That is the entire argument for Ballast.
+        </p>
+      </section>
+
+      <!-- Beat 4: the mechanism. One atomic transaction, five steps. -->
+      <section class="mechanism" id="mechanism">
+        <h2>One atomic transaction</h2>
+        <p class="section-lede">
+          A keeper decides <em>when</em>. The borrower's on-chain policy decides what is
+          permitted. Nothing here is custodial.
+        </p>
+        <ol class="steps">
+          <li data-step="1"><h3>Flash-borrow</h3><p>Take the loan token from Morpho for the length of one transaction.</p></li>
+          <li data-step="2"><h3>Repay</h3><p>Clear part of the borrower's debt, chosen to reach their target health.</p></li>
+          <li data-step="3"><h3>Withdraw</h3><p>Take the matching slice of collateral, capped by the borrower's own limit.</p></li>
+          <li data-step="4"><h3>Sell</h3><p>Sell it directly against a SparkDEX pool, inside the borrower's slippage bound.</p></li>
+          <li data-step="5"><h3>Settle</h3><p>Return the flash loan, pay the keeper fee, refund the surplus to the borrower.</p></li>
+        </ol>
+        <p class="pull">
+          If the pool is too thin to meet the bound, the transaction reverts and nothing
+          happens. A protective action that refuses is the system working.
+        </p>
+      </section>
+
+      <!-- Beat 5: the binding constraint. Figures pending a machine-readable source; see
+           the note in landing/README.md. -->
+      <section class="constraint" id="constraint">
+        <h2>Liquidity is the binding constraint</h2>
+        <p class="section-lede">
+          This is the honest limit of the design, and it was measured rather than assumed.
+        </p>
+        <p>
+          Deleveraging only beats liquidation while the collateral sale stays cheaper than the
+          penalty it avoids. Past roughly 300,000 FXRP in a single sale, it does not, and being
+          liquidated is the better outcome. Ballast caps each sale and repairs a position in
+          steps rather than pretending the depth exists.
+        </p>
+      </section>
     </main>
+
+    <!--
+      These qualifications are static markup on purpose. They are never wrapped in a
+      ScrollTrigger, never faded in, and never revealed on scrub. They must be legible at
+      first paint and with JavaScript disabled. Claims may animate; caveats may not.
+    -->
+    <footer id="limits">
+      <h2>Before you trust this with a position</h2>
+      <ul>
+        <li>The contracts are <strong>not audited</strong>.</li>
+        <li>
+          The manager owner can change the swap adapter. Treat that owner as trusted until
+          governance or a timelock is in place.
+        </li>
+        <li>
+          Liquidity is the binding constraint. Deleveraging beats liquidation only up to
+          roughly 300,000 FXRP in a single sale.
+        </li>
+        <li>
+          Protection depends on Morpho state, oracle updates, keeper uptime, and available
+          Flare liquidity. A policy is not a guarantee against liquidation.
+        </li>
+      </ul>
+      <p class="provenance">
+        Figures measured on Flare mainnet from {{positions}} positions across {{addresses}}
+        addresses. Regenerate with <code>node landing/data.mjs</code>.
+      </p>
+    </footer>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

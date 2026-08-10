@@ -1,0 +1,30 @@
+{
+  "positions": 739,
+  "addresses": 676,
+  "debt": 27107943,
+  "collateral": 56976433,
+  "nearBand": {
+    "positions": 148,
+    "debt": 4147077
+  },
+  "drawdown": [
+    {
+      "drop": 10,
+      "positions": 33,
+      "debt": 1063644,
+      "penalties": 54774
+    },
+    {
+      "drop": 20,
+      "positions": 121,
+      "debt": 3128044,
+      "penalties": 182701
+    },
+    {
+      "drop": 30,
+      "positions": 192,
+      "debt": 4898690,
+      "penalties": 301832
+    }
+  ]
+}

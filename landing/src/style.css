@@ -1,0 +1,107 @@
+/* Ballast landing.
+ *
+ * Nothing here hides content. No opacity:0, no transform offsets, no visibility:hidden on
+ * anything that carries meaning. Reveal states are set by JavaScript at runtime and only when
+ * motion is enabled, so with JS disabled or prefers-reduced-motion set, the page renders in
+ * its final state at first paint. That ordering is the whole reason the caveats stay legible.
+ */
+
+:root {
+  --bg: #0e0f11;
+  --ink: #f2f2f0;
+  --ink-muted: #9a9a96;
+  --rule: #26282c;
+  --accent: #e8624a;
+  --ok: #5bb98c;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, sans-serif;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #fbfbf9;
+    --ink: #16171a;
+    --ink-muted: #5f6167;
+    --rule: #e2e2dd;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+main, footer { max-width: 68rem; margin: 0 auto; padding: 0 1.5rem; }
+
+section { padding: 6rem 0; border-bottom: 1px solid var(--rule); }
+
+h1 { font-size: clamp(2.2rem, 6vw, 4rem); line-height: 1.05; letter-spacing: -0.02em; margin: 0 0 1.5rem; }
+h2 { font-size: clamp(1.4rem, 3vw, 2rem); letter-spacing: -0.015em; margin: 0 0 0.75rem; }
+h3 { font-size: 1rem; margin: 0 0 0.25rem; }
+
+.eyebrow { font-family: var(--mono); font-size: 0.8rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 1.5rem; }
+.lede { font-size: clamp(1.05rem, 2vw, 1.3rem); color: var(--ink-muted); max-width: 44rem; margin: 0 0 3rem; }
+.section-lede { color: var(--ink-muted); max-width: 44rem; margin: 0 0 2.5rem; }
+
+.skip { position: absolute; left: -9999px; }
+.skip:focus { left: 1rem; top: 1rem; padding: 0.6rem 1rem; background: var(--ink); color: var(--bg); z-index: 10; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Hero gauge -------------------------------------------------------------- */
+.gauge { margin: 0; }
+.gauge-track {
+  position: relative; height: 8rem; border: 1px solid var(--rule); border-radius: 4px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 14%, transparent), transparent 55%);
+}
+.gauge-line { position: absolute; left: 18%; top: 0; bottom: 0; border-left: 2px dashed var(--accent); }
+.gauge-line span, .gauge-marker span {
+  position: absolute; top: 0.5rem; left: 0.5rem; font-family: var(--mono);
+  font-size: 0.75rem; color: var(--ink-muted); white-space: nowrap;
+}
+.gauge-marker {
+  position: absolute; left: 62%; top: 0; bottom: 0; border-left: 2px solid var(--ok);
+}
+.gauge-marker span { color: var(--ok); font-size: 0.95rem; top: auto; bottom: 0.5rem; }
+.gauge figcaption { color: var(--ink-muted); font-size: 0.9rem; margin-top: 1rem; max-width: 40rem; }
+
+/* Figures ----------------------------------------------------------------- */
+.figures { list-style: none; padding: 0; margin: 0; display: grid; gap: 2.5rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+.figure { display: block; font-family: var(--mono); font-size: clamp(2rem, 5vw, 3.2rem); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.figure-label { display: block; color: var(--ink-muted); font-size: 0.95rem; margin-top: 0.5rem; max-width: 22rem; }
+
+/* Drawdown ---------------------------------------------------------------- */
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 0.85rem 0.5rem; border-bottom: 1px solid var(--rule); font-family: var(--mono); font-size: 0.95rem; }
+thead th { color: var(--ink-muted); font-weight: 400; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; }
+tbody th[scope="row"] { text-align: left; }
+tr.is-key td, tr.is-key th { color: var(--accent); }
+
+.pull { margin: 2.5rem 0 0; font-size: 1.15rem; max-width: 42rem; }
+
+/* Mechanism --------------------------------------------------------------- */
+.steps { list-style: none; padding: 0; margin: 0; counter-reset: step; display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+.steps li { counter-increment: step; background: var(--bg); padding: 1.5rem; }
+.steps li::before { content: counter(step); font-family: var(--mono); font-size: 0.75rem; color: var(--ink-muted); display: block; margin-bottom: 0.5rem; }
+.steps p { margin: 0; color: var(--ink-muted); font-size: 0.95rem; }
+
+/* Footer ------------------------------------------------------------------ */
+footer { padding: 4rem 1.5rem 6rem; }
+footer ul { padding-left: 1.1rem; margin: 0 0 2rem; max-width: 46rem; }
+footer li { margin-bottom: 0.6rem; color: var(--ink-muted); }
+footer li strong { color: var(--ink); }
+.provenance { font-family: var(--mono); font-size: 0.8rem; color: var(--ink-muted); }
+code { font-family: var(--mono); }
+
+@media (min-width: 48rem) {
+  .steps { grid-template-columns: repeat(5, 1fr); }
+}
