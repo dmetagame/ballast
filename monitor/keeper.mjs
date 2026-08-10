@@ -161,6 +161,19 @@ async function discoverPolicies() {
   return [...latestByPolicy.values()].slice(-MAX_POSITIONS);
 }
 
+/// Whether this operator must refuse a policy because the borrower named a different keeper.
+///
+/// Extracted from `processPolicy` so the refusal can be proven by test rather than by reading
+/// the code. Semantics are unchanged, including two details that are easy to lose:
+/// a missing `keeper` (a V1-shaped policy read through the V3 ABI) refuses, and the check is
+/// only reached when `execute` is true, because a dry run never acts and returns earlier.
+export function shouldSkipForDifferentKeeper({ managerVersion, execute, policyKeeper, operator }) {
+  if (managerVersion !== "v3") return false;
+  if (!execute) return false;
+  if (!policyKeeper) return true;
+  return policyKeeper.toLowerCase() !== operator.toLowerCase();
+}
+
 const formatHealth = (value) => formatUnits(value, 18);
 
 async function inspectPolicy(row) {
@@ -178,7 +191,7 @@ async function processPolicy(row) {
     const item = await inspectPolicy(row);
     log("info", "policy_inspected", { borrower: item.borrower, id: item.id, enabled: item.enabled, actionable: item.actionable, health: formatHealth(item.health), trigger: formatHealth(item.trigger), repayAssets: item.repayAssets.toString(), collateralNeeded: item.collateralNeeded.toString() });
     if (!item.enabled || !item.actionable) return { status: "skipped", reason: item.enabled ? "not_actionable" : "disabled" };
-    if (MANAGER_VERSION === "v3" && EXECUTE && item.keeper?.toLowerCase() !== account.address.toLowerCase()) {
+    if (shouldSkipForDifferentKeeper({ managerVersion: MANAGER_VERSION, execute: EXECUTE, policyKeeper: item.keeper, operator: account.address })) {
       log("info", "policy_skipped", { borrower: item.borrower, id: item.id, reason: "different_keeper", configuredKeeper: item.keeper, operator: account.address });
       return { status: "skipped", reason: "different_keeper" };
     }

@@ -3,7 +3,56 @@ import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { calculateEconomics, loadPrivateKey, mapWithConcurrency } from "./keeper.mjs";
+import { calculateEconomics, loadPrivateKey, mapWithConcurrency, shouldSkipForDifferentKeeper } from "./keeper.mjs";
+
+const OPERATOR = "0xEE3eA6f858aE84dD6959f241DfC257a2f8fA3f53";
+const OTHER_KEEPER = "0x302a6505c225bBB145569F35B89611d0677195a9";
+
+test("v3 keeper refuses a policy naming a different operator", () => {
+  assert.equal(
+    shouldSkipForDifferentKeeper({ managerVersion: "v3", execute: true, policyKeeper: OTHER_KEEPER, operator: OPERATOR }),
+    true,
+  );
+});
+
+test("v3 keeper acts on its own policy regardless of address casing", () => {
+  assert.equal(
+    shouldSkipForDifferentKeeper({
+      managerVersion: "v3",
+      execute: true,
+      policyKeeper: OPERATOR.toLowerCase(),
+      operator: OPERATOR.toUpperCase().replace("0X", "0x"),
+    }),
+    false,
+  );
+});
+
+// A V1-shaped policy read through the V3 ABI yields no keeper. Refusing is the safe reading:
+// an unnamed keeper is not this operator.
+test("v3 keeper refuses a policy with no keeper field", () => {
+  for (const policyKeeper of [null, undefined, ""]) {
+    assert.equal(
+      shouldSkipForDifferentKeeper({ managerVersion: "v3", execute: true, policyKeeper, operator: OPERATOR }),
+      true,
+    );
+  }
+});
+
+// Documents current behaviour rather than endorsing it: the check sits above the dry-run
+// return in processPolicy, so a dry run never reaches it and its transcript shows no refusal.
+test("dry run does not exercise the keeper refusal", () => {
+  assert.equal(
+    shouldSkipForDifferentKeeper({ managerVersion: "v3", execute: false, policyKeeper: OTHER_KEEPER, operator: OPERATOR }),
+    false,
+  );
+});
+
+test("v1 policies carry no keeper and are never refused on that basis", () => {
+  assert.equal(
+    shouldSkipForDifferentKeeper({ managerVersion: "v1", execute: true, policyKeeper: OTHER_KEEPER, operator: OPERATOR }),
+    false,
+  );
+});
 
 test("loadPrivateKey reads a protected credential file", () => {
   const directory = mkdtempSync(join(tmpdir(), "ballast-keeper-"));
