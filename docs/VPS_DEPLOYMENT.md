@@ -39,6 +39,31 @@ and direct HTTPS endpoint are preferable for operational continuity.
 10. Install the Ballast keeper as a systemd service in dry-run mode, then enable execution only
     after a controlled borrower enrollment and simulated transaction pass.
 
+## Service installation
+
+The production Compose override adds health checks and `unless-stopped` restart policies. The
+installer also keeps the FCC environment at mode `0600` and grants only the proxy container's
+numeric group (`1001`) read access to the private proxy configuration.
+
+```bash
+cd ~/ballast
+./scripts/install-fcc-service.sh
+sudo systemctl enable --now "ballast-fcc@$USER.service"
+sudo systemctl status "ballast-fcc@$USER.service" --no-pager
+```
+
+The service combines the scaffold's base and Coston2 Compose files with
+`deploy/fcc/docker-compose.production.yaml`. It waits for Redis and the public proxy health
+endpoint before treating the extension TEE dependency as ready.
+
+Keep the proxy ports bound to loopback when Caddy or another host reverse proxy terminates
+HTTPS:
+
+```text
+EXT_PROXY_INTERNAL_BIND=127.0.0.1:6673
+EXT_PROXY_EXTERNAL_BIND=127.0.0.1:6674
+```
+
 ## Required operator inputs
 
 The migration needs only the VPS address, SSH user/key access, and stable hostname. Existing

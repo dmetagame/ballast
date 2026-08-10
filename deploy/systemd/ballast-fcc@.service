@@ -1,0 +1,19 @@
+[Unit]
+Description=Ballast FCC Coston2 stack for %i
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+User=%i
+WorkingDirectory=/home/%i/fce-extension-scaffold
+EnvironmentFile=/home/%i/fce-extension-scaffold/.env
+ExecStart=/usr/bin/docker compose -f docker-compose.yaml -f docker-compose.coston2.yaml -f /home/%i/ballast/deploy/fcc/docker-compose.production.yaml up -d --remove-orphans
+ExecStop=/usr/bin/docker compose -f docker-compose.yaml -f docker-compose.coston2.yaml -f /home/%i/ballast/deploy/fcc/docker-compose.production.yaml stop
+TimeoutStartSec=600
+TimeoutStopSec=120
+
+[Install]
+WantedBy=multi-user.target
