@@ -53,21 +53,21 @@
         <ul class="figures">
           <li>
             <span class="figure">
-              <span class="figure-anim" aria-hidden="true">{{positions}}</span>
+              <span class="figure-anim" aria-hidden="true" data-count="{{positionsRaw}}">{{positions}}</span>
               <span class="sr-only">{{positions}}</span>
             </span>
             <span class="figure-label">XRP-collateralised borrow positions across {{addresses}} addresses</span>
           </li>
           <li>
             <span class="figure">
-              <span class="figure-anim" aria-hidden="true">{{debt}}</span>
+              <span class="figure-anim" aria-hidden="true" data-count="{{debtRaw}}">{{debt}}</span>
               <span class="sr-only">{{debtExact}}</span>
             </span>
             <span class="figure-label">of debt against {{collateral}} of collateral</span>
           </li>
           <li>
             <span class="figure">
-              <span class="figure-anim" aria-hidden="true">{{nearPositions}}</span>
+              <span class="figure-anim" aria-hidden="true" data-count="{{nearPositionsRaw}}">{{nearPositions}}</span>
               <span class="sr-only">{{nearPositions}}</span>
             </span>
             <span class="figure-label">positions at health 1.00 to 1.25, carrying {{nearDebt}} of debt</span>

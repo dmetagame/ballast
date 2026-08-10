@@ -22,6 +22,11 @@ function injectFigures() {
     collateral: usdCompact(figures.collateral),
     nearPositions: figures.nearBand.positions.toLocaleString("en-US"),
     nearDebt: usdCompact(figures.nearBand.debt),
+    // Raw values for the counter tweens. The visible text stays the formatted string above;
+    // these only give the animation something to interpolate toward.
+    positionsRaw: String(figures.positions),
+    debtRaw: String(figures.debt),
+    nearPositionsRaw: String(figures.nearBand.positions),
   };
   for (const d of [d10, d20, d30]) {
     tokens[`d${d.drop}Positions`] = d.positions.toLocaleString("en-US");

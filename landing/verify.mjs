@@ -132,6 +132,54 @@ const browser = await chromium.launch();
   check("deep link: drawdown rows visible", rows.every((o) => Number(o) > 0.9), `opacities ${rows.join(",")}`);
 }
 
+// --- counters land on the measured value ------------------------------------------------
+// A counter that eases into a rounded number and stops there has published a wrong figure.
+// Expected values are read from the built HTML, not typed here, so this compares the page
+// against what the build actually wrote from monitor/data.
+{
+  const html = readFileSync(join(dist, "index.html"), "utf8");
+  const authored = [...html.matchAll(/data-count="(\d+)"[^>]*>([^<]+)</g)].map((m) => ({
+    count: m[1],
+    text: m[2].trim(),
+  }));
+  check("counters: found in the built HTML", authored.length === 3, `${authored.length} elements`);
+
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.goto(base, { waitUntil: "networkidle" });
+
+  // Bring the figures into view so the counters run, then let them finish.
+  await page.evaluate(() => document.getElementById("stakes").scrollIntoView());
+  await page.waitForTimeout(2500);
+
+  const rendered = await page.evaluate(() =>
+    [...document.querySelectorAll("[data-count]")].map((el) => ({
+      count: el.dataset.count,
+      text: el.textContent.trim(),
+      ariaHidden: el.getAttribute("aria-hidden"),
+      screenReader: el.parentElement.querySelector(".sr-only")?.textContent.trim() ?? null,
+    })),
+  );
+
+  for (const expected of authored) {
+    const actual = rendered.find((r) => r.count === expected.count);
+    check(
+      `counter ${expected.count}: lands on the measured value`,
+      actual?.text === expected.text,
+      `showed "${actual?.text}", authored "${expected.text}"`,
+    );
+  }
+
+  check("counters: tween is hidden from screen readers", rendered.every((r) => r.ariaHidden === "true"));
+  check(
+    "counters: screen-reader value intact",
+    rendered.every((r) => r.screenReader && r.screenReader.length > 0),
+    rendered.map((r) => r.screenReader).join(" | "),
+  );
+
+  await ctx.close();
+}
+
 // --- keyboard, anchors, history --------------------------------------------------------
 // Smooth scroll is the most common way to break these. Lenis wraps native scroll rather than
 // replacing it, which is why it was chosen over ScrollSmoother; this is where that claim gets

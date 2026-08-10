@@ -32,6 +32,7 @@ export function initMotion() {
 
   const ctx = gsap.context(() => {
     heroGauge();
+    counters();
     drawdownRows();
     mechanismSteps();
   });
@@ -80,6 +81,58 @@ function heroGauge() {
     .to(state, { health: 1.04, ease: "expo.out", duration: 0.6, onUpdate: render }, 0)
     .to(marker, { x: 0, ease: "expo.out", duration: 0.4 }, 0.6)
     .to(state, { health: 1.35, ease: "expo.out", duration: 0.4, onUpdate: render }, 0.6);
+}
+
+/// Beat 2. The stakes, counted up.
+///
+/// Three properties this has to hold, in order of how badly getting them wrong would matter:
+///
+/// 1. **The final frame is the measured value, exactly.** The tween interpolates a proxy and
+///    formats it for display, but on completion the element is restored to the string the
+///    build wrote from `monitor/data`. Landing on a rounded approximation would mean the page
+///    published a wrong number, which is the one thing this project cannot do.
+/// 2. **Screen readers never hear the tween.** The animated span is `aria-hidden`; a
+///    visually-hidden sibling carries the real value and is never touched.
+/// 3. **No JavaScript, no problem.** The measured value is already the element's text from the
+///    server. This only ever replaces it temporarily, so a failure here leaves the number
+///    correct rather than blank.
+function counters() {
+  const els = gsap.utils.toArray("[data-count]");
+
+  els.forEach((el) => {
+    const target = Number(el.dataset.count);
+    if (!Number.isFinite(target)) return;
+
+    // Captured before anything animates: this is the authored, measured string.
+    const finalText = el.textContent;
+    const format = formatterFor(finalText);
+    const proxy = { value: 0 };
+
+    gsap.to(proxy, {
+      value: target,
+      duration: 1.2,
+      ease: "power3.out",
+      scrollTrigger: { trigger: el, start: "top 85%", once: true },
+      onStart() { el.style.willChange = "contents"; },
+      onUpdate() { el.textContent = format(proxy.value); },
+      onComplete() {
+        el.textContent = finalText;
+        el.style.willChange = "";
+      },
+    });
+  });
+}
+
+/// Derives a display format from the authored string, so the tween looks like the thing it is
+/// counting toward. Only used mid-flight; the exact value is restored on completion, so a
+/// mismatch here is cosmetic rather than a published error.
+function formatterFor(finalText) {
+  const compact = finalText.match(/^\$([\d.]+)M$/);
+  if (compact) {
+    const decimals = (compact[1].split(".")[1] ?? "").length;
+    return (v) => `$${(v / 1e6).toFixed(decimals)}M`;
+  }
+  return (v) => Math.round(v).toLocaleString("en-US");
 }
 
 /// Beat 3. Rows arrive as the drawdown deepens, and the -20% row lands last and stays
