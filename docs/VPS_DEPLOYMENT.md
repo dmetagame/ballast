@@ -53,8 +53,9 @@ sudo systemctl status "ballast-fcc@$USER.service" --no-pager
 ```
 
 The service combines the scaffold's base and Coston2 Compose files with
-`deploy/fcc/docker-compose.production.yaml`. It waits for Redis and the public proxy health
-endpoint before treating the extension TEE dependency as ready.
+`deploy/fcc/docker-compose.production.yaml`. It waits for Redis and the proxy's internal
+liveness endpoint before starting the extension TEE. The external `/info` endpoint depends on
+the TEE startup handshake, so it must not be used as the TEE dependency health check.
 
 Keep the proxy ports bound to loopback when Caddy or another host reverse proxy terminates
 HTTPS:

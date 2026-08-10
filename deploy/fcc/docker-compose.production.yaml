@@ -10,7 +10,7 @@ services:
   ext-proxy:
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:6664/info"]
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:6663/healthy"]
       interval: 30s
       timeout: 10s
       retries: 10
