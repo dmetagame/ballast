@@ -21,6 +21,20 @@ external proxy on port `6674`. Do not use a quick Cloudflare or ngrok tunnel.
 Tailscale Funnel is acceptable for judging if the VPS device remains registered, but a domain
 and direct HTTPS endpoint are preferable for operational continuity.
 
+## Current Coston2 deployment
+
+The always-on FCC is registered against the live Coston2 `FlareTeeManager` at
+`0x1a9C4A0f9D76c0b1D91d22E24E573a9b377618aE`:
+
+- Extension ID: `0x0000000000000000000000000000000000000000000000000000000000010246`
+- TEE ID: `0xd56b33B50F76E126616d9545E3469De45415d152`
+- Stable proxy: `https://ballast.rouma.online`
+- TEE node/proxy: `v0.0.24` / `v0.0.18`
+- Mode: `SIMULATED_TEE=true` on Coston2, status `2` (`PRODUCTION`)
+
+Verify this state with `./scripts/verify-fcc-production.sh`. The script accepts
+`TEE_ID`, `EXTENSION_ID`, and `EXT_PROXY_URL` overrides when rotating the host.
+
 ## Migration sequence
 
 1. Create a non-root `deploy` user with SSH-key access and usable `sudo`.

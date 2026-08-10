@@ -3,9 +3,9 @@ set -euo pipefail
 
 : "${COSTON2_RPC:=https://coston2-api.flare.network/ext/C/rpc}"
 : "${FLARE_TEE_MANAGER:=0x1a9C4A0f9D76c0b1D91d22E24E573a9b377618aE}"
-: "${TEE_ID:=0x5d596b7038657d2C0141a55Ae33929fDF7731aD4}"
-: "${EXTENSION_ID:=0x000000000000000000000000000000000000000000000000000000000001020b}"
-: "${EXT_PROXY_URL:=https://desktop-kv22766.tail68d34f.ts.net}"
+: "${TEE_ID:=0xd56b33B50F76E126616d9545E3469De45415d152}"
+: "${EXTENSION_ID:=0x0000000000000000000000000000000000000000000000000000000000010246}"
+: "${EXT_PROXY_URL:=https://ballast.rouma.online}"
 
 machine=$(cd /tmp && env -u CHAIN cast call "$FLARE_TEE_MANAGER" \
   'getTeeMachine(address)((address,address,string))' "$TEE_ID" --rpc-url "$COSTON2_RPC")
