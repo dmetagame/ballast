@@ -10,8 +10,7 @@
     "verify": "node verify.mjs"
   },
   "dependencies": {
-    "gsap": "^3.13.0",
-    "lenis": "^1.3.0"
+    "gsap": "^3.13.0"
   },
   "devDependencies": {
     "playwright": "^1.62.1",

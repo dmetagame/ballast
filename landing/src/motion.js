@@ -1,14 +1,22 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Lenis from "lenis";
-import "lenis/dist/lenis.css";
 
-/// Smooth scroll, scroll-driven beats, and a teardown that leaves nothing behind.
+/// Scroll-driven beats on native scroll, and a teardown that leaves nothing behind.
 ///
-/// Lenis rather than ScrollSmoother, and only one of the two: Lenis wraps native scroll, so
-/// `position: sticky`, in-page anchors, find-in-page and back/forward scroll restoration keep
-/// working. That matters more here than any capability ScrollSmoother adds, because this page
-/// exists to be read and checked.
+/// **No smooth-scroll library.** Lenis was tried and removed. It holds its own scroll
+/// position, so on a history traversal the browser restored `window.scrollY` and Lenis
+/// animated straight back to the value it still held: going back from an in-page anchor left
+/// the reader at 3362 instead of 0, while the same page without it restored correctly.
+///
+/// Two fixes were attempted and measured. Resyncing on `popstate` fixed back and broke the
+/// anchor, because Chromium fires `popstate` for same-document fragment navigation too, which
+/// froze the anchor's own scroll at 620px. Guarding that resync on `lenis.isScrolling` fixed
+/// the anchor and broke back again, because the browser's restore scroll makes Lenis report
+/// as scrolling. The two events are not distinguishable that way.
+///
+/// Back and forward are real navigation that real readers use. Scroll smoothing is a feel.
+/// When the two conflict the navigation wins, so the library went and ScrollTrigger runs on
+/// native scroll, which costs nothing here: scrub and pin work the same.
 ///
 /// Everything below animates transform and opacity only. Nothing that carries a claim starts
 /// hidden in CSS; initial states are set here, at runtime, and only once we know motion is
@@ -16,20 +24,11 @@ import "lenis/dist/lenis.css";
 export function initMotion() {
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-  // Reduced motion means Lenis is never constructed and no scrub timeline exists. The markup
-  // is already in its final state, so there is nothing to reveal and nothing to undo.
+  // Reduced motion means no scrub timeline exists at all. The markup is already in its final
+  // state, so there is nothing to reveal and nothing to undo.
   if (reduced.matches) return () => {};
 
   gsap.registerPlugin(ScrollTrigger);
-
-  const lenis = new Lenis({ autoRaf: false, anchors: true });
-
-  // One RAF loop. Driving Lenis from gsap's ticker keeps ScrollTrigger from reading a stale
-  // scroll position and lagging a frame behind the wheel.
-  const tick = (time) => lenis.raf(time * 1000);
-  lenis.on("scroll", ScrollTrigger.update);
-  gsap.ticker.add(tick);
-  gsap.ticker.lagSmoothing(0);
 
   const ctx = gsap.context(() => {
     heroGauge();
@@ -42,8 +41,6 @@ export function initMotion() {
 
   return () => {
     ctx.revert();
-    gsap.ticker.remove(tick);
-    lenis.destroy();
     ScrollTrigger.getAll().forEach((t) => t.kill());
   };
 }

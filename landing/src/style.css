@@ -49,6 +49,19 @@ h3 { font-size: 1rem; margin: 0 0 0.25rem; }
 .lede { font-size: clamp(1.05rem, 2vw, 1.3rem); color: var(--ink-muted); max-width: 44rem; margin: 0 0 3rem; }
 .section-lede { color: var(--ink-muted); max-width: 44rem; margin: 0 0 2.5rem; }
 
+.topnav {
+  max-width: 68rem; margin: 0 auto; padding: 1.25rem 1.5rem;
+  display: flex; flex-wrap: wrap; gap: 1.5rem;
+  font-family: var(--mono); font-size: 0.85rem;
+}
+.topnav a { color: var(--ink-muted); text-decoration: none; border-bottom: 1px solid transparent; }
+.topnav a:hover { color: var(--ink); border-bottom-color: var(--rule); }
+.topnav a span { opacity: 0.7; }
+
+/* Focus must be obvious. Smooth scroll moves the viewport, so a focused control that is not
+ * clearly marked is a control the keyboard user has lost track of. */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
 .skip { position: absolute; left: -9999px; }
 .skip:focus { left: 1rem; top: 1rem; padding: 0.6rem 1rem; background: var(--ink); color: var(--bg); z-index: 10; }
 

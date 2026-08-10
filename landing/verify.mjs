@@ -64,8 +64,10 @@ const browser = await chromium.launch();
   const page = await ctx.newPage();
   await page.goto(base, { waitUntil: "networkidle" });
 
+  // Guards against a smooth-scroll library being reintroduced. Lenis was removed because it
+  // broke back/forward restoration; if one comes back, this fails before the navigation does.
   const htmlClass = await page.evaluate(() => document.documentElement.className);
-  check("reduced: Lenis never constructed", !/lenis/i.test(htmlClass), `html class="${htmlClass}"`);
+  check("reduced: no smooth-scroll wrapper", !/lenis|scroll-smoother/i.test(htmlClass), `html class="${htmlClass}"`);
 
   const text = await visibleText(page);
   for (const [name, needle] of MUST_BE_VISIBLE) {
@@ -95,8 +97,16 @@ const browser = await chromium.launch();
   const page = await ctx.newPage();
   await page.goto(base, { waitUntil: "networkidle" });
 
+  // With no smooth-scroll library, the observable difference between motion on and off is
+  // whether the gsap context ran. It dims the mechanism steps to 0.35; reduced motion leaves
+  // them at 1. That is the discriminator, and it is checked from both sides.
+  const dimmed = await page.evaluate(() =>
+    [...document.querySelectorAll(".mechanism .steps li")].map((el) => getComputedStyle(el).opacity),
+  );
+  check("motion: beats initialised", dimmed.some((o) => Number(o) < 1), `opacities ${dimmed.join(",")}`);
+
   const htmlClass = await page.evaluate(() => document.documentElement.className);
-  check("motion: Lenis active", /lenis/i.test(htmlClass), `html class="${htmlClass}"`);
+  check("motion: still native scroll", !/lenis|scroll-smoother/i.test(htmlClass), `html class="${htmlClass}"`);
 
   const text = await visibleText(page);
   for (const [name, needle] of MUST_BE_VISIBLE) {
@@ -120,6 +130,88 @@ const browser = await chromium.launch();
     [...document.querySelectorAll(".drawdown tbody tr")].map((el) => getComputedStyle(el).opacity),
   );
   check("deep link: drawdown rows visible", rows.every((o) => Number(o) > 0.9), `opacities ${rows.join(",")}`);
+}
+
+// --- keyboard, anchors, history --------------------------------------------------------
+// Smooth scroll is the most common way to break these. Lenis wraps native scroll rather than
+// replacing it, which is why it was chosen over ScrollSmoother; this is where that claim gets
+// tested instead of asserted.
+{
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await page.goto(base, { waitUntil: "networkidle" });
+
+  // Smooth scroll has no fixed duration, so waiting a constant is a race. Poll until the
+  // position stops changing, which is what "settled" actually means.
+  const settle = async () => {
+    let previous = -1;
+    for (let i = 0; i < 40; i++) {
+      const y = await page.evaluate(() => window.scrollY);
+      if (y === previous) return;
+      previous = y;
+      await page.waitForTimeout(100);
+    }
+  };
+
+  // Tab through every focusable control. Each must be reachable in DOM order, and each must
+  // be scrolled into view once focused. A focused control off-screen is one the keyboard
+  // user has lost.
+  const expected = await page.evaluate(() =>
+    [...document.querySelectorAll("a[href]")].map((a) => a.getAttribute("href")),
+  );
+
+  const seen = [];
+  let offscreen = 0;
+  for (let i = 0; i < expected.length; i++) {
+    await page.keyboard.press("Tab");
+    await settle();
+    const info = await page.evaluate(() => {
+      const el = document.activeElement;
+      if (!el || el === document.body) return null;
+      const r = el.getBoundingClientRect();
+      return { href: el.getAttribute?.("href") ?? null, top: r.top, bottom: r.bottom, vh: innerHeight };
+    });
+    if (!info) break;
+    seen.push(info.href);
+    if (info.bottom < 0 || info.top > info.vh) offscreen++;
+  }
+
+  check("keyboard: every link reachable by Tab", seen.length === expected.length, `${seen.length}/${expected.length}`);
+  check("keyboard: Tab follows DOM order", seen.join("|") === expected.slice(0, seen.length).join("|"), seen.join(" "));
+  check("keyboard: focused control stays in view", offscreen === 0, `${offscreen} off-screen`);
+
+  // In-page anchor. Lenis is configured with anchors:true; this proves it actually moves.
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await settle();
+  await page.click('a[href="#limits"]');
+  await settle();
+  const afterAnchor = await page.evaluate(() => ({
+    y: window.scrollY,
+    limitsTop: document.getElementById("limits").getBoundingClientRect().top,
+    vh: window.innerHeight,
+  }));
+  check("anchor: #limits scrolls the page", afterAnchor.y > 200, `scrollY ${Math.round(afterAnchor.y)}`);
+  // Not "lands at the top": #limits is the last element, so the browser scrolls as far as the
+  // document allows and stops short. Measured at 232px without Lenis and 245px with it, so
+  // demanding zero would be asserting something no browser does. In view is the real claim.
+  check(
+    "anchor: target is in view",
+    afterAnchor.limitsTop >= 0 && afterAnchor.limitsTop < afterAnchor.vh,
+    `top ${Math.round(afterAnchor.limitsTop)} of ${afterAnchor.vh}`,
+  );
+
+  // Back should return to where the reader was, not strand them at the anchor.
+  await page.goBack();
+  await settle();
+  const afterBack = await page.evaluate(() => window.scrollY);
+  check("history: back restores the previous position", afterBack < afterAnchor.y - 100, `scrollY ${Math.round(afterBack)}`);
+
+  await page.goForward();
+  await settle();
+  const afterForward = await page.evaluate(() => window.scrollY);
+  check("history: forward returns to the anchor", afterForward > 200, `scrollY ${Math.round(afterForward)}`);
+
+  await ctx.close();
 }
 
 await browser.close();

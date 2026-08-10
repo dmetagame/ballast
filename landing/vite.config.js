@@ -56,7 +56,7 @@ export default defineConfig({
       output: {
         // ScrollTrigger is a separate entry point from gsap core; naming only "gsap" leaves
         // it in the app chunk and understates the motion stack's real cost.
-        manualChunks: { motion: ["gsap", "gsap/ScrollTrigger", "lenis"] },
+        manualChunks: { motion: ["gsap", "gsap/ScrollTrigger"] },
       },
     },
   },
