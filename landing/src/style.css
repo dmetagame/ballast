@@ -68,6 +68,9 @@ h3 { font-size: 1rem; margin: 0 0 0.25rem; }
   position: absolute; top: 0.5rem; left: 0.5rem; font-family: var(--mono);
   font-size: 0.75rem; color: var(--ink-muted); white-space: nowrap;
 }
+/* Resting position is healthy, to the right of the liquidation line. Motion moves this by
+ * transform only, never by `left`, so nothing animates a layout property. With JS off the
+ * marker simply stays here, which is a correct picture rather than a broken one. */
 .gauge-marker {
   position: absolute; left: 62%; top: 0; bottom: 0; border-left: 2px solid var(--ok);
 }
