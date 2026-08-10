@@ -4,6 +4,8 @@ broadcast/
 monitor/node_modules/
 app/node_modules/
 app/dist/
+landing/node_modules/
+landing/dist/
 .env
 .env.local
 monitor/data/accounts.json

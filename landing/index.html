@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Ballast: automated deleveraging for XRP-collateralised borrow positions on Flare." />
+    <title>Ballast · Deleverage before liquidation</title>
+  </head>
+  <body>
+    <main>
+      <h1>Ballast</h1>
+      <p>Automated, non-custodial deleveraging for XRP-collateralised borrow positions on Flare.</p>
+
+      <!--
+        Scaffold only. The narrative sections (hero, stakes, drawdown, mechanism, binding
+        constraint) are written in step 2, with every figure read from monitor/data at build
+        time rather than typed here.
+      -->
+
+      <!--
+        These qualifications are static markup on purpose. They are never wrapped in a
+        ScrollTrigger, never faded in, and never revealed on scrub. They must be legible at
+        first paint and with JavaScript disabled. Claims may animate; caveats may not.
+      -->
+      <footer>
+        <ul>
+          <li>The contracts are <strong>not audited</strong>.</li>
+          <li>
+            The manager owner can change the swap adapter. Treat that owner as trusted until
+            governance or a timelock is in place.
+          </li>
+          <li>
+            Liquidity is the binding constraint. Deleveraging beats liquidation only up to
+            roughly 300k FXRP in a single sale.
+          </li>
+          <li>
+            Protection depends on Morpho state, oracle updates, keeper uptime, and available
+            Flare liquidity. A policy is not a guarantee against liquidation.
+          </li>
+        </ul>
+      </footer>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
