@@ -16,7 +16,11 @@ import { chromium } from "playwright";
 
 const here = fileURLToPath(new URL(".", import.meta.url));
 const dist = join(here, "dist");
-if (!existsSync(join(dist, "index.html"))) throw new Error("run `npm run build` first");
+
+// BASE_URL targets a deployed build instead of the local one, so the same checks can be run
+// against production. Without it, the local dist is served over loopback.
+const REMOTE = process.env.BASE_URL;
+if (!REMOTE && !existsSync(join(dist, "index.html"))) throw new Error("run `npm run build` first");
 
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json" };
 
@@ -27,8 +31,14 @@ const server = createServer((req, res) => {
   res.writeHead(200, { "content-type": TYPES[extname(file)] ?? "application/octet-stream" });
   res.end(readFileSync(file));
 });
-await new Promise((r) => server.listen(0, r));
-const base = `http://127.0.0.1:${server.address().port}`;
+let base = REMOTE;
+if (!REMOTE) {
+  await new Promise((r) => server.listen(0, r));
+  base = `http://127.0.0.1:${server.address().port}`;
+} else {
+  server.close();
+}
+console.log(`target: ${base}\n`);
 
 const results = [];
 const check = (name, pass, detail = "") => {
@@ -137,7 +147,7 @@ const browser = await chromium.launch();
 // Expected values are read from the built HTML, not typed here, so this compares the page
 // against what the build actually wrote from monitor/data.
 {
-  const html = readFileSync(join(dist, "index.html"), "utf8");
+  const html = REMOTE ? await (await fetch(REMOTE)).text() : readFileSync(join(dist, "index.html"), "utf8");
   const authored = [...html.matchAll(/data-count="(\d+)"[^>]*>([^<]+)</g)].map((m) => ({
     count: m[1],
     text: m[2].trim(),
@@ -263,7 +273,7 @@ const browser = await chromium.launch();
 }
 
 await browser.close();
-server.close();
+if (!REMOTE) server.close();
 
 const failed = results.filter((r) => !r.pass);
 console.log(`\n${results.length - failed.length}/${results.length} checks passed`);
