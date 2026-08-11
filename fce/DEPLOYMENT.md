@@ -62,20 +62,21 @@ The sender pins subsequent evaluations to that machine and rejects stale or repe
 
 ## Current Status
 
-Fresh FCC registration completed on August 9, 2026 against the live Coston2 deployment:
+Fresh FCC registration completed on August 9, 2026 against the live Coston2 deployment and is
+now hosted on the always-on AWS VPS:
 
 ```text
-EXTENSION_ID=0x000000000000000000000000000000000000000000000000000000000001020b
-INSTRUCTION_SENDER=0x9195fCf9eE60993E22aBaE680301D750e59ca5fC
-TEE_ID=0x5d596b7038657d2C0141a55Ae33929fDF7731aD4
-EXT_PROXY_URL=https://desktop-kv22766.tail68d34f.ts.net
+EXTENSION_ID=0x0000000000000000000000000000000000000000000000000000000000010246
+INSTRUCTION_SENDER=0xe430Da1C7836e496013A6ba96F9F88632a35EAc6
+TEE_ID=0xd56b33B50F76E126616d9545E3469De45415d152
+EXT_PROXY_URL=https://ballast.rouma.online
 ```
 
 Registration used the current scaffold, `tee-node v0.0.24`, `tee-proxy v0.0.18`,
-`SIMULATED_TEE=true`, and `register-tee -command rRap`. The live manager returned status
-`2 = PRODUCTION`, and its stored machine URL matched the stable Funnel hostname exactly.
+`SIMULATED_TEE=true`, and `register-tee -command rRap`. The live manager returns status
+`2 = PRODUCTION`, and its stored machine URL matches the stable VPS hostname exactly.
 
-The current host is a workstation-backed deployment, not an uptime-guaranteed production
-service. On-chain status alone is insufficient: run `../scripts/verify-fcc-production.sh`
-to check both the manager record and the public `/info` endpoint. Move the stack to an
-always-on VPS and re-register the machine URL before relying on it operationally.
+The FCC service is still a simulated TEE on Coston2 and is not an uptime-guaranteed service.
+On-chain status alone is insufficient: run `../scripts/verify-fcc-production.sh` to check both
+the manager record and the public `/info` endpoint. A private borrower enrollment and complete
+confidential evaluation demo remain separate evidence tasks.

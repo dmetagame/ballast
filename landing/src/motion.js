@@ -147,6 +147,7 @@ function drawdownRows() {
   gsap.from(ordered, {
     opacity: 0,
     y: 16,
+    immediateRender: false,
     duration: 0.6,
     ease: "power3.out",
     stagger: 0.08,

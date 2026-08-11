@@ -1,8 +1,8 @@
 # Always-on FCC and keeper host
 
-Ballast's Coston2 FCC machine and the Flare mainnet keeper should run on an always-on host
-before production use. The current workstation-backed FCC registration is valid for judging,
-but its URL is unavailable whenever the workstation, WSL, Docker, or Tailscale stops.
+Ballast's Coston2 FCC machine and the Flare mainnet keeper run on an always-on AWS host. The
+FCC proxy uses the stable `ballast.rouma.online` hostname; the keeper remains in dry-run mode
+until a controlled borrower enrollment and protection receipt are verified.
 
 ## Recommended host
 

@@ -87,7 +87,25 @@ rather than assertions about behaviour:
   hash a policy identically. If they diverge, every enrollment is rejected as "policy does not
   match published commitment" and nothing in that error says why.
 
-## Live on Coston2
+## Current FCC registration
+
+The extension infrastructure is registered on the redeployed Coston2 `FlareTeeManager` and
+served from the always-on VPS:
+
+| What | Value |
+|---|---|
+| Extension ID | `66118` (`0x10246`) |
+| Instruction sender | `0xe430Da1C7836e496013A6ba96F9F88632a35EAc6` |
+| TEE ID | `0xd56b33B50F76E126616d9545E3469De45415d152` |
+| Proxy | `https://ballast.rouma.online` |
+| Status | `2` (`PRODUCTION`, `SIMULATED_TEE=true`) |
+
+Run `../scripts/verify-fcc-production.sh` to confirm the on-chain machine URL, status, and
+public `/info` extension ID. A private policy enrollment and complete confidential evaluation
+receipt are still required before presenting the current deployment as an end-to-end private
+borrower flow.
+
+## Historical Coston2 contract fixture
 
 A **real leveraged position under confidential protection**, health 1.1528 at deployment.
 
@@ -200,15 +218,15 @@ Three bugs this run found, all of which unit tests had missed:
 - The chain reader's Morpho address was never set, so every read would have gone to the zero
   address. Now wired through `MORPHO_ADDRESS`.
 
-## Not done yet
+## Remaining confidential demo work
 
-The run inside a real `tee-node` with `SIMULATED_TEE=true`, which is what produces a genuine
-machine signature. Everything up to that point works; the signature path itself is still
-exercised only by the Solidity fixture in `test/TeeResultHash.t.sol`.
+The current simulated TEE is registered and PRODUCTION, but the repository does not yet
+publish a fresh private policy enrollment, live evaluation request, signed result, and
+accepted verdict as one reproducible flow. The historical fixture above remains useful for
+contract integration evidence, not for a confidentiality claim.
 
-Note that the scaffold's `main` pins `tee-node v0.0.21-0.2026…`, below the **v0.0.22 minimum**
-the Flare team specifies. On that version every data-provider vote is rejected and the queue
-silently stays empty. Bump it before doing anything else.
+The deployed stack uses `tee-node v0.0.24`, above the **v0.0.22 minimum** required for valid
+data-provider votes.
 
 ## Coston2 FCC deployment checklist
 

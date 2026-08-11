@@ -123,6 +123,11 @@ const browser = await chromium.launch();
     check(`first paint: ${name}`, text.includes(needle));
   }
 
+  const drawdownOpacity = await page.evaluate(() =>
+    [...document.querySelectorAll(".drawdown tbody tr")].map((el) => getComputedStyle(el).opacity),
+  );
+  check("first paint: drawdown rows visible", drawdownOpacity.every((o) => Number(o) > 0.9), `opacities ${drawdownOpacity.join(",")}`);
+
   await ctx.close();
 }
 

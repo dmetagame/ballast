@@ -96,11 +96,10 @@ The FCC prototype hides a borrower's precise trigger behind a salted commitment,
 Current limitations that must remain explicit:
 
 - FCC infrastructure is on Coston2 while the production lending/liquidity path is on Flare mainnet.
-- The published Coston2 fixture commitment must be rotated with a private salt before making a confidentiality claim.
-- Fresh registration requires official indexer configuration and a stable extension-proxy hostname.
+- The current FCC machine is freshly registered and PRODUCTION on the redeployed manager, but no private borrower enrollment and end-to-end confidential evaluation evidence is published yet.
 - The current work proves confidential evaluation and verdict verification, not direct cross-network mainnet deleveraging.
 
-Recommendation: submit primarily to Bounty 1 unless the FCC registration and fresh private enrollment are completed before the deadline.
+Recommendation: submit primarily to Bounty 1 unless a fresh private enrollment and complete confidential evaluation demo are captured before the deadline.
 
 ## Demo readiness
 
