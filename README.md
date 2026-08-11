@@ -249,6 +249,12 @@ directly actionable list of who is closest to being liquidated.
 
 ## Try it
 
+The product landing page is publicly deployed at
+`https://ballast-landing-sepia.vercel.app`. It links to the measured risk dashboard at
+`https://ballast-alpha.vercel.app` and the read-only enrollment app below. The landing page
+lives in `landing/`; regenerate its committed figures with `node landing/data.mjs` before
+publishing updated market claims.
+
 One command, no testnet, no keys, no faucet:
 
 ```bash

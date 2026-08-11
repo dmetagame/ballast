@@ -115,8 +115,7 @@
         </p>
       </section>
 
-      <!-- Beat 5: the binding constraint. Figures pending a machine-readable source; see
-           the note in landing/README.md. -->
+      <!-- Beat 5: the binding constraint. -->
       <section class="constraint" id="constraint">
         <h2>Liquidity is the binding constraint</h2>
         <p class="section-lede">
@@ -141,8 +140,9 @@
       <ul>
         <li>The contracts are <strong>not audited</strong>.</li>
         <li>
-          The manager owner can change the swap adapter. Treat that owner as trusted until
-          governance or a timelock is in place.
+          The manager owner can propose a different swap adapter, but V3 accepts it only after
+          the configured administrative timelock. Treat that owner as trusted until governance
+          is in place.
         </li>
         <li>
           Liquidity is the binding constraint. Deleveraging beats liquidation only up to
@@ -154,8 +154,8 @@
         </li>
       </ul>
       <p class="provenance">
-        Figures measured on Flare mainnet from {{positions}} positions across {{addresses}}
-        addresses. Regenerate with <code>node landing/data.mjs</code>.
+        Figures measured on Flare mainnet as of {{generated}}, from {{positions}} positions
+        across {{addresses}} addresses. Regenerate with <code>node landing/data.mjs</code>.
       </p>
     </footer>
 

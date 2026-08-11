@@ -53,7 +53,7 @@ const MUST_BE_VISIBLE = [
   ["figure: near band", "148"],
   ["figure: penalties at -20%", "$182,701"],
   ["caveat: not audited", "not audited"],
-  ["caveat: owner powers", "change the swap adapter"],
+  ["caveat: owner powers", "administrative timelock"],
   ["caveat: liquidity ceiling", "300,000 FXRP"],
   ["caveat: no guarantee", "not a guarantee against liquidation"],
 ];

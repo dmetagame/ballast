@@ -15,6 +15,7 @@ const usdCompact = (n) =>
 function injectFigures() {
   const [d10, d20, d30] = figures.drawdown;
   const tokens = {
+    generated: figures.generated,
     positions: figures.positions.toLocaleString("en-US"),
     addresses: figures.addresses.toLocaleString("en-US"),
     debt: usdCompact(figures.debt),

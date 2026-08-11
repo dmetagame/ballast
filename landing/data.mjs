@@ -28,6 +28,8 @@ if (!existsSync(join(dataDir, "positions.json"))) {
 
 const read = (name) => JSON.parse(readFileSync(join(dataDir, name), "utf8"));
 
+let generated = null;
+
 // Venue liquidation parameters, matching dashboard/build.mjs. Enosys is a 10% incentive with
 // a 0.5 close factor; Morpho's incentive at 77% LLTV is ~7.4% with full liquidation.
 const enosys = read("positions.json").map((p) => ({
@@ -57,6 +59,7 @@ const drawdown = [10, 20, 30].map((drop) => {
 const nearBand = positions.filter((p) => p.h >= 1 && p.h <= 1.25);
 
 const figures = {
+  generated,
   positions: positions.length,
   addresses: new Set(positions.map((p) => p.a)).size,
   debt: Math.round(sum(positions, (p) => p.d)),
@@ -74,6 +77,8 @@ if (existsSync(dashboard)) {
   const match = html.match(/const DATA = (\{.*?\});/s);
   if (!match) throw new Error("could not read the dashboard payload for cross-check");
   const { meta } = JSON.parse(match[1]);
+  generated = meta.generated;
+  figures.generated = generated;
   for (const key of ["positions", "addresses", "debt", "collateral"]) {
     if (meta[key] !== figures[key]) {
       throw new Error(
