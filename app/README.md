@@ -32,3 +32,7 @@ The form defaults are deliberately conservative for the controlled beta: trigger
 UI enables policy submission, and the summary warns when a policy would be actionable immediately.
 
 Public app: https://ballast-enrollment.vercel.app
+
+`../scripts/activate-production.sh` verifies mainnet contract state, persists the public Vite
+configuration, builds and verifies the bundle, deploys it, repoints the public alias, and verifies
+the deployed HTML and JavaScript before reporting success.

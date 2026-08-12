@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "check": "node --check src/main.js",
-    "verify:production": "node verify-production-build.mjs"
+    "verify:production": "node verify-production-build.mjs",
+    "verify:deployment": "node verify-deployment.mjs"
   },
   "dependencies": {
     "viem": "^2.21.0"

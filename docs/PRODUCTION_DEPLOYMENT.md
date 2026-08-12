@@ -58,6 +58,9 @@ Build and deploy from `app/` only after the pool is active and ownership state i
 Run `npm run verify:production` after the build; it fails if the bundle contains the legacy
 manager, wrong keeper, wrong ABI version, or disabled writes.
 
+Use `scripts/activate-production.sh` for production releases. It also updates the public alias
+and runs `npm run verify:deployment` against the live artifact before returning success.
+
 ## Keeper configuration
 
 ```text
