@@ -10,7 +10,7 @@
     <main class="shell">
       <header class="topbar">
         <a class="brand" href="./">BALLAST <span>/ ENROLLMENT</span></a>
-        <div class="network"><span class="dot"></span><span id="networkLabel">Flare mainnet · read-only manager</span></div>
+        <div class="network"><span class="dot"></span><span id="networkLabel">Flare mainnet · V3 manager</span></div>
         <button id="connectButton" class="button button-dark">Connect wallet</button>
       </header>
 
@@ -18,7 +18,7 @@
         <p class="eyebrow">Borrower control panel</p>
         <h1>Put a guardrail around your Morpho position.</h1>
         <p class="lede">Ballast can repay part of an FXRP-collateralised borrow before liquidation. You choose the limits. The keeper only acts within them.</p>
-        <div class="notice notice-amber"><strong>V3 deployed, finalization pending.</strong> This app reads the verified V3 manager on Flare mainnet. Enrollment writes remain disabled until the pool and ownership timelocks are finalized after August 11, 2026 at 16:04:58 UTC.</div>
+        <div class="notice notice-green"><strong>V3 finalized on Flare mainnet.</strong> The SparkDEX pool is active, ownership has moved to the production owner, and enrollment writes are enabled. Use a controlled position and conservative limits until a live protection receipt is published.</div>
       </section>
 
       <section class="grid">
@@ -58,7 +58,7 @@
           </div>
           <div class="policy-summary" id="policySummary">Set limits to preview the onchain policy.</div>
           <button class="button button-primary" id="policyButton" type="submit" disabled>Save protection policy</button>
-          <p id="policyHint" class="hint">This production manager is read-only in the enrollment app.</p>
+          <p id="policyHint" class="hint">Policies are written directly to the finalized V3 manager.</p>
         </form>
       </section>
 

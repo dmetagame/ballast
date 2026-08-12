@@ -86,7 +86,11 @@ contract BallastManagerV3ForkTest is Test {
         // The pool timelock advances the fork beyond the historical FTSO freshness window.
         // Pin the oracle response after the warp so this test exercises the swap path rather
         // than depending on a live feed remaining fresh at an old block timestamp.
-        vm.mockCall(ORACLE, abi.encodeWithSelector(IOracle.price.selector), abi.encode(1_027_279_650_000_000_000_000_000_000_000_000_000));
+        vm.mockCall(
+            ORACLE,
+            abi.encodeWithSelector(IOracle.price.selector),
+            abi.encode(1_027_279_650_000_000_000_000_000_000_000_000_000)
+        );
         uint256 beforeHealth = liveBallast.healthOf(BORROWER, MARKET_ID);
 
         vm.prank(keeper);
@@ -95,5 +99,48 @@ contract BallastManagerV3ForkTest is Test {
         assertGt(liveBallast.healthOf(BORROWER, MARKET_ID), beforeHealth);
         assertEq(IERC20(FXRP).balanceOf(address(liveBallast)), 0);
         assertEq(IERC20(USDT0).balanceOf(address(liveBallast)), 0);
+    }
+}
+
+contract BallastManagerV3ProductionForkTest is Test {
+    address internal constant MORPHO = 0xF4346F5132e810f80a28487a79c7559d9797E8B0;
+    address internal constant USDT0 = 0xe7cd86e13AC4309349F30B3435a9d337750fC82D;
+    address internal constant FXRP = 0xAd552A648C74D49E10027AB8a618A3ad4901c5bE;
+    address internal constant POOL_ALGEBRA = 0x927485d88a66253c63Af9163dca5f21c25A57393;
+    address internal constant BORROWER = 0x94743510608B2D49Cf9E7509Fcd4018801Bb5506;
+    address internal constant PRODUCTION_MANAGER = 0x746066ACe5dc89a3692137b8cdE3c31328629d09;
+    address internal constant PRODUCTION_ADAPTER = 0xA3B9822228b6d0DE77089B0C67Ec0A73A9A9C202;
+    Id internal constant MARKET_ID = Id.wrap(0x2f31ab3fc12d6d10d1de9e5c74053126f03ac1f80a2e6d69d36a411fef7d942f);
+
+    function testProductionDeploymentProtectsRealPosition() public {
+        vm.createSelectFork(vm.rpcUrl("flare"));
+
+        BallastManagerV3 ballast = BallastManagerV3(PRODUCTION_MANAGER);
+        SparkDexAdapterV2 adapter = SparkDexAdapterV2(PRODUCTION_ADAPTER);
+        address keeper = makeAddr("productionForkKeeper");
+
+        assertEq(address(ballast.swapAdapter()), PRODUCTION_ADAPTER);
+        assertEq(adapter.manager(), PRODUCTION_MANAGER);
+        assertEq(adapter.poolFor(keccak256(abi.encodePacked(FXRP, USDT0))), POOL_ALGEBRA);
+
+        uint256 healthBefore = ballast.healthOf(BORROWER, MARKET_ID);
+        uint128 trigger = 1.35e18;
+        uint128 target = 1.50e18;
+        assertLt(healthBefore, trigger);
+
+        vm.startPrank(BORROWER);
+        IMorpho(MORPHO).setAuthorization(PRODUCTION_MANAGER, true);
+        ballast.setPolicy(MARKET_ID, trigger, target, type(uint64).max, 1_000, 25, 0, keeper);
+        vm.stopPrank();
+
+        (bool actionable,,,) = ballast.previewProtect(BORROWER, MARKET_ID);
+        assertTrue(actionable);
+
+        vm.prank(keeper);
+        ballast.protect(BORROWER, MARKET_ID);
+
+        assertGt(ballast.healthOf(BORROWER, MARKET_ID), healthBefore);
+        assertEq(IERC20(FXRP).balanceOf(PRODUCTION_MANAGER), 0);
+        assertEq(IERC20(USDT0).balanceOf(PRODUCTION_MANAGER), 0);
     }
 }

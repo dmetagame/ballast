@@ -141,8 +141,9 @@ Live at chain 14, source verified on Blockscout.
 | `SparkDexAdapterV2` | [`0xA3B9822228b6d0DE77089B0C67Ec0A73A9A9C202`](https://flare-explorer.flare.network/address/0xA3B9822228b6d0DE77089B0C67Ec0A73A9A9C202) |
 
 The V3 contracts were deployed in block `67019411` on August 9, 2026 and are source verified.
-Their pool and ownership timelocks expire at Unix time `1786464298`, approximately August 11,
-2026 at 16:04:58 UTC. V3 is therefore live but not production-active until finalization succeeds.
+The pool and ownership timelocks were finalized after Unix time `1786464298`: the production
+owner now controls both contracts, the intended SparkDEX pool is active, and the manager is
+unpaused.
 
 Wired to the live market it was measured against: Morpho Blue
 `0xF4346F5132e810f80a28487a79c7559d9797E8B0`, selling FXRP
@@ -150,7 +151,8 @@ Wired to the live market it was measured against: Morpho Blue
 `0xe7cd86e13AC4309349F30B3435a9d337750fC82D` through the SparkDEX Algebra pool
 `0x927485d88a66253c63Af9163dca5f21c25A57393`.
 
-**Owner powers, stated plainly.** Both contracts have an `owner`, currently the deployer.
+**Owner powers, stated plainly.** Both contracts have the production `owner`
+`0x302a6505c225bBB145569F35B89611d0677195a9`.
 The owner can repoint `BallastManager` at a different swap adapter and can register pools on
 the adapter. Borrower funds are never held by Ballast and a protective action is bounded by
 the borrower's own `maxCollateralPerAction` and `maxSlippageBps`, but a malicious adapter
@@ -251,7 +253,7 @@ directly actionable list of who is closest to being liquidated.
 
 The product landing page is publicly deployed at
 `https://ballast-landing-sepia.vercel.app`. It links to the measured risk dashboard at
-`https://ballast-alpha.vercel.app` and the read-only enrollment app below. The landing page
+`https://ballast-alpha.vercel.app` and the V3 enrollment app below. The landing page
 lives in `landing/`; regenerate its committed figures with `node landing/data.mjs` before
 publishing updated market claims.
 
@@ -290,8 +292,8 @@ For hardened production operation, set `MANAGER_VERSION=v3` and point `BALLAST` 
 policy; the keeper refuses to execute a V3 policy configured for another operator.
 
 The borrower enrollment app lives in `app/` and is publicly deployed at
-`https://ballast-enrollment.vercel.app`. Keep it read-only until V3 pool activation and ownership
-handoff are verified. Enable writes only after finalizing V3:
+`https://ballast-enrollment.vercel.app`. It targets the finalized V3 manager with enrollment
+writes enabled:
 
 ```bash
 cd app

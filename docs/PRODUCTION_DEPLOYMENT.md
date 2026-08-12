@@ -100,33 +100,29 @@ never configure both `PRIVATE_KEY` and `PRIVATE_KEY_FILE`.
 7. Keeper dry run reports no errors.
 8. A controlled small position completes authorization, policy enrollment, preview, and protection.
 
-## Current delivery state — August 9, 2026
+## Current delivery state — August 12, 2026
 
 Completed and verified:
 
 - GitHub `main` contains the productionization changes.
 - Enrollment app is publicly available at `https://ballast-enrollment.vercel.app`.
-- V3 phase one is mined on Flare mainnet. `BallastManagerV3` is
+- V3 is finalized on Flare mainnet. `BallastManagerV3` is
   `0x746066ACe5dc89a3692137b8cdE3c31328629d09` and `SparkDexAdapterV2` is
   `0xA3B9822228b6d0DE77089B0C67Ec0A73A9A9C202`.
 - The deployment was mined in block `67019411` (`0x3fea293`), and both contracts are
   source verified on Flare Explorer.
-- The proposed FXRP/USD₮0 pool is `0x927485d88a66253c63Af9163dca5f21c25A57393`.
-- The pool and ownership timelocks expire at Unix time `1786464298`, approximately
-  **August 11, 2026 at 16:04:58 UTC (17:04:58 WAT)**. Until then, the pool is inactive
-  and ownership remains with the temporary deployer.
-- The app may point at V3 in read-only mode while the timelock runs. Enrollment writes must
-  remain disabled until pool activation, ownership acceptance, and final state verification.
+- The active FXRP/USD₮0 pool is `0x927485d88a66253c63Af9163dca5f21c25A57393`.
+- The production owner `0x302a6505c225bBB145569F35B89611d0677195a9` owns both contracts;
+  pending ownership and pool proposals are cleared.
+- `scripts/verify-production.sh` confirms the manager/adapter binding, owner, guardian, pool,
+  unpaused state, and empty pending admin actions.
 - V3 unit tests, V3 fork tests, existing live Flare suites, app build, keeper tests, and FCC tests pass.
 
-Still required before enabling production writes:
+Still required before broad enrollment:
 
-1. Wait until the configured admin delay expires.
-2. Run `FinalizeV3.s.sol` with the deployer to activate the pool, then with the owner to accept both ownership handoffs.
-3. Verify the live pool, manager binding, owners, guardian, and paused status.
-4. Rebuild/redeploy the app with V3 writes enabled.
-5. Configure the dedicated keeper with `FROM_BLOCK=67019411`, run a dry-run, and confirm its signer matches enrolled policies.
-6. Enroll a controlled test position and verify one real protection receipt before broad enrollment.
+1. Configure the dedicated keeper with `FROM_BLOCK=67019411`, run a dry-run, and confirm its signer matches enrolled policies.
+2. Enroll a controlled test position and verify one real protection receipt.
+3. Enable keeper execution only after that controlled receipt succeeds.
 
 Phase-one transaction hashes remain in the ignored Foundry broadcast artifact at
 `broadcast/DeployV3.s.sol/14/run-latest.json` on the deployment host.

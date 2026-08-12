@@ -16,7 +16,7 @@ const isFlare = () => currentChainId === flare.id;
 
 $("managerLink").href = managerExplorer;
 $("managerLink").textContent = short(MANAGER);
-$("networkLabel").textContent = ENABLE_WRITES ? "Flare mainnet · enrollment enabled by configuration" : "Flare mainnet · read-only manager";
+$("networkLabel").textContent = ENABLE_WRITES ? "Flare mainnet · V3 enrollment enabled" : "Flare mainnet · read-only build";
 
 async function connect() {
   if (!window.ethereum) { setStatus("Install a wallet such as MetaMask or Rabby to continue.", "error"); return; }
