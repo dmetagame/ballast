@@ -6,7 +6,10 @@ This audit maps the repository's current state to the Flare Summer Signal produc
 
 Ballast is already a strong Bounty 1 submission. It solves a measured problem for FXRP borrowers, depends materially on Flare-native assets and pricing, has verified mainnet contracts, and demonstrates the complete protection transaction against forked live state.
 
-The principal submission risk is not missing smart-contract functionality. It is product packaging and evidence: no real borrower has enrolled, the keeper is operator software rather than a hosted service, and the FCC work must be described as a separate Coston2 prototype rather than a completed mainnet confidential-protection path.
+The principal submission risk is no longer missing product infrastructure. The contracts,
+frontends, dry-run keeper, and FCC machine are deployed. The remaining risk is evidence: no
+consenting borrower has completed a real mainnet protection receipt, no private FCC enrollment
+receipt is published, and the demo video and external feedback are still missing.
 
 ## Eligibility and submission completeness
 
@@ -19,11 +22,12 @@ The principal submission risk is not missing smart-contract functionality. It is
 | Working demo | Ready | `./demo.sh` against a Flare mainnet fork |
 | Repository | Ready | Public GitHub repository |
 | Flare integration explanation | Ready | FXRP, Morpho, FTSO-priced oracle path, SparkDEX |
-| New work explanation | Needs final wording | Add dated before/during-hackathon summary to DoraHacks form |
+| New work explanation | Ready | `docs/HACKATHON_SUBMISSION.md` contains the work summary |
 | Deployments | Ready | Mainnet and Coston2 addresses documented |
 | Roadmap | Ready | Submission pack and README known gaps |
 | Demo video | Missing | Record a concise end-to-end walkthrough |
-| Hosted product link | Partial | Static dashboard is hostable; protection demo remains CLI/fork based |
+| Hosted product link | Ready, controlled beta | Landing, dashboard, enrollment, FCC proxy, and dry-run keeper are live |
+| Live protection receipt | Missing | Requires a consenting controlled borrower and capital |
 
 ## Judging criteria
 
@@ -62,10 +66,10 @@ Avoid claiming that Ballast directly calls FTSO contracts on mainnet unless the 
 
 Remaining technical risks:
 
-1. Owner can replace the adapter.
+1. The production owner is an EOA and can accept delayed adapter/pool changes.
 2. Contracts are unaudited.
 3. Only one pool is used per token pair.
-4. Keeper operation has no uptime, alerting, or profitability controls.
+4. Keeper restart supervision and profitability controls exist, but external alerts and a live execution history do not.
 5. Mainnet enrollment and protection have not occurred with a consenting live borrower.
 
 ### Evidence of new work — good but must be packaged
@@ -120,26 +124,25 @@ Do not spend demo time on every contract or every FCC infrastructure component. 
 ### Submission critical
 
 1. Record and publish the demo video.
-2. Add the hosted dashboard URL to the README and DoraHacks entry.
-3. Write the exact before/during-hackathon work statement.
-4. Collect and document external user feedback.
-5. Confirm all DoraHacks fields, deadline timezone, team details, and bounty selection in the logged-in submission flow.
+2. Collect and document external user feedback.
+3. Refresh the market-data snapshot if time permits.
+4. Confirm all DoraHacks fields, deadline timezone, team details, and bounty selection in the logged-in submission flow.
 
 ### High impact product work
 
-1. Add a borrower enrollment UI for Morpho authorization and `setPolicy`.
-2. Add keeper alerts, persistent state, gas/profit checks, and retry behavior.
+1. Complete a controlled mainnet enrollment and protection receipt.
+2. Add external keeper alerts and persistent event checkpoints.
 3. Add multi-pool routing for stressed FXRP liquidity.
-4. Move owner powers to a timelock or constrained governance mechanism.
+4. Move EOA ownership to a multisig or governance contract.
 
 ### FCC completion
 
-1. Obtain current official indexer access/configuration.
-2. Provision a stable public proxy hostname.
-3. Register a fresh extension and production machine.
-4. Generate a private policy salt and encrypt enrollment to that machine.
-5. Capture a complete Coston2 enrollment/evaluation/verdict demo.
+1. Generate a fresh private policy salt and commitment.
+2. Encrypt enrollment to the registered production TEE.
+3. Capture a complete Coston2 evaluation and relayed verdict receipt.
 
 ## Current recommendation
 
-Freeze the core Bounty 1 contracts unless a defect is found. Spend remaining time on enrollment UX, the demo video, live evidence, and submission clarity. The current implementation already demonstrates more technical depth than most hackathon prototypes; the best path to a higher score is making that depth immediately verifiable to judges.
+Freeze the core Bounty 1 contracts unless a defect is found. The enrollment UX and hosted
+infrastructure are now present. Spend remaining time on the controlled receipt, demo video,
+external feedback, fresh market data, and concise submission evidence.

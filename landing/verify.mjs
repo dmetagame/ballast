@@ -33,7 +33,7 @@ const server = createServer((req, res) => {
 });
 let base = REMOTE;
 if (!REMOTE) {
-  await new Promise((r) => server.listen(0, r));
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
   base = `http://127.0.0.1:${server.address().port}`;
 } else {
   server.close();
@@ -56,6 +56,7 @@ const MUST_BE_VISIBLE = [
   ["caveat: owner powers", "administrative timelock"],
   ["caveat: liquidity ceiling", "300,000 FXRP"],
   ["caveat: no guarantee", "not a guarantee against liquidation"],
+  ["caveat: keeper dry-run", "hosted keeper remains dry-run"],
 ];
 
 async function visibleText(page) {

@@ -103,6 +103,7 @@ contract BallastManagerV3ForkTest is Test {
 }
 
 contract BallastManagerV3ProductionForkTest is Test {
+    uint256 internal constant PRODUCTION_FORK_BLOCK = 67_260_848;
     address internal constant MORPHO = 0xF4346F5132e810f80a28487a79c7559d9797E8B0;
     address internal constant USDT0 = 0xe7cd86e13AC4309349F30B3435a9d337750fC82D;
     address internal constant FXRP = 0xAd552A648C74D49E10027AB8a618A3ad4901c5bE;
@@ -113,7 +114,7 @@ contract BallastManagerV3ProductionForkTest is Test {
     Id internal constant MARKET_ID = Id.wrap(0x2f31ab3fc12d6d10d1de9e5c74053126f03ac1f80a2e6d69d36a411fef7d942f);
 
     function testProductionDeploymentProtectsRealPosition() public {
-        vm.createSelectFork(vm.rpcUrl("flare"));
+        vm.createSelectFork(vm.rpcUrl("flare"), PRODUCTION_FORK_BLOCK);
 
         BallastManagerV3 ballast = BallastManagerV3(PRODUCTION_MANAGER);
         SparkDexAdapterV2 adapter = SparkDexAdapterV2(PRODUCTION_ADAPTER);

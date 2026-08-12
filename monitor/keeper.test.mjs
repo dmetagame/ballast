@@ -10,7 +10,7 @@ const OTHER_KEEPER = "0x302a6505c225bBB145569F35B89611d0677195a9";
 
 test("v3 keeper refuses a policy naming a different operator", () => {
   assert.equal(
-    shouldSkipForDifferentKeeper({ managerVersion: "v3", execute: true, policyKeeper: OTHER_KEEPER, operator: OPERATOR }),
+    shouldSkipForDifferentKeeper({ managerVersion: "v3", policyKeeper: OTHER_KEEPER, operator: OPERATOR }),
     true,
   );
 });
@@ -19,7 +19,6 @@ test("v3 keeper acts on its own policy regardless of address casing", () => {
   assert.equal(
     shouldSkipForDifferentKeeper({
       managerVersion: "v3",
-      execute: true,
       policyKeeper: OPERATOR.toLowerCase(),
       operator: OPERATOR.toUpperCase().replace("0X", "0x"),
     }),
@@ -32,7 +31,7 @@ test("v3 keeper acts on its own policy regardless of address casing", () => {
 test("v3 keeper refuses a policy with no keeper field", () => {
   for (const policyKeeper of [null, undefined, ""]) {
     assert.equal(
-      shouldSkipForDifferentKeeper({ managerVersion: "v3", execute: true, policyKeeper, operator: OPERATOR }),
+      shouldSkipForDifferentKeeper({ managerVersion: "v3", policyKeeper, operator: OPERATOR }),
       true,
     );
   }
@@ -40,16 +39,23 @@ test("v3 keeper refuses a policy with no keeper field", () => {
 
 // Documents current behaviour rather than endorsing it: the check sits above the dry-run
 // return in processPolicy, so a dry run never reaches it and its transcript shows no refusal.
-test("dry run does not exercise the keeper refusal", () => {
+test("dry run without a key cannot assess the keeper identity", () => {
   assert.equal(
-    shouldSkipForDifferentKeeper({ managerVersion: "v3", execute: false, policyKeeper: OTHER_KEEPER, operator: OPERATOR }),
+    shouldSkipForDifferentKeeper({ managerVersion: "v3", policyKeeper: OTHER_KEEPER, operator: undefined }),
     false,
+  );
+});
+
+test("dry run with a key refuses a policy naming a different operator", () => {
+  assert.equal(
+    shouldSkipForDifferentKeeper({ managerVersion: "v3", policyKeeper: OTHER_KEEPER, operator: OPERATOR }),
+    true,
   );
 });
 
 test("v1 policies carry no keeper and are never refused on that basis", () => {
   assert.equal(
-    shouldSkipForDifferentKeeper({ managerVersion: "v1", execute: true, policyKeeper: OTHER_KEEPER, operator: OPERATOR }),
+    shouldSkipForDifferentKeeper({ managerVersion: "v1", policyKeeper: OTHER_KEEPER, operator: OPERATOR }),
     false,
   );
 });

@@ -153,8 +153,9 @@ Wired to the live market it was measured against: Morpho Blue
 
 **Owner powers, stated plainly.** Both contracts have the production `owner`
 `0x302a6505c225bBB145569F35B89611d0677195a9`.
-The owner can repoint `BallastManager` at a different swap adapter and can register pools on
-the adapter. Borrower funds are never held by Ballast and a protective action is bounded by
+The owner can propose a different swap adapter and register pools on the adapter, but V3 applies
+its configured administrative delay before either change is accepted. Borrower funds are never
+held by Ballast and a protective action is bounded by
 the borrower's own `maxCollateralPerAction` and `maxSlippageBps`, but a malicious adapter
 could keep collateral routed through it during a `protect()` call. Anyone enrolling should
 treat the owner as trusted, or wait for ownership to be renounced or moved behind a timelock.
@@ -163,6 +164,10 @@ treat the owner as trusted, or wait for ownership to be renounced or moved behin
 
 Fork-tested against **live Flare mainnet state, real borrower positions, and real SparkDEX
 liquidity**. Not audited.
+
+The finalized production addresses also pass `./scripts/verify-production-fork.sh` at pinned
+block `67260848`: the deployed V3 manager and adapter execute against a real borrower position
+on a local Flare fork, improve health, and leave both manager token balances at zero.
 
 ```
 $ forge test -vv                                    # 14 passed, 0 failed
@@ -265,7 +270,7 @@ One command, no testnet, no keys, no faucet:
 
 ## Run the keeper
 
-The permissionless keeper discovers `PolicySet` events, reads each borrower's current policy,
+The keeper discovers `PolicySet` events, reads each borrower's current policy,
 calls `previewProtect`, and reports only positions that are actionable. It is dry-run by default:
 
 ```bash
@@ -284,12 +289,18 @@ npm run keeper:execute
 ```
 
 Useful controls are `BALLAST`, `FROM_BLOCK`, `EXPLORER_URL`, and `MAX_POSITIONS`. The default
-start block is the published mainnet deployment. Keep the private key outside shell history and
-use a dedicated keeper account. A failed simulation is skipped rather than broadcast.
+manager and start block are the finalized V3 deployment. Keep the private key outside shell
+history and use a dedicated keeper account. Supplying the protected key during dry-run lets the
+keeper prove that each V3 policy names this operator; a failed simulation is skipped rather than
+broadcast.
 
 For hardened production operation, set `MANAGER_VERSION=v3` and point `BALLAST` at
 `0x746066ACe5dc89a3692137b8cdE3c31328629d09`. V3 requires each borrower to name the keeper that may act on their
 policy; the keeper refuses to execute a V3 policy configured for another operator.
+
+The hosted operator is `0xA20a59090f609329405F5DcA785Af9357F6965E7`. Its AWS service is active
+with `EXECUTE=false`; it is not yet a protection SLA and will remain dry-run until a controlled
+mainnet `Protected` receipt succeeds.
 
 The borrower enrollment app lives in `app/` and is publicly deployed at
 `https://ballast-enrollment.vercel.app`. It targets the finalized V3 manager with enrollment
@@ -298,10 +309,16 @@ writes enabled:
 ```bash
 cd app
 VITE_BALLAST_MANAGER=0x746066ACe5dc89a3692137b8cdE3c31328629d09 \
+VITE_BALLAST_KEEPER=0xA20a59090f609329405F5DcA785Af9357F6965E7 \
 VITE_ENABLE_ENROLLMENT_WRITES=true \
 VITE_MANAGER_VERSION=v3 \
 npm run build
+npm run verify:production
 ```
+
+The public enrollment surface is a controlled beta: policy writes are available, but the hosted
+keeper does not broadcast protection yet. Users must not treat enrollment alone as active
+liquidation protection.
 
 It forks Flare mainnet into a local anvil node, funds a demo borrower with real FXRP by
 impersonating a real holder, deploys Ballast, opens a leveraged position, and has a keeper
@@ -371,13 +388,12 @@ Two things that will waste your time otherwise:
 - **Coston2 uses a test market.** The FCC integration has a Coston2 Morpho deployment backed by
   the live FTSOv2 XRP/USD feed, but its collateral, loan token and oracle-quoted swap venue are
   scaffolding. Mainnet execution and liquidity claims remain grounded in the fork tests.
-- **Legacy owner is an EOA.** The published V1 deployment remains unchanged for compatibility;
-  production enrollment should target V3. Its manager and adapter admin changes are delayed,
-  protection can be guardian-paused, and delayed ownership transfer is pending until August 11,
-  2026 at approximately 16:04:58 UTC.
-- **The keeper is operator software.** `monitor/keeper.mjs` provides a dry-run-first loop and an
-  explicit execution mode; no borrower has enrolled on the published manager yet, and this is
-  not a hosted service or uptime guarantee.
+- **The production owner is an EOA.** The published V1 deployment remains unchanged for
+  compatibility; production enrollment targets finalized V3. Manager and adapter admin changes
+  are delayed, protection can be guardian-paused, and both ownership handoffs are complete.
+- **The keeper is hosted but intentionally dry-run.** The AWS service runs continuously with
+  restart supervision and execution-economics bounds, but no borrower has enrolled on V3 and no
+  live `Protected` receipt exists. It is not an uptime or protection guarantee.
 - **Single-venue routing.** The adapter swaps against one registered pool per pair. Splitting
   across the Algebra and UniV3 pools would add roughly 20% more depth.
 - **The drawdown simulation is a worst case.** `PoolPusher` moves the price by dumping into a
@@ -386,11 +402,10 @@ Two things that will waste your time otherwise:
   correspondingly optimistic. Reality sits between them.
 - **Surplus is returned as loan token,** not re-supplied as collateral. Value is preserved but
   the borrower ends up holding USD₮0 rather than a larger position.
-- **FCC requires a fresh deployment.** The confidential-trigger implementation is complete,
-  but the advertised Coston2 commitment reused a public test fixture. Rotate it with a private
-  random salt and redeploy the changed sender/v2/trigger ABIs before making a confidentiality
-  claim. The new sender pins each enrollment to one production TEE and rejects historical or
-  repeated evaluation blocks.
+- **FCC infrastructure is fresh; private-flow evidence is not.** Extension `0x10246` and TEE
+  `0xd56b33B50F76E126616d9545E3469De45415d152` are PRODUCTION on the redeployed Coston2 manager
+  at `https://ballast.rouma.online`. A new private salt, encrypted enrollment, evaluation, and
+  relayed verdict receipt are still required before claiming an end-to-end confidential flow.
 
 The complete deployment runbook, role separation, finalization sequence, and pre-enrollment
 checks are in `docs/PRODUCTION_DEPLOYMENT.md`.

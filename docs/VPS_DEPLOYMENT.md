@@ -4,6 +4,19 @@ Ballast's Coston2 FCC machine and the Flare mainnet keeper run on an always-on A
 FCC proxy uses the stable `ballast.rouma.online` hostname; the keeper remains in dry-run mode
 until a controlled borrower enrollment and protection receipt are verified.
 
+## Current keeper deployment
+
+- Host: AWS, Europe (Stockholm)
+- Manager: `0x746066ACe5dc89a3692137b8cdE3c31328629d09`
+- Keeper: `0xA20a59090f609329405F5DcA785Af9357F6965E7`
+- Start block: `67019411`
+- Mode: continuous dry-run, `EXECUTE=false`
+- Service state verified August 12, 2026: active, zero restarts
+- Execution bounds: gas ceiling, minimum fee, loan-token/FLR conversion, and minimum profit set
+
+The protected key may be loaded during dry-run so the service can reject policies naming a
+different keeper without broadcasting transactions.
+
 ## Recommended host
 
 - Ubuntu 24.04 LTS

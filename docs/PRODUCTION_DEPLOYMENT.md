@@ -48,20 +48,23 @@ If deployer and final owner differ, run finalization once with the deployer for 
 ## App configuration
 
 ```text
-VITE_BALLAST_MANAGER=0x...
+VITE_BALLAST_MANAGER=0x746066ACe5dc89a3692137b8cdE3c31328629d09
+VITE_BALLAST_KEEPER=0xA20a59090f609329405F5DcA785Af9357F6965E7
 VITE_ENABLE_ENROLLMENT_WRITES=true
 VITE_MANAGER_VERSION=v3
 ```
 
 Build and deploy from `app/` only after the pool is active and ownership state is confirmed.
+Run `npm run verify:production` after the build; it fails if the bundle contains the legacy
+manager, wrong keeper, wrong ABI version, or disabled writes.
 
 ## Keeper configuration
 
 ```text
-BALLAST=0x...
+BALLAST=0x746066ACe5dc89a3692137b8cdE3c31328629d09
 MANAGER_VERSION=v3
-FROM_BLOCK=<deployment block>
-EXECUTE=true
+FROM_BLOCK=67019411
+EXECUTE=false
 RUN_ONCE=false
 PRIVATE_KEY_FILE=<protected credential path when running outside systemd>
 MAX_GAS_FLR_WEI=<hard ceiling>
@@ -116,13 +119,20 @@ Completed and verified:
   pending ownership and pool proposals are cleared.
 - `scripts/verify-production.sh` confirms the manager/adapter binding, owner, guardian, pool,
   unpaused state, and empty pending admin actions.
-- V3 unit tests, V3 fork tests, existing live Flare suites, app build, keeper tests, and FCC tests pass.
+- `scripts/verify-production-fork.sh` passes against pinned block `67260848`, executing the
+  deployed V3 manager and adapter against a real position.
+- The AWS keeper service is active without restarts, targets V3 from block `67019411`, applies
+  gas/fee/profit bounds, and remains `EXECUTE=false`.
+- The dedicated keeper is `0xA20a59090f609329405F5DcA785Af9357F6965E7`.
+- V3 unit tests, the production fork, app production-build verification, landing verification,
+  keeper tests, FCC tests, and dependency audits pass.
 
 Still required before broad enrollment:
 
-1. Configure the dedicated keeper with `FROM_BLOCK=67019411`, run a dry-run, and confirm its signer matches enrolled policies.
-2. Enroll a controlled test position and verify one real protection receipt.
-3. Enable keeper execution only after that controlled receipt succeeds.
+1. Fund and enroll a consenting controlled borrower with a small FXRP/USD₮0 Morpho position.
+2. Confirm Morpho authorization, V3 policy, keeper preview, and one real `Protected` receipt.
+3. Verify improved health, borrower surplus, and zero manager balances from that receipt.
+4. Enable keeper execution only after the controlled flow succeeds.
 
 Phase-one transaction hashes remain in the ignored Foundry broadcast artifact at
 `broadcast/DeployV3.s.sol/14/run-latest.json` on the deployment host.

@@ -4,7 +4,7 @@
 
 **Bounty 1: Interoperable Asset Products.** Ballast protects leveraged FXRP positions on Flare by atomically deleveraging a borrow before liquidation.
 
-The optional Bounty 2 work is documented separately as an FCC prototype. The primary submission should lead with the live, fork-tested Bounty 1 product rather than overclaiming a cross-chain FCC deployment that is not yet live end-to-end.
+The optional Bounty 2 work is documented separately as an FCC prototype. The primary submission should lead with the deployed, fork-tested Bounty 1 product rather than overclaiming a cross-chain FCC flow that is not live end-to-end.
 
 ## One-line product
 
@@ -24,14 +24,35 @@ Leveraged FXRP borrowers can lose approximately 7.4% of position value when a Mo
 
 ## What is implemented
 
-- Live Flare mainnet deployment: `BallastManager` and `SparkDexAdapter`.
+- Finalized and verified Flare mainnet deployment: `BallastManagerV3` and `SparkDexAdapterV2`.
 - Policy-controlled authorization: borrower chooses trigger, target, action cap, slippage, fee, and cooldown.
 - Atomic Morpho flash-loan deleveraging with zero retained collateral.
 - Direct SparkDEX pool integration with an enforced minimum output.
 - Morpho-exact health and repayment sizing.
 - Fork tests against real Morpho positions and real SparkDEX liquidity.
 - Static risk dashboard from measured Flare mainnet state.
-- Dry-run-first keeper service that discovers policies and calls `previewProtect` before optional execution.
+- Hosted enrollment UI with Morpho authorization, V3 policy setup, and borrower exit controls.
+- Always-on AWS keeper service that discovers policies, verifies the named V3 operator, calls
+  `previewProtect`, simulates before execution, and remains dry-run pending a controlled receipt.
+- Fresh FCC extension and simulated TEE in PRODUCTION on the redeployed Coston2 manager.
+
+## Hosted surfaces
+
+- Product narrative: `https://ballast-landing-sepia.vercel.app`
+- Measured risk dashboard: `https://ballast-alpha.vercel.app`
+- Controlled enrollment beta: `https://ballast-enrollment.vercel.app`
+- FCC proxy: `https://ballast.rouma.online`
+
+The enrollment UI accepts policy transactions, but the hosted keeper remains dry-run. Do not
+describe an enrolled policy as active automated protection until the live receipt milestone is met.
+
+## Work completed during Summer Signal
+
+During Summer Signal we scanned Flare lending markets, measured the FXRP liquidation surface
+and DEX depth, implemented the policy registry and atomic Morpho/SparkDEX deleveraging path,
+deployed and verified V1 and hardened V3 contracts on Flare mainnet, built fork and liquidity
+tests, shipped the dashboard, landing and enrollment surfaces, deployed a dry-run keeper to AWS,
+and registered the confidential trigger extension and TEE on Coston2.
 
 ## Demonstration script
 
@@ -46,6 +67,8 @@ Leveraged FXRP borrowers can lose approximately 7.4% of position value when a Mo
 
 - Mainnet contracts and explorer links are recorded in `README.md`.
 - Reproducible demo: `./demo.sh`.
+- Finalized production-state check: `./scripts/verify-production.sh`.
+- Deployed-address fork check: `./scripts/verify-production-fork.sh`.
 - Solidity test suite: `forge test --match-path 'test/*'` with fork tests requiring network access.
 - FCC unit and cross-language tests: `cd fce && go test ./...`.
 - Keeper dry run: `cd monitor && node keeper.mjs`.
@@ -57,16 +80,17 @@ The committed measurement snapshot reports 739 XRP-collateralised borrow positio
 
 ## Honest limitations
 
-- The mainnet contract owner is an EOA and can change the adapter.
+- The mainnet contract owner is an EOA; adapter and pool changes are delayed but remain trusted administration.
 - The system is not audited.
 - Liquidity is finite; action caps and cooldowns are deliberate safety controls.
-- The keeper is permissionless infrastructure, not a guaranteed service-level promise.
+- The hosted keeper is intentionally dry-run and is not a guaranteed service-level promise.
+- No consenting borrower has completed a real mainnet enrollment and protection receipt yet.
 - FCC currently demonstrates confidential verdict verification on Coston2; it does not claim that a Coston2 verdict directly deleverages a mainnet position.
 
 ## Roadmap
 
-1. Run the keeper continuously with alerts and transaction simulation.
-2. Route across multiple FXRP/loan pools to improve stressed liquidity.
-3. Move owner powers behind a timelock or governance contract.
-4. Complete fresh FCC enrollment with private policy salt and stable proxy infrastructure.
-5. Explore a unified confidential trigger for the live protection path.
+1. Complete a controlled mainnet enrollment and publish the first `Protected` receipt.
+2. Enable keeper execution with external alerts only after that receipt succeeds.
+3. Route across multiple FXRP/loan pools to improve stressed liquidity.
+4. Move EOA ownership to a multisig or governance contract.
+5. Complete a private FCC enrollment, evaluation, and relayed verdict receipt.

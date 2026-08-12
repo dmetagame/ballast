@@ -18,7 +18,8 @@
         <p class="eyebrow">Borrower control panel</p>
         <h1>Put a guardrail around your Morpho position.</h1>
         <p class="lede">Ballast can repay part of an FXRP-collateralised borrow before liquidation. You choose the limits. The keeper only acts within them.</p>
-        <div class="notice notice-green"><strong>V3 finalized on Flare mainnet.</strong> The SparkDEX pool is active, ownership has moved to the production owner, and enrollment writes are enabled. Use a controlled position and conservative limits until a live protection receipt is published.</div>
+        <div id="deploymentNotice" class="notice notice-green"><strong>V3 finalized on Flare mainnet.</strong> The SparkDEX pool is active and ownership has moved to the production owner.</div>
+        <div class="notice notice-amber"><strong>Controlled beta.</strong> The hosted keeper is intentionally dry-run and will not broadcast protection until a controlled mainnet receipt succeeds. Do not rely on Ballast for live liquidation protection yet.</div>
       </section>
 
       <section class="grid">
@@ -28,8 +29,10 @@
             <div><dt>Wallet</dt><dd id="walletAddress">Connect a wallet</dd></div>
             <div><dt>Chain</dt><dd id="chainStatus">—</dd></div>
             <div><dt>Ballast manager</dt><dd><a id="managerLink" target="_blank" rel="noreferrer">—</a></dd></div>
+            <div><dt>Current health</dt><dd id="healthStatus">—</dd></div>
             <div><dt>Morpho authorization</dt><dd id="authorizationStatus">—</dd></div>
             <div><dt>Policy status</dt><dd id="policyStatus">—</dd></div>
+            <div><dt>Protection preview</dt><dd id="previewStatus">—</dd></div>
           </dl>
           <button id="refreshButton" class="button button-light" disabled>Refresh position</button>
         </article>
@@ -48,17 +51,17 @@
         <p class="body-copy policy-intro">The policy is the hard boundary for every protective action. Values are encoded onchain and apply to the configured Morpho market.</p>
         <form id="policyForm" novalidate>
           <div class="form-grid">
-            <label><span>Trigger health</span><small>Act below this factor · minimum 1.00</small><div class="input-wrap"><input id="triggerHealth" name="triggerHealth" value="1.50" inputmode="decimal" required /><span>×</span></div><em data-error-for="triggerHealth"></em></label>
-            <label><span>Target health</span><small>Restore at least this factor</small><div class="input-wrap"><input id="targetHealth" name="targetHealth" value="1.80" inputmode="decimal" required /><span>×</span></div><em data-error-for="targetHealth"></em></label>
-            <label><span>Max collateral per action</span><small>FXRP units · caps each sale</small><div class="input-wrap"><input id="maxCollateral" name="maxCollateral" value="25000" inputmode="decimal" required /><span>FXRP</span></div><em data-error-for="maxCollateral"></em></label>
-            <label><span>Max slippage</span><small>Hard contract ceiling: 10%</small><div class="input-wrap"><input id="maxSlippage" name="maxSlippage" value="2" inputmode="decimal" required /><span>%</span></div><em data-error-for="maxSlippage"></em></label>
+            <label><span>Trigger health</span><small>Act below this factor · minimum 1.00</small><div class="input-wrap"><input id="triggerHealth" name="triggerHealth" value="1.15" inputmode="decimal" required /><span>×</span></div><em data-error-for="triggerHealth"></em></label>
+            <label><span>Target health</span><small>Restore at least this factor</small><div class="input-wrap"><input id="targetHealth" name="targetHealth" value="1.30" inputmode="decimal" required /><span>×</span></div><em data-error-for="targetHealth"></em></label>
+            <label><span>Max collateral per action</span><small>FXRP units · start small and raise deliberately</small><div class="input-wrap"><input id="maxCollateral" name="maxCollateral" value="100" inputmode="decimal" required /><span>FXRP</span></div><em data-error-for="maxCollateral"></em></label>
+            <label><span>Max slippage</span><small>Hard contract ceiling: 10%</small><div class="input-wrap"><input id="maxSlippage" name="maxSlippage" value="1" inputmode="decimal" required /><span>%</span></div><em data-error-for="maxSlippage"></em></label>
             <label><span>Keeper fee</span><small>Paid from recovered surplus · max 5%</small><div class="input-wrap"><input id="keeperFee" name="keeperFee" value="0.25" inputmode="decimal" required /><span>%</span></div><em data-error-for="keeperFee"></em></label>
             <label><span>Cooldown</span><small>Minimum time between actions</small><div class="input-wrap"><input id="cooldown" name="cooldown" value="3600" inputmode="numeric" required /><span>seconds</span></div><em data-error-for="cooldown"></em></label>
-            <label><span>Keeper address</span><small>Dedicated operator allowed to protect this position</small><div class="input-wrap"><input id="keeperAddress" name="keeperAddress" placeholder="0x…" autocomplete="off" required /></div><em data-error-for="keeperAddress"></em></label>
+            <label><span>Keeper address</span><small>Prefilled with the hosted dry-run operator; verify before signing</small><div class="input-wrap"><input id="keeperAddress" name="keeperAddress" placeholder="0x…" autocomplete="off" required /></div><em data-error-for="keeperAddress"></em></label>
           </div>
           <div class="policy-summary" id="policySummary">Set limits to preview the onchain policy.</div>
           <button class="button button-primary" id="policyButton" type="submit" disabled>Save protection policy</button>
-          <p id="policyHint" class="hint">Policies are written directly to the finalized V3 manager.</p>
+          <p id="policyHint" class="hint">Policies are written directly to the finalized V3 manager. The hosted keeper remains dry-run during controlled validation.</p>
         </form>
       </section>
 
@@ -74,7 +77,7 @@
 
       <section class="trust-grid">
         <article class="card trust-card"><p class="eyebrow">Security model</p><h2>What Ballast can and cannot do</h2><ul><li>Ballast never holds your collateral outside a single atomic protection transaction.</li><li>Keepers can call protection, but cannot choose values outside your policy.</li><li>Your policy caps trigger, target, collateral sold, slippage, keeper fee, and cooldown.</li><li>Authorization is separate from policy setup and can be revoked on Morpho.</li></ul></article>
-        <article class="card trust-card"><p class="eyebrow">Trust assumptions</p><h2>Read this before enrolling</h2><ul><li>The deployed manager owner can change the swap adapter; treat that owner as trusted until governance or a timelock is in place.</li><li>The contracts are not audited. Start with small exposure and conservative limits.</li><li>Protection depends on Morpho state, oracle updates, keeper uptime, and available Flare liquidity.</li><li>A policy is not a guarantee against liquidation or adverse execution.</li></ul></article>
+        <article class="card trust-card"><p class="eyebrow">Trust assumptions</p><h2>Read this before enrolling</h2><ul><li>The deployed manager owner is an EOA and can propose a different swap adapter; V3 accepts that change only after its administrative timelock.</li><li>The contracts are not audited. Start with small exposure and conservative limits.</li><li>Protection depends on Morpho state, oracle updates, keeper uptime, and available Flare liquidity.</li><li>A policy is not a guarantee against liquidation or adverse execution.</li></ul></article>
       </section>
 
       <footer><span id="statusMessage">Connect a wallet to inspect your account.</span><span>Ballast · Flare mainnet · Morpho Blue FXRP / USD₮0</span></footer>

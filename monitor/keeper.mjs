@@ -14,9 +14,9 @@ import { privateKeyToAccount } from "viem/accounts";
 
 const RPC_URL = process.env.RPC_URL || "https://flare-api.flare.network/ext/C/rpc";
 const EXPLORER_URL = process.env.EXPLORER_URL || "https://flare-explorer.flare.network/api";
-const BALLAST = getAddress(process.env.BALLAST || "0x379e5B8Cf31fC5D46aEc2fc17F17708951015571");
-const MANAGER_VERSION = process.env.MANAGER_VERSION || "v1";
-const DEFAULT_DEPLOYMENT_BLOCK = 66714351n;
+const BALLAST = getAddress(process.env.BALLAST || "0x746066ACe5dc89a3692137b8cdE3c31328629d09");
+const MANAGER_VERSION = process.env.MANAGER_VERSION || "v3";
+const DEFAULT_DEPLOYMENT_BLOCK = 67019411n;
 const FROM_BLOCK = BigInt(process.env.FROM_BLOCK || DEFAULT_DEPLOYMENT_BLOCK);
 const EXECUTE = process.env.EXECUTE === "true";
 const RUN_ONCE = process.env.RUN_ONCE === "true";
@@ -38,8 +38,9 @@ const chain = {
   rpcUrls: { default: { http: [RPC_URL] } },
 };
 const publicClient = createPublicClient({ chain, transport: http(RPC_URL) });
+const operatorAccount = PRIVATE_KEY ? privateKeyToAccount(PRIVATE_KEY) : null;
 const account = EXECUTE
-  ? privateKeyToAccount(PRIVATE_KEY || (() => { throw new Error("PRIVATE_KEY or PRIVATE_KEY_FILE is required with EXECUTE=true"); })())
+  ? operatorAccount || (() => { throw new Error("PRIVATE_KEY or PRIVATE_KEY_FILE is required with EXECUTE=true"); })()
   : null;
 const walletClient = account ? createWalletClient({ account, chain, transport: http(RPC_URL) }) : null;
 
@@ -161,15 +162,9 @@ async function discoverPolicies() {
   return [...latestByPolicy.values()].slice(-MAX_POSITIONS);
 }
 
-/// Whether this operator must refuse a policy because the borrower named a different keeper.
-///
-/// Extracted from `processPolicy` so the refusal can be proven by test rather than by reading
-/// the code. Semantics are unchanged, including two details that are easy to lose:
-/// a missing `keeper` (a V1-shaped policy read through the V3 ABI) refuses, and the check is
-/// only reached when `execute` is true, because a dry run never acts and returns earlier.
-export function shouldSkipForDifferentKeeper({ managerVersion, execute, policyKeeper, operator }) {
+export function shouldSkipForDifferentKeeper({ managerVersion, policyKeeper, operator }) {
   if (managerVersion !== "v3") return false;
-  if (!execute) return false;
+  if (!operator) return false;
   if (!policyKeeper) return true;
   return policyKeeper.toLowerCase() !== operator.toLowerCase();
 }
@@ -191,8 +186,8 @@ async function processPolicy(row) {
     const item = await inspectPolicy(row);
     log("info", "policy_inspected", { borrower: item.borrower, id: item.id, enabled: item.enabled, actionable: item.actionable, health: formatHealth(item.health), trigger: formatHealth(item.trigger), repayAssets: item.repayAssets.toString(), collateralNeeded: item.collateralNeeded.toString() });
     if (!item.enabled || !item.actionable) return { status: "skipped", reason: item.enabled ? "not_actionable" : "disabled" };
-    if (shouldSkipForDifferentKeeper({ managerVersion: MANAGER_VERSION, execute: EXECUTE, policyKeeper: item.keeper, operator: account.address })) {
-      log("info", "policy_skipped", { borrower: item.borrower, id: item.id, reason: "different_keeper", configuredKeeper: item.keeper, operator: account.address });
+    if (shouldSkipForDifferentKeeper({ managerVersion: MANAGER_VERSION, policyKeeper: item.keeper, operator: operatorAccount?.address })) {
+      log("info", "policy_skipped", { borrower: item.borrower, id: item.id, reason: "different_keeper", configuredKeeper: item.keeper, operator: operatorAccount.address });
       return { status: "skipped", reason: "different_keeper" };
     }
     if (!EXECUTE) return { status: "dry_run", reason: "execution_disabled" };
@@ -229,7 +224,10 @@ export async function runCycle() {
 }
 
 export async function main() {
-  log("info", "keeper_started", { chainId: chain.id, ballast: BALLAST, managerVersion: MANAGER_VERSION, mode: EXECUTE ? "execute" : "dry_run", runOnce: RUN_ONCE, pollIntervalMs: POLL_INTERVAL_MS, maxConcurrency: MAX_CONCURRENCY });
+  log("info", "keeper_started", { chainId: chain.id, ballast: BALLAST, managerVersion: MANAGER_VERSION, mode: EXECUTE ? "execute" : "dry_run", operator: operatorAccount?.address || null, runOnce: RUN_ONCE, pollIntervalMs: POLL_INTERVAL_MS, maxConcurrency: MAX_CONCURRENCY });
+  if (MANAGER_VERSION === "v3" && !operatorAccount) {
+    log("warn", "keeper_identity_unverified", { reason: "no_private_key_in_dry_run" });
+  }
   do {
     try {
       await runCycle();

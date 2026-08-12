@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "check": "node --check src/main.js"
+    "check": "node --check src/main.js",
+    "verify:production": "node verify-production-build.mjs"
   },
   "dependencies": {
     "viem": "^2.21.0"
