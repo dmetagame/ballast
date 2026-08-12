@@ -18,6 +18,7 @@ if (meta("ballast-manager-version") !== "v3") throw new Error("deployed manager 
 if (meta("ballast-writes-enabled") !== "true") throw new Error("deployed writes are not enabled");
 if (!normalizedHtml.includes("controlled beta")) throw new Error("controlled-beta disclosure is missing");
 if (!normalizedHtml.includes('value="1.15"') || !normalizedHtml.includes('value="100"')) throw new Error("conservative policy defaults are missing");
+if (!normalizedHtml.includes('role="status"') || !normalizedHtml.includes('aria-live="polite"')) throw new Error("accessible transaction status is missing");
 
 const assetPath = html.match(/<script[^>]+src=["']([^"']*index-[^"']*\.js)["']/i)?.[1];
 if (!assetPath) throw new Error("deployment JavaScript asset was not found");
@@ -29,5 +30,6 @@ const bundle = (await bundleResponse.text()).toLowerCase();
 if (!bundle.includes(PRODUCTION_MANAGER.toLowerCase())) throw new Error("production manager is missing from the deployed bundle");
 if (!bundle.includes(PRODUCTION_KEEPER.toLowerCase())) throw new Error("production keeper is missing from the deployed bundle");
 if (bundle.includes(legacyManager)) throw new Error("legacy manager is present in the deployed bundle");
+if (!bundle.includes("reverted onchain")) throw new Error("reverted receipt handling is missing from the deployed bundle");
 
 console.log(`deployment verified: ${baseUrl}`);

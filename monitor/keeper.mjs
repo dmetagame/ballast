@@ -169,6 +169,11 @@ export function shouldSkipForDifferentKeeper({ managerVersion, policyKeeper, ope
   return policyKeeper.toLowerCase() !== operator.toLowerCase();
 }
 
+export function assertSuccessfulReceipt(receipt, hash) {
+  if (receipt.status !== "success") throw new Error(`protection transaction reverted: ${hash}`);
+  return receipt;
+}
+
 const formatHealth = (value) => formatUnits(value, 18);
 
 async function inspectPolicy(row) {
@@ -202,6 +207,7 @@ async function processPolicy(row) {
     }
     const hash = await withRetry(() => walletClient.writeContract(simulation.request), { label: "rpc.writeProtect" });
     const receipt = await withRetry(() => publicClient.waitForTransactionReceipt({ hash }), { label: "rpc.waitForReceipt" });
+    assertSuccessfulReceipt(receipt, hash);
     log("info", "protection_confirmed", { borrower: item.borrower, id: item.id, hash, status: receipt.status, blockNumber: receipt.blockNumber.toString(), gasEstimate: gasEstimate.toString(), gasPrice: gasPrice.toString(), expectedKeeperFee: economics.expectedKeeperFee.toString() });
     return { status: "confirmed", hash };
   } catch (error) {

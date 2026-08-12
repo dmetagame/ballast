@@ -37,5 +37,8 @@ if (content.includes(legacyManager)) throw new Error("legacy V1 manager is prese
 if (!content.includes(productionKeeper)) throw new Error("production keeper is missing from the bundle");
 if (!content.includes("v3 enrollment enabled")) throw new Error("V3 enrollment marker is missing from the bundle");
 if (!content.includes("setpolicy")) throw new Error("policy write ABI is missing from the bundle");
+if (!html.includes('role="status"') || !html.includes('aria-live="polite"')) throw new Error("accessible transaction status is missing");
+if (!content.includes("reverted onchain")) throw new Error("reverted receipt handling is missing from the bundle");
+if (!content.includes("focus-within")) throw new Error("form focus visibility is missing from the bundle");
 
 console.log("production build verified: finalized V3 manager and policy ABI present");

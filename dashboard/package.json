@@ -3,5 +3,8 @@
   "private": true,
   "type": "module",
   "description": "Static risk dashboard. Regenerate with `node build.mjs`; falls back to the published data snapshot when monitor/data is absent.",
-  "scripts": { "build": "node build.mjs" }
+  "scripts": {
+    "build": "node build.mjs",
+    "verify": "node verify.mjs"
+  }
 }

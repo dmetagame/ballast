@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { calculateEconomics, loadPrivateKey, mapWithConcurrency, shouldSkipForDifferentKeeper } from "./keeper.mjs";
+import { assertSuccessfulReceipt, calculateEconomics, loadPrivateKey, mapWithConcurrency, shouldSkipForDifferentKeeper } from "./keeper.mjs";
 
 const OPERATOR = "0xEE3eA6f858aE84dD6959f241DfC257a2f8fA3f53";
 const OTHER_KEEPER = "0x302a6505c225bBB145569F35B89611d0677195a9";
@@ -103,6 +103,18 @@ test("calculateEconomics checks priced profit after gas", () => {
   const result = calculateEconomics({ repayAssets: 10_000_000n, keeperFeeBps: 100, gasEstimate: 10n, gasPrice: 1n, maxGasFlrWei: null, minKeeperFeeUnits: null, loanTokenUnitsPerFlr: 1_000_000n, minProfitFlrWei: 999_999_999_999_999_991n });
   assert.equal(result.ok, false);
   assert.equal(result.reason, "profit_below_minimum");
+});
+
+test("keeper rejects a reverted protection receipt", () => {
+  assert.throws(
+    () => assertSuccessfulReceipt({ status: "reverted" }, "0xdeadbeef"),
+    /protection transaction reverted: 0xdeadbeef/,
+  );
+});
+
+test("keeper accepts a successful protection receipt", () => {
+  const receipt = { status: "success" };
+  assert.equal(assertSuccessfulReceipt(receipt, "0x1234"), receipt);
 });
 
 test("mapWithConcurrency never exceeds the worker limit", async () => {

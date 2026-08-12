@@ -13,6 +13,7 @@
         <div class="network"><span class="dot"></span><span id="networkLabel">Flare mainnet · V3 manager</span></div>
         <button id="connectButton" class="button button-dark">Connect wallet</button>
       </header>
+      <div id="statusMessage" class="status-bar" role="status" aria-live="polite" aria-atomic="true">Connect a wallet to inspect your account.</div>
 
       <section class="intro">
         <p class="eyebrow">Borrower control panel</p>
@@ -80,7 +81,7 @@
         <article class="card trust-card"><p class="eyebrow">Trust assumptions</p><h2>Read this before enrolling</h2><ul><li>The deployed manager owner is an EOA and can propose a different swap adapter; V3 accepts that change only after its administrative timelock.</li><li>The contracts are not audited. Start with small exposure and conservative limits.</li><li>Protection depends on Morpho state, oracle updates, keeper uptime, and available Flare liquidity.</li><li>A policy is not a guarantee against liquidation or adverse execution.</li></ul></article>
       </section>
 
-      <footer><span id="statusMessage">Connect a wallet to inspect your account.</span><span>Ballast · Flare mainnet · Morpho Blue FXRP / USD₮0</span></footer>
+      <footer><span>Ballast · Flare mainnet · Morpho Blue FXRP / USD₮0</span></footer>
     </main>
     <script type="module" src="/src/main.js"></script>
   </body>
