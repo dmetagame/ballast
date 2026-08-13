@@ -67,6 +67,12 @@ and runs `npm run verify:deployment` against the live artifact before returning 
 BALLAST=0x746066ACe5dc89a3692137b8cdE3c31328629d09
 MANAGER_VERSION=v3
 FROM_BLOCK=67019411
+STATE_FILE=<persistent writable checkpoint path>
+BLOCKSCOUT_URL=https://flare-explorer.flare.network
+CONFIRMATION_BLOCKS=12
+RPC_LOG_PAGE_BLOCKS=30
+LOG_QUERY_CONCURRENCY=4
+MAX_POSITIONS=0
 EXECUTE=false
 RUN_ONCE=false
 PRIVATE_KEY_FILE=<protected credential path when running outside systemd>
@@ -77,6 +83,11 @@ MIN_PROFIT_FLR_WEI=<minimum net profit>
 ```
 
 Run the keeper under a process supervisor with log collection and restart policy. Confirm the keeper address shown in the enrollment app matches the operator account.
+
+The checkpoint file records only public borrower/market identifiers and the next confirmed block.
+Keep it on persistent storage writable by the service. `MAX_POSITIONS=0` scans every discovered
+policy; any positive cap is a circuit breaker and causes the cycle to fail rather than process a
+partial set.
 
 The repository includes a hardened user-level systemd unit:
 

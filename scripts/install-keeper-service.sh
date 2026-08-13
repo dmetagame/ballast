@@ -7,6 +7,7 @@ unit_dir="${HOME}/.config/systemd/user"
 key_file="${config_dir}/keeper.private-key"
 
 mkdir -p "$config_dir" "$unit_dir"
+chmod 700 "$config_dir"
 if [ ! -f "$config_dir/keeper.env" ]; then
   install -m 600 "$repo_root/deploy/systemd/keeper.env.example" "$config_dir/keeper.env"
   printf 'created %s; fill production values before starting the service\n' "$config_dir/keeper.env"

@@ -3,10 +3,32 @@ import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { assertSuccessfulReceipt, calculateEconomics, loadPrivateKey, mapWithConcurrency, shouldSkipForDifferentKeeper } from "./keeper.mjs";
+import { toEventSelector } from "viem";
+import {
+  applyPolicyLogs,
+  assertSuccessfulReceipt,
+  buildRpcLogRanges,
+  calculateEconomics,
+  collectPolicyLogs,
+  collectRpcPolicyLogs,
+  enforcePositionLimit,
+  handleCycleFailure,
+  loadDiscoveryState,
+  loadPrivateKey,
+  mapWithConcurrency,
+  saveDiscoveryState,
+  selectSyncTarget,
+  shouldSkipForDifferentKeeper,
+  validateBlockscoutTip,
+} from "./keeper.mjs";
 
 const OPERATOR = "0xEE3eA6f858aE84dD6959f241DfC257a2f8fA3f53";
 const OTHER_KEEPER = "0x302a6505c225bBB145569F35B89611d0677195a9";
+const MANAGER = "0x746066ACe5dc89a3692137b8cdE3c31328629d09";
+const MARKET_ID = "0x2f31ab3fc12d6d10d1de9e5c74053126f03ac1f80a2e6d69d36a411fef7d942f";
+const POLICY_SET_TOPIC = toEventSelector("PolicySet(address,bytes32,uint128,uint128,uint64,uint32)");
+const POLICY_DISABLED_TOPIC = toEventSelector("PolicyDisabled(address,bytes32)");
+const addressTopic = (address) => `0x${address.slice(2).padStart(64, "0")}`;
 
 test("v3 keeper refuses a policy naming a different operator", () => {
   assert.equal(
@@ -37,8 +59,6 @@ test("v3 keeper refuses a policy with no keeper field", () => {
   }
 });
 
-// Documents current behaviour rather than endorsing it: the check sits above the dry-run
-// return in processPolicy, so a dry run never reaches it and its transcript shows no refusal.
 test("dry run without a key cannot assess the keeper identity", () => {
   assert.equal(
     shouldSkipForDifferentKeeper({ managerVersion: "v3", policyKeeper: OTHER_KEEPER, operator: undefined }),
@@ -115,6 +135,117 @@ test("keeper rejects a reverted protection receipt", () => {
 test("keeper accepts a successful protection receipt", () => {
   const receipt = { status: "success" };
   assert.equal(assertSuccessfulReceipt(receipt, "0x1234"), receipt);
+});
+
+test("one-shot keeper failures exit non-zero while watch mode continues", () => {
+  const error = new Error("cycle failed");
+  assert.throws(() => handleCycleFailure(error, true), error);
+  assert.doesNotThrow(() => handleCycleFailure(error, false));
+});
+
+test("keeper sync target never outruns confirmations or Blockscout", () => {
+  assert.equal(selectSyncTarget(1_000n, 995n, 12), 988n);
+  assert.equal(selectSyncTarget(1_000n, 980n, 12), 980n);
+});
+
+test("Blockscout bootstrap requires a complete indexed chain", () => {
+  assert.equal(validateBlockscoutTip({ total_blocks: "123" }, { finished_indexing_blocks: true }), 123n);
+  assert.throws(
+    () => validateBlockscoutTip({ total_blocks: "123" }, { finished_indexing_blocks: false }),
+    /indexing is incomplete/,
+  );
+});
+
+test("RPC log pagination respects Flare's 30-block maximum", () => {
+  assert.deepEqual(buildRpcLogRanges(10n, 75n, 30), [
+    { fromBlock: 10n, toBlock: 39n },
+    { fromBlock: 40n, toBlock: 69n },
+    { fromBlock: 70n, toBlock: 75n },
+  ]);
+  assert.throws(() => buildRpcLogRanges(10n, 75n, 31), /invalid RPC log range/);
+});
+
+test("RPC log collection merges every page", async () => {
+  const requests = [];
+  const result = await collectRpcPolicyLogs({
+    fromBlock: 10n,
+    toBlock: 70n,
+    request: async ({ params }) => {
+      requests.push(params[0]);
+      return [{ blockNumber: params[0].fromBlock, logIndex: "0x0", topics: [POLICY_SET_TOPIC, addressTopic(OPERATOR), MARKET_ID] }];
+    },
+  });
+  assert.equal(requests.length, 3);
+  assert.equal(result.pageCount, 3);
+  assert.equal(result.logs.length, 3);
+});
+
+test("Blockscout cursor collection stops after crossing the checkpoint", async () => {
+  const pages = [
+    {
+      items: [
+        { block_number: 105, index: 2, topics: ["0x1234"] },
+        { block_number: 104, index: 1, topics: [POLICY_DISABLED_TOPIC, addressTopic(OPERATOR), MARKET_ID] },
+      ],
+      next_page_params: { block_number: 104, index: 1, items_count: 50 },
+    },
+    {
+      items: [
+        { block_number: 103, index: 1, topics: [POLICY_SET_TOPIC, addressTopic(OPERATOR), MARKET_ID] },
+        { block_number: 99, index: 1, topics: [POLICY_SET_TOPIC, addressTopic(OTHER_KEEPER), MARKET_ID] },
+      ],
+      next_page_params: { block_number: 99, index: 1, items_count: 50 },
+    },
+  ];
+  let calls = 0;
+  const result = await collectPolicyLogs({
+    fromBlock: 100n,
+    toBlock: 104n,
+    fetchPage: async () => pages[calls++],
+  });
+  assert.equal(calls, 2);
+  assert.equal(result.pageCount, 2);
+  const policies = applyPolicyLogs(new Map(), result.logs);
+  assert.equal(policies.size, 0);
+});
+
+test("policy index applies set and disable events in chain order", () => {
+  const policies = applyPolicyLogs(new Map(), [
+    { blockNumber: "0x3", logIndex: "0x0", topics: [POLICY_DISABLED_TOPIC, addressTopic(OPERATOR), MARKET_ID] },
+    { blockNumber: "0x2", logIndex: "0x0", topics: [POLICY_SET_TOPIC, addressTopic(OPERATOR), MARKET_ID] },
+    { blockNumber: "0x4", logIndex: "0x0", topics: [POLICY_SET_TOPIC, addressTopic(OPERATOR), MARKET_ID] },
+  ]);
+  assert.deepEqual([...policies.values()], [{ borrower: OPERATOR, id: MARKET_ID }]);
+});
+
+test("policy checkpoint survives a process restart", () => {
+  const directory = mkdtempSync(join(tmpdir(), "ballast-state-"));
+  const stateFile = join(directory, "keeper-state.json");
+  const state = {
+    chainId: 14,
+    manager: MANAGER,
+    fromBlock: 67_019_411n,
+    nextBlock: 67_100_001n,
+    policies: [{ borrower: OPERATOR, id: MARKET_ID }],
+  };
+  saveDiscoveryState(stateFile, state);
+  assert.deepEqual(loadDiscoveryState(stateFile, state), {
+    nextBlock: state.nextBlock,
+    policies: state.policies,
+  });
+});
+
+test("policy checkpoint is ignored for a different manager", () => {
+  const directory = mkdtempSync(join(tmpdir(), "ballast-state-mismatch-"));
+  const stateFile = join(directory, "keeper-state.json");
+  const state = { chainId: 14, manager: MANAGER, fromBlock: 1n, nextBlock: 2n, policies: [] };
+  saveDiscoveryState(stateFile, state);
+  assert.equal(loadDiscoveryState(stateFile, { ...state, manager: OTHER_KEEPER }), null);
+});
+
+test("position limits fail closed instead of dropping policies", () => {
+  assert.throws(() => enforcePositionLimit([1, 2, 3], 2), /refusing partial coverage/);
+  assert.deepEqual(enforcePositionLimit([1, 2, 3], 0), [1, 2, 3]);
 });
 
 test("mapWithConcurrency never exceeds the worker limit", async () => {

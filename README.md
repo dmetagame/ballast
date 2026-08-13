@@ -288,11 +288,17 @@ EXECUTE=true \
 npm run keeper:execute
 ```
 
-Useful controls are `BALLAST`, `FROM_BLOCK`, `EXPLORER_URL`, and `MAX_POSITIONS`. The default
-manager and start block are the finalized V3 deployment. Keep the private key outside shell
-history and use a dedicated keeper account. Supplying the protected key during dry-run lets the
-keeper prove that each V3 policy names this operator; a failed simulation is skipped rather than
-broadcast.
+Useful controls are `BALLAST`, `FROM_BLOCK`, `STATE_FILE`, `BLOCKSCOUT_URL`,
+`CONFIRMATION_BLOCKS`, `RPC_LOG_PAGE_BLOCKS`, `LOG_QUERY_CONCURRENCY`, and `MAX_POSITIONS`. The
+keeper indexes history through Blockscout cursor pages, fills any explorer lag through Flare's
+30-block RPC log windows, and atomically checkpoints the complete active-policy set through the
+confirmed chain tip. After bootstrap, normal cycles use RPC only, so explorer downtime cannot
+stall already-checkpointed operation. They resume without rescanning deployment history or leaving
+an indexing gap. `MAX_POSITIONS=0` means no limit; a positive limit fails closed rather than
+silently dropping policies. The default manager and start block are the finalized V3 deployment.
+Keep the private key outside shell history and use a dedicated keeper account. Supplying the
+protected key during dry-run lets the keeper prove that each V3 policy names this operator; a
+failed simulation is skipped rather than broadcast.
 
 For hardened production operation, set `MANAGER_VERSION=v3` and point `BALLAST` at
 `0x746066ACe5dc89a3692137b8cdE3c31328629d09`. V3 requires each borrower to name the keeper that may act on their
