@@ -23,7 +23,7 @@ jobs:
             monitor/package-lock.json
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.22"
+          go-version: "1.25.1"
           cache-dependency-path: fce/go.sum
       - run: forge test --no-match-path 'test/*.fork.t.sol'
       - run: npm ci
