@@ -1,6 +1,9 @@
 import { readFileSync } from "node:fs";
 
-const html = readFileSync(new URL("./index.html", import.meta.url), "utf8");
+const baseUrl = process.env.BASE_URL?.replace(/\/$/, "");
+const response = baseUrl ? await fetch(baseUrl, { redirect: "follow" }) : null;
+if (response && !response.ok) throw new Error(`deployment returned ${response.status} ${response.statusText}`);
+const html = response ? await response.text() : readFileSync(new URL("./index.html", import.meta.url), "utf8");
 
 const checks = [
   ["HTML doctype", /^<!doctype html>/i.test(html)],
@@ -14,3 +17,4 @@ const checks = [
 const failed = checks.filter(([, pass]) => !pass);
 for (const [name, pass] of checks) console.log(`${pass ? "ok" : "FAIL"} ${name}`);
 if (failed.length) process.exit(1);
+if (baseUrl) console.log(`deployment verified: ${baseUrl}`);

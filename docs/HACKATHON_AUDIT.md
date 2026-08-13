@@ -7,9 +7,10 @@ This audit maps the repository's current state to the Flare Summer Signal produc
 Ballast is already a strong Bounty 1 submission. It solves a measured problem for FXRP borrowers, depends materially on Flare-native assets and pricing, has verified mainnet contracts, and demonstrates the complete protection transaction against forked live state.
 
 The principal submission risk is no longer missing product infrastructure. The contracts,
-frontends, dry-run keeper, and FCC machine are deployed. The remaining risk is evidence: no
-consenting borrower has completed a real mainnet protection receipt, no private FCC enrollment
-receipt is published, and the demo video and external feedback are still missing.
+frontends, dry-run keeper, and FCC machine are deployed. The static frontends were migrated from
+a disabled Vercel team to isolated paths on the existing AWS host without changing the FCC root
+proxy. The remaining product evidence gaps are a real mainnet protection receipt, a private FCC
+enrollment receipt, the demo video, and external feedback.
 
 ## Eligibility and submission completeness
 
@@ -26,7 +27,7 @@ receipt is published, and the demo video and external feedback are still missing
 | Deployments | Ready | Mainnet and Coston2 addresses documented |
 | Roadmap | Ready | Submission pack and README known gaps |
 | Demo video | Missing | Record a concise end-to-end walkthrough |
-| Hosted product link | Ready, controlled beta | Landing, dashboard, enrollment, FCC proxy, and dry-run keeper are live |
+| Hosted product link | Ready, controlled beta | Landing, dashboard, enrollment, FCC proxy, and dry-run keeper are live on AWS |
 | Live protection receipt | Missing | Requires a consenting controlled borrower and capital |
 
 ## Judging criteria
@@ -62,14 +63,17 @@ Avoid claiming that Ballast directly calls FTSO contracts on mainnet unless the 
 - The manager and adapter retain no normal transaction surplus.
 - Fork tests cover real Morpho positions, real tokens, real oracle behavior, and real SparkDEX pools.
 - Liquidity tests document where deleveraging stops being economically rational.
-- The new keeper discovers enrolled policies, previews actions, defaults to dry-run, simulates before broadcast, and requires explicit execution credentials.
+- The keeper discovers enrolled policies, checkpoints the complete active set through the
+  confirmed chain tip, previews actions, defaults to dry-run, simulates before broadcast, and
+  requires explicit execution credentials.
 
 Remaining technical risks:
 
 1. The production owner is an EOA and can accept delayed adapter/pool changes.
 2. Contracts are unaudited.
 3. Only one pool is used per token pair.
-4. Keeper restart supervision and profitability controls exist, but external alerts and a live execution history do not.
+4. Keeper restart supervision, persistent event checkpoints, and profitability controls exist,
+   but external alerts and a live execution history do not.
 5. Mainnet enrollment and protection have not occurred with a consenting live borrower.
 
 ### Evidence of new work — good but must be packaged
@@ -131,7 +135,7 @@ Do not spend demo time on every contract or every FCC infrastructure component. 
 ### High impact product work
 
 1. Complete a controlled mainnet enrollment and protection receipt.
-2. Add external keeper alerts and persistent event checkpoints.
+2. Add external keeper alerts and an operator incident runbook.
 3. Add multi-pool routing for stressed FXRP liquidity.
 4. Move EOA ownership to a multisig or governance contract.
 

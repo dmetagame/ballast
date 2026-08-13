@@ -1,0 +1,34 @@
+ballast.rouma.online {
+    header {
+        Strict-Transport-Security "max-age=31536000"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        X-Frame-Options "DENY"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    }
+
+    @product path /product
+    redir @product /product/ 308
+    handle_path /product/* {
+        root * /var/www/ballast-current/landing
+        file_server
+    }
+
+    @risk path /risk
+    redir @risk /risk/ 308
+    handle_path /risk/* {
+        root * /var/www/ballast-current/dashboard
+        file_server
+    }
+
+    @enroll path /enroll
+    redir @enroll /enroll/ 308
+    handle_path /enroll/* {
+        root * /var/www/ballast-current/enrollment
+        file_server
+    }
+
+    handle {
+        reverse_proxy 127.0.0.1:6674
+    }
+}

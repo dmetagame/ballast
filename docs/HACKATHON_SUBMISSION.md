@@ -33,20 +33,29 @@ Leveraged FXRP borrowers can lose approximately 7.4% of position value when a Mo
 - Static risk dashboard from measured Flare mainnet state.
 - Hosted enrollment UI with Morpho authorization, V3 policy setup, and borrower exit controls.
 - Always-on AWS keeper service that discovers policies, verifies the named V3 operator, calls
-  `previewProtect`, simulates before execution, and remains dry-run pending a controlled receipt.
+  `previewProtect`, simulates before execution, persists confirmed event checkpoints, and remains
+  dry-run pending a controlled receipt.
 - Fresh FCC extension and simulated TEE in PRODUCTION on the redeployed Coston2 manager.
 
 ## Hosted surfaces
 
-- Product narrative: `https://ballast-landing-sepia.vercel.app`
-- Measured risk dashboard: `https://ballast-alpha.vercel.app`
-- Controlled enrollment beta: `https://ballast-enrollment.vercel.app`
+- Product narrative: `https://ballast.rouma.online/product/`
+- Measured risk dashboard: `https://ballast.rouma.online/risk/`
+- Controlled enrollment beta: `https://ballast.rouma.online/enroll/`
 - FCC proxy: `https://ballast.rouma.online`
+
+The static frontends are served from the same AWS host as the FCC proxy under isolated paths;
+the root and FCC API routes continue to proxy to the registered extension service.
 
 The enrollment UI accepts policy transactions, but the hosted keeper remains dry-run. Do not
 describe an enrolled policy as active automated protection until the live receipt milestone is met.
 
 ## Work completed during Summer Signal
+
+Ballast is submitted as a hackathon-built project; the repository's initial commit is dated
+August 2, 2026, during the Summer Signal development window. No pre-hackathon production usage
+or traction is being claimed. The work below is the work built, ported, integrated, or improved
+for this submission:
 
 During Summer Signal we scanned Flare lending markets, measured the FXRP liquidation surface
 and DEX depth, implemented the policy registry and atomic Morpho/SparkDEX deleveraging path,

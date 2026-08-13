@@ -257,8 +257,8 @@ directly actionable list of who is closest to being liquidated.
 ## Try it
 
 The product landing page is publicly deployed at
-`https://ballast-landing-sepia.vercel.app`. It links to the measured risk dashboard at
-`https://ballast-alpha.vercel.app` and the V3 enrollment app below. The landing page
+`https://ballast.rouma.online/product/`. It links to the measured risk dashboard at
+`https://ballast.rouma.online/risk/` and the V3 enrollment app below. The landing page
 lives in `landing/`; regenerate its committed figures with `node landing/data.mjs` before
 publishing updated market claims.
 
@@ -309,7 +309,7 @@ with `EXECUTE=false`; it is not yet a protection SLA and will remain dry-run unt
 mainnet `Protected` receipt succeeds.
 
 The borrower enrollment app lives in `app/` and is publicly deployed at
-`https://ballast-enrollment.vercel.app`. It targets the finalized V3 manager with enrollment
+`https://ballast.rouma.online/enroll/`. It targets the finalized V3 manager with enrollment
 writes enabled:
 
 ```bash

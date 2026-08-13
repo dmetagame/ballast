@@ -31,8 +31,8 @@ The form defaults are deliberately conservative for the controlled beta: trigger
 `1.30`, `100 FXRP` per-action cap, and `1%` slippage. Borrowers must authorize Morpho before the
 UI enables policy submission, and the summary warns when a policy would be actionable immediately.
 
-Public app: https://ballast-enrollment.vercel.app
+Public app: https://ballast.rouma.online/enroll/
 
-`../scripts/activate-production.sh` verifies mainnet contract state, persists the public Vite
-configuration, builds and verifies the bundle, deploys it, repoints the public alias, and verifies
-the deployed HTML and JavaScript before reporting success.
+`../scripts/activate-production.sh` verifies mainnet contract state, builds and verifies all three
+static surfaces, deploys them atomically to AWS, reloads Caddy without replacing the FCC fallback,
+and verifies the public HTML and JavaScript before reporting success.

@@ -10,9 +10,9 @@ until a controlled borrower enrollment and protection receipt are verified.
 - Manager: `0x746066ACe5dc89a3692137b8cdE3c31328629d09`
 - Keeper: `0xA20a59090f609329405F5DcA785Af9357F6965E7`
 - Start block: `67019411`
-- Discovery: confirmed RPC log pages with persistent checkpointing
+- Discovery: Blockscout bootstrap plus confirmed 30-block RPC pages with persistent checkpointing
 - Mode: continuous dry-run, `EXECUTE=false`
-- Service state verified August 12, 2026: active, zero restarts
+- Service state verified August 13, 2026: active, zero restarts; confirm the deployed commit during each release
 - Execution bounds: gas ceiling, minimum fee, loan-token/FLR conversion, and minimum profit set
 
 The protected key may be loaded during dry-run so the service can reject policies naming a
@@ -34,6 +34,28 @@ external proxy on port `6674`. Do not use a quick Cloudflare or ngrok tunnel.
 
 Tailscale Funnel is acceptable for judging if the VPS device remains registered, but a domain
 and direct HTTPS endpoint are preferable for operational continuity.
+
+## Static product surfaces
+
+The same Caddy site serves immutable static releases without taking over the FCC API routes:
+
+- `/product/` serves the landing surface.
+- `/risk/` serves the generated risk dashboard.
+- `/enroll/` serves the V3 borrower control panel.
+- Every other path, including `/info`, continues to proxy to the FCC service on `127.0.0.1:6674`.
+
+`scripts/deploy-static-aws.sh` builds and verifies all three surfaces, refuses a dirty release by
+default, records the exact Git commit in each `release.json`, atomically switches the current
+release symlink, reloads Caddy, and restores the previous release and Caddy configuration if
+activation or public verification fails. Run it only from a committed release:
+
+```bash
+./scripts/deploy-static-aws.sh
+./scripts/verify-static-production.sh
+```
+
+The Caddy configuration adds HSTS, clickjacking protection, MIME sniffing protection, a restrained
+referrer policy, and disables unused camera, microphone, and geolocation permissions.
 
 ## Current Coston2 deployment
 

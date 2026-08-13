@@ -117,12 +117,12 @@ never configure both `PRIVATE_KEY` and `PRIVATE_KEY_FILE`.
 7. Keeper dry run reports no errors.
 8. A controlled small position completes authorization, policy enrollment, preview, and protection.
 
-## Current delivery state — August 12, 2026
+## Current delivery state — August 13, 2026
 
 Completed and verified:
 
 - GitHub `main` contains the productionization changes.
-- Enrollment app is publicly available at `https://ballast-enrollment.vercel.app`.
+- Enrollment app is publicly available at `https://ballast.rouma.online/enroll/`.
 - V3 is finalized on Flare mainnet. `BallastManagerV3` is
   `0x746066ACe5dc89a3692137b8cdE3c31328629d09` and `SparkDexAdapterV2` is
   `0xA3B9822228b6d0DE77089B0C67Ec0A73A9A9C202`.
@@ -136,10 +136,19 @@ Completed and verified:
 - `scripts/verify-production-fork.sh` passes against pinned block `67260848`, executing the
   deployed V3 manager and adapter against a real position.
 - The AWS keeper service is active without restarts, targets V3 from block `67019411`, applies
-  gas/fee/profit bounds, and remains `EXECUTE=false`.
+  gas/fee/profit bounds, and remains `EXECUTE=false`. Its active policy index is persisted with
+  mode `0600`, bootstraps through Blockscout, fills explorer lag through Flare's 30-block RPC log
+  windows, and resumes from confirmed checkpoints without rescanning deployment history.
 - The dedicated keeper is `0xA20a59090f609329405F5DcA785Af9357F6965E7`.
 - V3 unit tests, the production fork, app production-build verification, landing verification,
   keeper tests, FCC tests, and dependency audits pass.
+
+Current hosting state:
+
+- Landing, dashboard, and enrollment are deployed as immutable static releases on the AWS host at
+  `/product/`, `/risk/`, and `/enroll/`.
+- Caddy serves those exact prefixes and preserves the FCC reverse proxy as the fallback handler,
+  so `/info` and all extension routes continue to reach port `6674`.
 
 Still required before broad enrollment:
 

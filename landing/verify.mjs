@@ -19,7 +19,7 @@ const dist = join(here, "dist");
 
 // BASE_URL targets a deployed build instead of the local one, so the same checks can be run
 // against production. Without it, the local dist is served over loopback.
-const REMOTE = process.env.BASE_URL;
+const REMOTE = process.env.BASE_URL?.replace(/\/$/, "");
 if (!REMOTE && !existsSync(join(dist, "index.html"))) throw new Error("run `npm run build` first");
 
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json" };

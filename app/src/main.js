@@ -8,13 +8,28 @@ let account;
 let currentChainId;
 let currentHealth;
 let isAuthorized = false;
+let policyFormDirty = false;
+let loadedPolicyAccount;
 
 const $ = (id) => document.getElementById(id);
 const short = (value) => value ? `${value.slice(0, 6)}…${value.slice(-4)}` : "—";
 const explorer = (hash) => `${flare.blockExplorers.default.url}/tx/${hash}`;
 const managerExplorer = `${flare.blockExplorers.default.url}/address/${MANAGER}`;
+const DEFAULT_POLICY = {
+  triggerHealth: "1.15",
+  targetHealth: "1.30",
+  maxCollateral: "100",
+  maxSlippage: "1",
+  keeperFee: "0.25",
+  cooldown: "3600",
+  keeperAddress: KEEPER,
+};
 const setStatus = (message, tone = "") => { $("statusMessage").textContent = message; $("statusMessage").className = `status-bar ${tone}`; };
 const isFlare = () => currentChainId === flare.id;
+
+function resetPolicyForm() {
+  for (const [id, value] of Object.entries(DEFAULT_POLICY)) $(id).value = value;
+}
 
 async function waitForSuccess(hash, action) {
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
@@ -34,6 +49,9 @@ function resetAccount() {
   currentChainId = undefined;
   currentHealth = undefined;
   isAuthorized = false;
+  policyFormDirty = false;
+  loadedPolicyAccount = undefined;
+  resetPolicyForm();
   $("connectButton").textContent = "Connect wallet";
   $("walletBadge").textContent = "Not connected";
   $("walletAddress").textContent = "Connect a wallet";
@@ -109,6 +127,17 @@ async function refresh() {
     publicClient.readContract({ address: MANAGER, abi: managerAbi, functionName: "previewProtect", args: [account, MARKET_ID] }),
   ]);
   const [actionable, health, repayAssets, collateralNeeded] = preview;
+  if (policy.triggerHealth > 0n && (!policyFormDirty || loadedPolicyAccount !== account)) {
+    $("triggerHealth").value = formatUnits(policy.triggerHealth, 18);
+    $("targetHealth").value = formatUnits(policy.targetHealth, 18);
+    $("maxCollateral").value = formatUnits(policy.maxCollateralPerAction, 6);
+    $("maxSlippage").value = formatUnits(policy.maxSlippageBps, 2);
+    $("keeperFee").value = formatUnits(policy.keeperFeeBps, 2);
+    $("cooldown").value = policy.cooldown.toString();
+    if (policy.keeper) $("keeperAddress").value = policy.keeper;
+    policyFormDirty = false;
+    loadedPolicyAccount = account;
+  }
   currentHealth = health;
   isAuthorized = authorized;
   const healthText = health === (2n ** 256n - 1n) ? "No debt" : `${formatUnits(health, 18)}×`;
@@ -222,7 +251,7 @@ async function submitPolicy(event) {
   if (!ENABLE_WRITES) return setStatus("Enrollment writes are disabled in this build.", "warning");
   if (!isAuthorized) return setStatus("Authorize the V3 manager on Morpho before saving a policy.", "warning");
   if (!isFlare() && !(await switchToFlare())) return;
-  try { const args = validatePolicy(); if (MANAGER_VERSION !== "v3") throw new Error("Enrollment writes require VITE_MANAGER_VERSION=v3."); setStatus("Waiting for policy confirmation…"); const hash = await walletClient.writeContract({ address: MANAGER, abi: managerAbi, functionName: "setPolicy", args, account, chain: flare }); setStatus(`Policy submitted: ${short(hash)} · ${explorer(hash)}`); await waitForSuccess(hash, "Policy update"); await refresh(); setStatus("Protection policy confirmed onchain.", "success"); }
+  try { const args = validatePolicy(); if (MANAGER_VERSION !== "v3") throw new Error("Enrollment writes require VITE_MANAGER_VERSION=v3."); setStatus("Waiting for policy confirmation…"); const hash = await walletClient.writeContract({ address: MANAGER, abi: managerAbi, functionName: "setPolicy", args, account, chain: flare }); setStatus(`Policy submitted: ${short(hash)} · ${explorer(hash)}`); await waitForSuccess(hash, "Policy update"); policyFormDirty = false; await refresh(); setStatus("Protection policy confirmed onchain.", "success"); }
   catch (error) { setStatus(error.shortMessage || error.message, "error"); }
 }
 
@@ -232,7 +261,10 @@ $("authorizeButton").addEventListener("click", sendAuthorization);
 $("disablePolicyButton").addEventListener("click", disablePolicy);
 $("revokeAuthorizationButton").addEventListener("click", revokeAuthorization);
 $("policyForm").addEventListener("submit", submitPolicy);
-[...document.querySelectorAll("input")].forEach((input) => input.addEventListener("input", updateSummary));
+[...document.querySelectorAll("input")].forEach((input) => input.addEventListener("input", () => {
+  policyFormDirty = true;
+  updateSummary();
+}));
 if (window.ethereum) {
   window.ethereum.on?.("chainChanged", (chainId) => {
     currentChainId = Number.parseInt(chainId, 16);
@@ -241,6 +273,9 @@ if (window.ethereum) {
   window.ethereum.on?.("accountsChanged", (accounts) => {
     if (!accounts.length) return resetAccount();
     account = getAddress(accounts[0]);
+    policyFormDirty = false;
+    loadedPolicyAccount = undefined;
+    resetPolicyForm();
     renderAccount();
     refresh().catch((error) => setStatus(error.shortMessage || error.message, "error"));
   });

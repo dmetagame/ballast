@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => {
     && manager.toLowerCase() === PRODUCTION_MANAGER.toLowerCase();
 
   return {
+    base: "./",
     plugins: [{
       name: "ballast-build-metadata",
       transformIndexHtml: {

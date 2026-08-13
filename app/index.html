@@ -58,7 +58,7 @@
             <label><span>Max slippage</span><small>Hard contract ceiling: 10%</small><div class="input-wrap"><input id="maxSlippage" name="maxSlippage" value="1" inputmode="decimal" required /><span>%</span></div><em data-error-for="maxSlippage"></em></label>
             <label><span>Keeper fee</span><small>Paid from recovered surplus · max 5%</small><div class="input-wrap"><input id="keeperFee" name="keeperFee" value="0.25" inputmode="decimal" required /><span>%</span></div><em data-error-for="keeperFee"></em></label>
             <label><span>Cooldown</span><small>Minimum time between actions</small><div class="input-wrap"><input id="cooldown" name="cooldown" value="3600" inputmode="numeric" required /><span>seconds</span></div><em data-error-for="cooldown"></em></label>
-            <label><span>Keeper address</span><small>Prefilled with the hosted dry-run operator; verify before signing</small><div class="input-wrap"><input id="keeperAddress" name="keeperAddress" placeholder="0x…" autocomplete="off" required /></div><em data-error-for="keeperAddress"></em></label>
+            <label class="address-field"><span>Keeper address</span><small>Prefilled with the hosted dry-run operator; verify before signing</small><div class="input-wrap"><input id="keeperAddress" name="keeperAddress" placeholder="0x…" autocomplete="off" required /></div><em data-error-for="keeperAddress"></em></label>
           </div>
           <div class="policy-summary" id="policySummary">Set limits to preview the onchain policy.</div>
           <button class="button button-primary" id="policyButton" type="submit" disabled>Save protection policy</button>

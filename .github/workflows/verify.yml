@@ -25,6 +25,8 @@ jobs:
         with:
           go-version: "1.25.1"
           cache-dependency-path: fce/go.sum
+      - run: for file in scripts/*.sh; do bash -n "$file"; done
+      - run: node --check monitor/verify-controlled-receipt.mjs
       - run: forge test --no-match-path 'test/*.fork.t.sol'
       - run: npm ci
         working-directory: app
@@ -46,10 +48,11 @@ jobs:
   production-fork:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
         with:
           submodules: recursive
       - uses: foundry-rs/foundry-toolchain@v1
       - run: ./scripts/verify-production-fork.sh
+      - run: ./scripts/verify-controlled-production-fork.sh

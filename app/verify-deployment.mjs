@@ -1,6 +1,6 @@
 import { PRODUCTION_KEEPER, PRODUCTION_MANAGER } from "./src/production.js";
 
-const baseUrl = (process.env.BASE_URL || "https://ballast-enrollment.vercel.app").replace(/\/$/, "");
+const baseUrl = (process.env.BASE_URL || "https://ballast.rouma.online/enroll/").replace(/\/$/, "");
 const legacyManager = "0x379e5b8cf31fc5d46aec2fc17f17708951015571";
 
 const response = await fetch(baseUrl, { redirect: "follow" });
