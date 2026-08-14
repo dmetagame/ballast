@@ -16,6 +16,7 @@ import {
   loadDiscoveryState,
   loadPrivateKey,
   mapWithConcurrency,
+  resolveOperatorAddress,
   saveDiscoveryState,
   selectSyncTarget,
   shouldSkipForDifferentKeeper,
@@ -60,17 +61,28 @@ test("v3 keeper refuses a policy with no keeper field", () => {
   }
 });
 
-test("dry run without a key cannot assess the keeper identity", () => {
+test("dry run without an operator address cannot assess the keeper identity", () => {
   assert.equal(
     shouldSkipForDifferentKeeper({ managerVersion: "v3", policyKeeper: OTHER_KEEPER, operator: undefined }),
     false,
   );
 });
 
-test("dry run with a key refuses a policy naming a different operator", () => {
+test("dry run with an operator address refuses a policy naming a different operator", () => {
   assert.equal(
     shouldSkipForDifferentKeeper({ managerVersion: "v3", policyKeeper: OTHER_KEEPER, operator: OPERATOR }),
     true,
+  );
+});
+
+test("dry run resolves the operator from a public address", () => {
+  assert.equal(resolveOperatorAddress({ configuredAddress: OPERATOR.toLowerCase() }), OPERATOR);
+});
+
+test("execution refuses an operator address that does not match the signer", () => {
+  assert.throws(
+    () => resolveOperatorAddress({ configuredAddress: OTHER_KEEPER, signerAddress: OPERATOR }),
+    /does not match the configured private key/,
   );
 });
 

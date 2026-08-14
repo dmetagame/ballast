@@ -11,6 +11,10 @@ const BALLAST = getAddress(process.env.BALLAST || "0x746066ACe5dc89a3692137b8cdE
 const ADAPTER = getAddress(process.env.ADAPTER || "0xA3B9822228b6d0DE77089B0C67Ec0A73A9A9C202");
 const OWNER = getAddress(process.env.OWNER || "0x302a6505c225bBB145569F35B89611d0677195a9");
 const GUARDIAN = getAddress(process.env.GUARDIAN || "0xFf97ED39EAe2a4f5fa79097EdDbFD4c27876f8ce");
+const EXPECTED_KEEPER = getAddress(process.env.EXPECTED_KEEPER || "0xA20a59090f609329405F5DcA785Af9357F6965E7");
+const OPERATOR_ADDRESS = process.env.OPERATOR_ADDRESS?.trim()
+  ? getAddress(process.env.OPERATOR_ADDRESS.trim())
+  : null;
 const ACTIVE_POOL = getAddress(process.env.ACTIVE_POOL || "0x927485d88a66253c63Af9163dca5f21c25A57393");
 const COLLATERAL_TOKEN = getAddress(process.env.COLLATERAL_TOKEN || "0xAd552A648C74D49E10027AB8a618A3ad4901c5bE");
 const LOAN_TOKEN = getAddress(process.env.LOAN_TOKEN || "0xe7cd86e13AC4309349F30B3435a9d337750fC82D");
@@ -109,11 +113,19 @@ function checkKeeperState() {
   return validateKeeperState({ state, modifiedMs: statSync(STATE_FILE).mtimeMs });
 }
 
+export function validateKeeperIdentity({ operatorAddress, expectedKeeper = EXPECTED_KEEPER }) {
+  if (!operatorAddress) throw new Error("OPERATOR_ADDRESS is missing from the keeper environment");
+  const operator = getAddress(operatorAddress);
+  if (!sameAddress(operator, expectedKeeper)) throw new Error(`keeper operator mismatch: ${operator}`);
+  return operator;
+}
+
 function checkKeeperService() {
   if (!CHECK_KEEPER_SERVICE) return { skipped: true };
+  const operator = validateKeeperIdentity({ operatorAddress: OPERATOR_ADDRESS });
   try {
     execFileSync("systemctl", ["--user", "is-active", "--quiet", KEEPER_UNIT], { stdio: "ignore" });
-    return { active: true };
+    return { active: true, operator };
   } catch {
     throw new Error(`keeper service is not active: ${KEEPER_UNIT}`);
   }

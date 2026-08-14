@@ -15,7 +15,7 @@ if [ ! -f "$config_dir/keeper.env" ]; then
 fi
 if [ ! -f "$key_file" ]; then
   install -m 600 /dev/null "$key_file"
-  printf 'created empty %s; write the dedicated keeper key before setting EXECUTE=true\n' "$key_file"
+  printf 'created empty %s; use it only for an approved manual execution window\n' "$key_file"
 fi
 chmod 600 "$config_dir/keeper.env" "$key_file"
 if [ -L "$runtime_current" ]; then
@@ -28,6 +28,9 @@ else
 fi
 if grep -Eq '^PRIVATE_KEY=.+$' "$config_dir/keeper.env"; then
   printf 'warning: remove PRIVATE_KEY from %s after moving it to %s\n' "$config_dir/keeper.env" "$key_file" >&2
+fi
+if ! grep -Eq '^OPERATOR_ADDRESS=0x[0-9A-Fa-f]{40}$' "$config_dir/keeper.env"; then
+  printf 'warning: set OPERATOR_ADDRESS in %s before starting the dry-run service\n' "$config_dir/keeper.env" >&2
 fi
 install -m 644 "$repo_root/deploy/systemd/ballast-keeper.service" "$unit_dir/ballast-keeper.service"
 install -m 644 "$repo_root/deploy/systemd/ballast-keeper-health.service" "$unit_dir/ballast-keeper-health.service"

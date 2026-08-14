@@ -12,11 +12,12 @@ until a controlled borrower enrollment and protection receipt are verified.
 - Start block: `67019411`
 - Discovery: Blockscout bootstrap plus confirmed 30-block RPC pages with persistent checkpointing
 - Mode: continuous dry-run, `EXECUTE=false`
+- Identity: `OPERATOR_ADDRESS` only; the funded key is hidden from the dry-run service
 - Service state verified August 13, 2026: active, zero restarts; confirm the deployed commit during each release
 - Execution bounds: gas ceiling, minimum fee, loan-token/FLR conversion, and minimum profit set
 
-The protected key may be loaded during dry-run so the service can reject policies naming a
-different keeper without broadcasting transactions.
+The dry-run service rejects policies naming a different keeper using the public operator address;
+it does not load the funded signing key.
 
 ## Recommended host
 

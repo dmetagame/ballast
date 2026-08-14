@@ -296,9 +296,10 @@ confirmed chain tip. After bootstrap, normal cycles use RPC only, so explorer do
 stall already-checkpointed operation. They resume without rescanning deployment history or leaving
 an indexing gap. `MAX_POSITIONS=0` means no limit; a positive limit fails closed rather than
 silently dropping policies. The default manager and start block are the finalized V3 deployment.
-Keep the private key outside shell history and use a dedicated keeper account. Supplying the
-protected key during dry-run lets the keeper prove that each V3 policy names this operator; a
-failed simulation is skipped rather than broadcast.
+Keep the private key outside shell history and use a dedicated keeper account. Dry-run needs only
+`OPERATOR_ADDRESS`, which lets the keeper prove that each V3 policy names this operator without
+exposing the funded key to the continuous service. A failed simulation is skipped rather than
+broadcast.
 
 For hardened production operation, set `MANAGER_VERSION=v3` and point `BALLAST` at
 `0x746066ACe5dc89a3692137b8cdE3c31328629d09`. V3 requires each borrower to name the keeper that may act on their

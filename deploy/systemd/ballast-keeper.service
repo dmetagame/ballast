@@ -7,8 +7,7 @@ Wants=network-online.target
 Type=simple
 WorkingDirectory=%h/ballast-runtime-current/monitor
 EnvironmentFile=%h/.config/ballast/keeper.env
-LoadCredential=keeper_private_key:%h/.config/ballast/keeper.private-key
-ExecStart=/usr/bin/env npm run keeper:watch
+ExecStart=/usr/bin/env EXECUTE=false npm run keeper:watch
 Restart=on-failure
 RestartSec=10
 TimeoutStopSec=30
@@ -17,6 +16,7 @@ PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
 ReadWritePaths=%h/.config/ballast
+InaccessiblePaths=-%h/.config/ballast/keeper.private-key
 
 [Install]
 WantedBy=default.target

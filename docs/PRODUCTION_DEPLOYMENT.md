@@ -90,7 +90,7 @@ LOG_QUERY_CONCURRENCY=4
 MAX_POSITIONS=0
 EXECUTE=false
 RUN_ONCE=false
-PRIVATE_KEY_FILE=<protected credential path when running outside systemd>
+OPERATOR_ADDRESS=<dedicated keeper address>
 MAX_GAS_FLR_WEI=<hard ceiling>
 MIN_KEEPER_FEE_UNITS=<USD₮0 base units>
 LOAN_TOKEN_UNITS_PER_FLR=<USD₮0 base units per FLR>
@@ -116,10 +116,11 @@ journalctl --user -u ballast-keeper -f
 The installer creates the environment file with mode `0600` and does not start the service until
 the operator explicitly enables it.
 
-The systemd unit loads the keeper key from `~/.config/ballast/keeper.private-key` through
-`LoadCredential`; the key is not placed in `keeper.env` or exported directly by the service.
-Write the dedicated keeper key to that file with mode `0600` only after dry-run validation, and
-never configure both `PRIVATE_KEY` and `PRIVATE_KEY_FILE`.
+The continuous systemd unit is structurally dry-run-only: it uses `OPERATOR_ADDRESS` to verify V3
+policy ownership and explicitly hides `~/.config/ballast/keeper.private-key` from the service.
+Store the dedicated keeper key with mode `0600` and expose it only during an explicitly approved
+manual execution window through `PRIVATE_KEY_FILE`; never configure both `PRIVATE_KEY` and
+`PRIVATE_KEY_FILE`.
 
 The health timer checks the keeper checkpoint age, Flare chain identity, finalized manager,
 adapter, pool and admin state, Coston2 FCC registration/PRODUCTION status, and all three hosted static surfaces every

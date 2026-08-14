@@ -7,6 +7,7 @@ set -euo pipefail
 : "${RUNTIME_CURRENT:=/home/ubuntu/ballast-runtime-current}"
 : "${RUNTIME_SERVICE:=ballast-keeper.service}"
 : "${HEALTH_TIMER:=ballast-keeper-health.timer}"
+: "${RUNTIME_OPERATOR:=0xA20a59090f609329405F5DcA785Af9357F6965E7}"
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 commit=$(git -C "$repo_root" rev-parse HEAD)
@@ -48,7 +49,7 @@ tar -czf "$archive" -C "$stage" .
 scp "${ssh_options[@]}" "$archive" "$STATIC_HOST:$remote_archive"
 
 ssh "${ssh_options[@]}" "$STATIC_HOST" bash -s -- \
-  "$remote_archive" "$release_id" "$RUNTIME_RELEASE_ROOT" "$RUNTIME_CURRENT" "$RUNTIME_SERVICE" "$HEALTH_TIMER" <<'REMOTE'
+  "$remote_archive" "$release_id" "$RUNTIME_RELEASE_ROOT" "$RUNTIME_CURRENT" "$RUNTIME_SERVICE" "$HEALTH_TIMER" "$RUNTIME_OPERATOR" <<'REMOTE'
 set -euo pipefail
 archive=$1
 release_id=$2
@@ -56,8 +57,21 @@ release_root=$3
 current_link=$4
 service=$5
 health_timer=$6
+expected_operator=$7
 release_dir="$release_root/$release_id"
 unit_dir="$HOME/.config/systemd/user"
+env_file="$HOME/.config/ballast/keeper.env"
+
+[[ -f "$env_file" ]] || { echo "keeper environment is missing: $env_file" >&2; exit 1; }
+configured_operator=$(sed -n 's/^OPERATOR_ADDRESS=//p' "$env_file" | tail -1)
+[[ -n "$configured_operator" && "${configured_operator,,}" = "${expected_operator,,}" ]] || {
+  echo "keeper OPERATOR_ADDRESS is missing or unexpected" >&2
+  exit 1
+}
+grep -Eq '^EXECUTE=false$' "$env_file" || {
+  echo "keeper.env must retain EXECUTE=false for the continuous service" >&2
+  exit 1
+}
 
 mkdir -p "$release_root" "$release_dir" "$unit_dir"
 tar -xzf "$archive" -C "$release_dir"

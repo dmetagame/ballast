@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { runChecks, validateKeeperState, validateProductionState } from "./healthcheck.mjs";
+import { runChecks, validateKeeperIdentity, validateKeeperState, validateProductionState } from "./healthcheck.mjs";
 
 const MANAGER = "0x746066ACe5dc89a3692137b8cdE3c31328629d09";
 
@@ -18,6 +18,13 @@ test("keeper health state rejects stale or mismatched checkpoints", () => {
   const state = { version: 1, chainId: 14, manager: MANAGER.toLowerCase(), fromBlock: "67019411", nextBlock: "123", policies: [] };
   assert.throws(() => validateKeeperState({ state, manager: MANAGER, modifiedMs: 0, nowMs: 10_000, maxAgeMs: 5_000 }), /stale/);
   assert.throws(() => validateKeeperState({ state: { ...state, chainId: 114 }, manager: MANAGER, modifiedMs: 9_000, nowMs: 10_000, maxAgeMs: 5_000 }), /identity/);
+});
+
+test("keeper health requires the configured production operator", () => {
+  const keeper = "0xA20a59090f609329405F5DcA785Af9357F6965E7";
+  assert.equal(validateKeeperIdentity({ operatorAddress: keeper }), keeper);
+  assert.throws(() => validateKeeperIdentity({ operatorAddress: null }), /missing/);
+  assert.throws(() => validateKeeperIdentity({ operatorAddress: MANAGER }), /mismatch/);
 });
 
 test("production state requires the finalized manager, adapter, pool, and owners", () => {

@@ -28,7 +28,7 @@ const RPC_LOG_PAGE_BLOCKS = boundedPositiveInteger("RPC_LOG_PAGE_BLOCKS", 30, 30
 const LOG_QUERY_CONCURRENCY = positiveInteger("LOG_QUERY_CONCURRENCY", 4);
 const EXECUTE = process.env.EXECUTE === "true";
 const RUN_ONCE = process.env.RUN_ONCE === "true";
-const PRIVATE_KEY = loadPrivateKey();
+const PRIVATE_KEY = EXECUTE ? loadPrivateKey() : undefined;
 const MAX_POSITIONS = nonNegativeInteger("MAX_POSITIONS", 0);
 const MAX_CONCURRENCY = positiveInteger("MAX_CONCURRENCY", 4);
 const POLL_INTERVAL_MS = positiveInteger("POLL_INTERVAL_MS", 30_000);
@@ -53,6 +53,10 @@ const chain = {
 };
 const publicClient = createPublicClient({ chain, transport: http(RPC_URL) });
 const operatorAccount = PRIVATE_KEY ? privateKeyToAccount(PRIVATE_KEY) : null;
+const operatorAddress = resolveOperatorAddress({
+  configuredAddress: process.env.OPERATOR_ADDRESS,
+  signerAddress: operatorAccount?.address,
+});
 const account = EXECUTE
   ? operatorAccount || (() => { throw new Error("PRIVATE_KEY or PRIVATE_KEY_FILE is required with EXECUTE=true"); })()
   : null;
@@ -83,6 +87,15 @@ export function loadPrivateKey({
   if (!filePath) return undefined;
   const fileKey = readFileSync(filePath, "utf8").trim();
   return fileKey || undefined;
+}
+
+export function resolveOperatorAddress({ configuredAddress, signerAddress } = {}) {
+  const configured = configuredAddress?.trim() ? getAddress(configuredAddress.trim()) : null;
+  const signer = signerAddress?.trim() ? getAddress(signerAddress.trim()) : null;
+  if (configured && signer && configured !== signer) {
+    throw new Error(`OPERATOR_ADDRESS does not match the configured private key: ${signer}`);
+  }
+  return signer || configured;
 }
 
 function positiveInteger(name, fallback) {
@@ -462,8 +475,8 @@ async function processPolicy(row) {
     const item = await inspectPolicy(row);
     log("info", "policy_inspected", { borrower: item.borrower, id: item.id, enabled: item.enabled, actionable: item.actionable, health: formatHealth(item.health), trigger: formatHealth(item.trigger), repayAssets: item.repayAssets.toString(), collateralNeeded: item.collateralNeeded.toString() });
     if (!item.enabled || !item.actionable) return { status: "skipped", reason: item.enabled ? "not_actionable" : "disabled" };
-    if (shouldSkipForDifferentKeeper({ managerVersion: MANAGER_VERSION, policyKeeper: item.keeper, operator: operatorAccount?.address })) {
-      log("info", "policy_skipped", { borrower: item.borrower, id: item.id, reason: "different_keeper", configuredKeeper: item.keeper, operator: operatorAccount.address });
+    if (shouldSkipForDifferentKeeper({ managerVersion: MANAGER_VERSION, policyKeeper: item.keeper, operator: operatorAddress })) {
+      log("info", "policy_skipped", { borrower: item.borrower, id: item.id, reason: "different_keeper", configuredKeeper: item.keeper, operator: operatorAddress });
       return { status: "skipped", reason: "different_keeper" };
     }
     if (!EXECUTE) return { status: "dry_run", reason: "execution_disabled" };
@@ -503,9 +516,9 @@ export async function runCycle() {
 }
 
 export async function main() {
-  log("info", "keeper_started", { chainId: chain.id, ballast: BALLAST, managerVersion: MANAGER_VERSION, mode: EXECUTE ? "execute" : "dry_run", operator: operatorAccount?.address || null, runOnce: RUN_ONCE, pollIntervalMs: POLL_INTERVAL_MS, maxConcurrency: MAX_CONCURRENCY, maxPositions: MAX_POSITIONS, stateFile: STATE_FILE, healthStateFile: HEALTH_STATE_FILE, expectedReleaseCommit: EXPECTED_RELEASE_COMMIT, blockscoutUrl: BLOCKSCOUT_URL, confirmationBlocks: CONFIRMATION_BLOCKS, rpcLogPageBlocks: RPC_LOG_PAGE_BLOCKS, logQueryConcurrency: LOG_QUERY_CONCURRENCY });
-  if (MANAGER_VERSION === "v3" && !operatorAccount) {
-    log("warn", "keeper_identity_unverified", { reason: "no_private_key_in_dry_run" });
+  log("info", "keeper_started", { chainId: chain.id, ballast: BALLAST, managerVersion: MANAGER_VERSION, mode: EXECUTE ? "execute" : "dry_run", operator: operatorAddress || null, operatorSource: operatorAccount ? "private_key" : operatorAddress ? "address" : null, runOnce: RUN_ONCE, pollIntervalMs: POLL_INTERVAL_MS, maxConcurrency: MAX_CONCURRENCY, maxPositions: MAX_POSITIONS, stateFile: STATE_FILE, healthStateFile: HEALTH_STATE_FILE, expectedReleaseCommit: EXPECTED_RELEASE_COMMIT, blockscoutUrl: BLOCKSCOUT_URL, confirmationBlocks: CONFIRMATION_BLOCKS, rpcLogPageBlocks: RPC_LOG_PAGE_BLOCKS, logQueryConcurrency: LOG_QUERY_CONCURRENCY });
+  if (MANAGER_VERSION === "v3" && !operatorAddress) {
+    log("warn", "keeper_identity_unverified", { reason: "no_operator_address_in_dry_run" });
   }
   do {
     try {
