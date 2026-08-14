@@ -310,10 +310,14 @@ with `EXECUTE=false`; it is not yet a protection SLA and will remain dry-run unt
 mainnet `Protected` receipt succeeds.
 
 The host also runs a five-minute fail-closed health timer over keeper checkpoint freshness,
-manager, adapter, pool and admin state, FCC registration, and the three public surfaces. When execution is
-enabled, the keeper refuses to broadcast unless that result is fresh and matches its immutable
-release commit. Release deployment rolls static and keeper components back if they cannot advance
-to the same Git commit. An external webhook destination is optional and must be configured separately.
+manager, adapter, pool and admin state, FCC registration, and the three public surfaces. It publishes
+only status, check time, and release provenance at `/ops/health.json`; no borrower or operator data is
+exposed. A separate GitHub Actions watchdog checks that signal and every public `release.json` four
+times per hour against the current `main` commit, opens a `production-alert` issue on failure, and
+closes it after recovery. When execution is enabled, the keeper refuses to broadcast unless the
+internal result is fresh and matches its immutable release commit. Release deployment rolls static
+and keeper components back if they cannot advance to the same Git commit. A private webhook
+destination remains optional.
 
 The borrower enrollment app lives in `app/` and is publicly deployed at
 `https://ballast.rouma.online/enroll/`. It targets the finalized V3 manager with enrollment
@@ -406,8 +410,8 @@ Two things that will waste your time otherwise:
   are delayed, protection can be guardian-paused, and both ownership handoffs are complete.
 - **The keeper is hosted but intentionally dry-run.** The AWS service runs continuously with
   restart supervision and execution-economics bounds, but no borrower has enrolled on V3 and no
-  live `Protected` receipt exists. Health monitoring is active, but it is not an uptime or
-  protection guarantee.
+  live `Protected` receipt exists. Internal and independent external health monitoring are active,
+  but they are not an uptime or protection guarantee.
 - **Single-venue routing.** The adapter swaps against one registered pool per pair. Splitting
   across the Algebra and UniV3 pools would add roughly 20% more depth.
 - **The drawdown simulation is a worst case.** `PoolPusher` moves the price by dumping into a

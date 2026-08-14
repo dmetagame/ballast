@@ -16,6 +16,18 @@ ballast.rouma.online {
 	@hashedAssets path /product/assets/* /enroll/assets/*
 	header @hashedAssets Cache-Control "public, max-age=31536000, immutable"
 
+	@ops path /ops/health.json
+	header @ops {
+		Content-Type "application/json"
+		Cache-Control "no-store"
+		Content-Security-Policy "default-src 'none'; frame-ancestors 'none'"
+	}
+	handle @ops {
+		root * /var/www/ballast-ops
+		try_files /health.json =503
+		file_server
+	}
+
 	@product path /product
 	redir @product /product/ 308
 	handle_path /product/* {

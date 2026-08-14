@@ -37,6 +37,7 @@ remote_main=$(git -C "$repo_root" rev-parse origin/main)
 }
 git -C "$repo_root" diff --check
 node --check "$repo_root/monitor/healthcheck.mjs"
+node --check "$repo_root/monitor/watchdog.mjs"
 
 git -C "$repo_root" archive "$commit" \
   monitor \
@@ -74,6 +75,7 @@ grep -Eq '^EXECUTE=false$' "$env_file" || {
 }
 
 mkdir -p "$release_root" "$release_dir" "$unit_dir"
+sudo install -d -o "$(id -un)" -g "$(id -gn)" -m 0755 /var/www/ballast-ops
 tar -xzf "$archive" -C "$release_dir"
 npm ci --omit=dev --prefix "$release_dir/monitor"
 if [[ -L "$current_link" ]]; then
@@ -144,7 +146,13 @@ if [[ "$health_ok" != true ]]; then
   echo 'keeper health check did not pass' >&2
   rollback 1
 fi
+EXPECTED_RELEASE_COMMIT=$(jq -r '.commit' "$release_dir/release.json") node "$release_dir/monitor/watchdog.mjs"
 systemctl --user enable --now "$health_timer"
+next_health_trigger=$(systemctl --user show "$health_timer" -p NextElapseUSecMonotonic --value)
+[[ -n "$next_health_trigger" && "$next_health_trigger" != infinity ]] || {
+  echo 'keeper health timer has no next trigger' >&2
+  rollback 1
+}
 rm -f "$archive"
 printf 'keeper runtime deployed: release=%s commit=%s service=%s health_timer=%s\n' \
   "$release_id" "$(jq -r '.commit' "$release_dir/release.json")" "$service" "$health_timer"

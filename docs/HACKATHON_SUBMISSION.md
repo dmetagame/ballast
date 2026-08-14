@@ -35,8 +35,10 @@ Leveraged FXRP borrowers can lose approximately 7.4% of position value when a Mo
 - Always-on AWS keeper service that discovers policies, verifies the named V3 operator, calls
   `previewProtect`, simulates before execution, persists confirmed event checkpoints, and remains
   dry-run pending a controlled receipt. A five-minute health timer checks keeper freshness,
-  manager, adapter, pool and admin state, FCC registration, and hosted release provenance; future execution fails closed
-  unless that result is fresh and matches the running release.
+  manager, adapter, pool and admin state, FCC registration, and hosted release provenance; future
+  execution fails closed unless that result is fresh and matches the running release. A separate
+  GitHub watchdog checks the sanitized public health signal four times per hour and manages a
+  `production-alert` issue across failure and recovery.
 - Fresh FCC extension and simulated TEE in PRODUCTION on the redeployed Coston2 manager.
 
 ## Hosted surfaces

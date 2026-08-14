@@ -75,8 +75,9 @@ Remaining technical risks:
 1. The production owner is an EOA and can accept delayed adapter/pool changes.
 2. Contracts are unaudited.
 3. Only one pool is used per token pair.
-4. Keeper restart supervision, persistent event checkpoints, profitability controls, and a
-   fail-closed health timer exist. A webhook alert destination and live execution history do not.
+4. Keeper restart supervision, persistent event checkpoints, profitability controls, a fail-closed
+   health timer, and an independent GitHub issue watchdog exist. A second private webhook destination
+   and live execution history do not.
 5. Mainnet enrollment and protection have not occurred with a consenting live borrower.
 
 ### Evidence of new work — good but must be packaged
@@ -137,7 +138,7 @@ Do not spend demo time on every contract or every FCC infrastructure component. 
 ### High impact product work
 
 1. Complete a controlled mainnet enrollment and protection receipt.
-2. Configure an external keeper alert webhook; the health timer and incident runbook are present.
+2. Optionally configure a private webhook in addition to the independent GitHub issue watchdog.
 3. Add multi-pool routing for stressed FXRP liquidity.
 4. Move EOA ownership to a multisig or governance contract.
 

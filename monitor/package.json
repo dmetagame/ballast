@@ -14,6 +14,7 @@
     "keeper:watch": "node keeper.mjs",
     "keeper:execute-watch": "EXECUTE=true node keeper.mjs",
     "healthcheck": "node healthcheck.mjs",
+    "watchdog": "node watchdog.mjs",
     "verify:controlled": "node verify-controlled-receipt.mjs",
     "test": "node --test *.test.mjs"
   },

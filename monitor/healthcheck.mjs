@@ -22,6 +22,7 @@ const POOL_KEY = keccak256(encodePacked(["address", "address"], [COLLATERAL_TOKE
 const FROM_BLOCK = String(process.env.FROM_BLOCK || "67019411");
 const STATE_FILE = process.env.STATE_FILE || join(process.env.HOME || process.cwd(), ".config", "ballast", "keeper-state.json");
 const HEALTH_STATE_FILE = process.env.HEALTH_STATE_FILE || join(process.env.HOME || process.cwd(), ".config", "ballast", "health-state.json");
+const PUBLIC_HEALTH_FILE = process.env.PUBLIC_HEALTH_FILE?.trim();
 const MAX_STATE_AGE_MS = nonNegativeInteger("HEALTHCHECK_MAX_STATE_AGE_MS", 180_000);
 const KEEPER_UNIT = process.env.KEEPER_UNIT || "ballast-keeper.service";
 const CHECK_KEEPER_SERVICE = process.env.HEALTHCHECK_KEEPER_SERVICE !== "false";
@@ -272,17 +273,36 @@ function loadPreviousStatus() {
   }
 }
 
+export function publicHealthState({ status, checkedAt, releaseCommit = EXPECTED_RELEASE_COMMIT }) {
+  return {
+    version: 1,
+    service: "ballast",
+    status,
+    checkedAt,
+    releaseCommit,
+  };
+}
+
+function writeJsonAtomic(path, value, mode, directoryMode = 0o700) {
+  mkdirSync(dirname(path), { recursive: true, mode: directoryMode });
+  const temporaryPath = `${path}.${process.pid}.tmp`;
+  writeFileSync(temporaryPath, `${JSON.stringify(value)}\n`, { mode });
+  renameSync(temporaryPath, path);
+}
+
 function saveHealthState(status, errors) {
+  const checkedAt = new Date().toISOString();
   mkdirSync(dirname(HEALTH_STATE_FILE), { recursive: true, mode: 0o700 });
-  const temporaryPath = `${HEALTH_STATE_FILE}.${process.pid}.tmp`;
-  writeFileSync(temporaryPath, `${JSON.stringify({
+  writeJsonAtomic(HEALTH_STATE_FILE, {
     version: 2,
     status,
-    checkedAt: new Date().toISOString(),
+    checkedAt,
     releaseCommit: EXPECTED_RELEASE_COMMIT,
     errors,
-  })}\n`, { mode: 0o600 });
-  renameSync(temporaryPath, HEALTH_STATE_FILE);
+  }, 0o600);
+  if (PUBLIC_HEALTH_FILE) {
+    writeJsonAtomic(PUBLIC_HEALTH_FILE, publicHealthState({ status, checkedAt }), 0o644, 0o755);
+  }
 }
 
 async function sendAlert(status, errors, previousStatus) {

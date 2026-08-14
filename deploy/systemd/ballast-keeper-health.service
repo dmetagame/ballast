@@ -7,10 +7,11 @@ Wants=network-online.target
 Type=oneshot
 WorkingDirectory=%h/ballast-runtime-current/monitor
 EnvironmentFile=%h/.config/ballast/keeper.env
+Environment=PUBLIC_HEALTH_FILE=/var/www/ballast-ops/health.json
 ExecStart=/usr/bin/env node healthcheck.mjs
 TimeoutStartSec=180
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=%h/.config/ballast
+ReadWritePaths=%h/.config/ballast /var/www/ballast-ops

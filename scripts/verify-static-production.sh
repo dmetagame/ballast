@@ -5,6 +5,8 @@ set -euo pipefail
 : "${DASHBOARD_URL:=https://ballast.rouma.online/risk/}"
 : "${ENROLLMENT_URL:=https://ballast.rouma.online/enroll/}"
 : "${EXPECTED_COMMIT:=}"
+: "${HEALTH_URL:=https://ballast.rouma.online/ops/health.json}"
+: "${VERIFY_OPS_HEALTH:=false}"
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 
@@ -19,6 +21,15 @@ grep -Fq 'x-frame-options: deny' <<<"$headers"
 grep -Fq 'strict-transport-security: max-age=31536000' <<<"$headers"
 grep -Fq "content-security-policy: default-src 'self'" <<<"$headers"
 grep -Fq 'cache-control: no-cache' <<<"$headers"
+if [[ "$VERIFY_OPS_HEALTH" = true ]]; then
+  HEALTH_URL="$HEALTH_URL" \
+    RELEASE_URLS="${PRODUCT_URL%/}/release.json,${DASHBOARD_URL%/}/release.json,${ENROLLMENT_URL%/}/release.json" \
+    EXPECTED_RELEASE_COMMIT="$EXPECTED_COMMIT" \
+    node "$repo_root/monitor/watchdog.mjs"
+  health_headers=$(curl --fail --silent --show-error --head --max-time 20 "$HEALTH_URL" | tr -d '\r' | tr '[:upper:]' '[:lower:]')
+  grep -Fq 'content-type: application/json' <<<"$health_headers"
+  grep -Fq 'cache-control: no-store' <<<"$health_headers"
+fi
 
 product_html=$(curl --fail --silent --show-error --max-time 20 "$PRODUCT_URL")
 asset_path=$(grep -Eo 'assets/[A-Za-z0-9._-]+' <<<"$product_html" | head -1)

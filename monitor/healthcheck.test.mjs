@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { runChecks, validateKeeperIdentity, validateKeeperState, validateProductionState } from "./healthcheck.mjs";
+import { publicHealthState, runChecks, validateKeeperIdentity, validateKeeperState, validateProductionState } from "./healthcheck.mjs";
 
 const MANAGER = "0x746066ACe5dc89a3692137b8cdE3c31328629d09";
 
@@ -68,4 +68,14 @@ test("healthcheck aggregates failures without skipping remaining checks", async 
   assert.deepEqual(calls, ["state", "service", "chain", "fcc", "static"]);
   assert.equal(result.ok, false);
   assert.deepEqual(result.errors, ["state: stale", "chain: paused"]);
+});
+
+test("public health state exposes only status, freshness, and release provenance", () => {
+  assert.deepEqual(publicHealthState({ status: "ok", checkedAt: "2026-08-14T06:00:00Z", releaseCommit: "1".repeat(40) }), {
+    version: 1,
+    service: "ballast",
+    status: "ok",
+    checkedAt: "2026-08-14T06:00:00Z",
+    releaseCommit: "1".repeat(40),
+  });
 });

@@ -140,6 +140,11 @@ redeploy the intended committed release with `scripts/deploy-keeper-aws.sh`; it 
 unpushed release and rolls back on activation failure. For an FCC failure, verify `/info`, the onchain TEE
 URL, and status `2` before rotating a registration.
 
+The health timer writes a sanitized public signal to `/var/www/ballast-ops/health.json`, served as
+`https://ballast.rouma.online/ops/health.json` with `no-store`. GitHub's scheduled
+`Production Watchdog` compares its release commit with all three static releases and current `main`,
+then opens a `production-alert` issue if the signal fails, becomes stale, or diverges.
+
 Keep the proxy ports bound to loopback when Caddy or another host reverse proxy terminates
 HTTPS:
 

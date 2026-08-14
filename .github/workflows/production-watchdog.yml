@@ -1,0 +1,88 @@
+name: Production Watchdog
+
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+    inputs:
+      exercise_alert:
+        description: Exercise the failure and issue-creation path
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: production-watchdog
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - id: watchdog
+        continue-on-error: true
+        env:
+          EXERCISE_ALERT: ${{ inputs.exercise_alert }}
+          EXPECTED_RELEASE_COMMIT: ${{ github.sha }}
+        run: |
+          set -o pipefail
+          if [[ "${EXERCISE_ALERT:-false}" = true ]]; then
+            export HEALTH_URL="https://ballast.rouma.online/ops/watchdog-alert-drill.json"
+          fi
+          node monitor/watchdog.mjs 2>&1 | tee /tmp/ballast-watchdog.log
+      - uses: actions/github-script@v9
+        if: always() && steps.watchdog.outcome == 'failure'
+        env:
+          WATCHDOG_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- ballast-production-watchdog -->';
+            const output = fs.readFileSync('/tmp/ballast-watchdog.log', 'utf8').trim().slice(-6000);
+            try {
+              await github.rest.issues.getLabel({ owner: context.repo.owner, repo: context.repo.repo, name: 'production-alert' });
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              await github.rest.issues.createLabel({ owner: context.repo.owner, repo: context.repo.repo, name: 'production-alert', color: 'b42318', description: 'Automated production health incident' });
+            }
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'production-alert',
+              per_page: 100,
+            });
+            const existing = issues.find((issue) => issue.body?.includes(marker));
+            const body = `${marker}\nThe independent production watchdog failed at ${new Date().toISOString()}.\n\nRun: ${process.env.WATCHDOG_RUN_URL}\n\n\`\`\`\n${output}\n\`\`\``;
+            if (existing) {
+              await github.rest.issues.update({ owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, body });
+            } else {
+              await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title: 'Production watchdog failure', body, labels: ['production-alert'] });
+            }
+      - uses: actions/github-script@v9
+        if: always() && steps.watchdog.outcome == 'success'
+        with:
+          script: |
+            const marker = '<!-- ballast-production-watchdog -->';
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'production-alert',
+              per_page: 100,
+            });
+            for (const issue of issues.filter((item) => item.body?.includes(marker))) {
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: issue.number, body: `Production recovered at ${new Date().toISOString()}.` });
+              await github.rest.issues.update({ owner: context.repo.owner, repo: context.repo.repo, issue_number: issue.number, state: 'closed', state_reason: 'completed' });
+            }
+      - if: always() && steps.watchdog.outcome == 'failure'
+        run: exit 1

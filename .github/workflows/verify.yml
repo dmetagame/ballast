@@ -28,7 +28,9 @@ jobs:
       - run: for file in scripts/*.sh; do bash -n "$file"; done
       - run: node --check monitor/verify-controlled-receipt.mjs
       - run: node --check monitor/healthcheck.mjs
+      - run: node --check monitor/watchdog.mjs
       - run: systemd-analyze --user verify deploy/systemd/ballast-keeper.service deploy/systemd/ballast-keeper-health.service deploy/systemd/ballast-keeper-health.timer
+      - run: grep -Fxq 'OnActiveSec=2min' deploy/systemd/ballast-keeper-health.timer && grep -Fxq 'OnUnitActiveSec=5min' deploy/systemd/ballast-keeper-health.timer && ! grep -q '^OnBootSec=' deploy/systemd/ballast-keeper-health.timer
       - run: forge test --no-match-path 'test/*.fork.t.sol'
       - run: npm ci
         working-directory: app

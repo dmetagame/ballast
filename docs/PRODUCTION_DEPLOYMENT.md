@@ -123,10 +123,14 @@ manual execution window through `PRIVATE_KEY_FILE`; never configure both `PRIVAT
 `PRIVATE_KEY_FILE`.
 
 The health timer checks the keeper checkpoint age, Flare chain identity, finalized manager,
-adapter, pool and admin state, Coston2 FCC registration/PRODUCTION status, and all three hosted static surfaces every
-five minutes. With `EXECUTE=true`, every broadcast additionally requires a fresh successful health
-result for the exact runtime release. Set `ALERT_WEBHOOK_URL` in the protected environment file
-for a JSON alert on a failure or recovery transition.
+adapter, pool and admin state, Coston2 FCC registration/PRODUCTION status, and all three hosted static
+surfaces every five minutes. A sanitized status document at `/ops/health.json` contains only the
+result, timestamp, and release commit. The scheduled `Production Watchdog` workflow checks that
+document and release synchronization against the current `main` commit four times per hour,
+opening and resolving a GitHub `production-alert` issue across failure and recovery. With
+`EXECUTE=true`, every broadcast additionally requires a fresh successful internal health result for
+the exact runtime release. Set `ALERT_WEBHOOK_URL` in the protected environment file only if a
+second private alert channel is wanted.
 
 ## Pre-enrollment checks
 
@@ -163,7 +167,7 @@ Completed and verified:
   windows, and resumes from confirmed checkpoints without rescanning deployment history.
 - The dedicated keeper is `0xA20a59090f609329405F5DcA785Af9357F6965E7`.
 - V3 unit tests, the production fork, app production-build verification, landing verification,
-  keeper tests, FCC tests, and dependency audits pass.
+  keeper tests, FCC tests, dependency audits, and the independent production watchdog pass.
 
 Current hosting state:
 
