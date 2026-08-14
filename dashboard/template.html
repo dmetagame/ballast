@@ -75,6 +75,9 @@
 
   /* ---------------------------------------------------------------- header */
   header { display: flex; flex-direction: column; gap: 6px; }
+  .surface-nav { display: flex; flex-wrap: wrap; gap: 14px; font-family: var(--mono); font-size: 12px; }
+  .surface-nav a { color: var(--ink-muted); text-decoration: none; }
+  .surface-nav a:hover, .surface-nav a[aria-current="page"] { color: var(--ink); }
   .eyebrow {
     font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
     color: var(--ink-muted); font-weight: 600;
@@ -165,7 +168,7 @@
   .plotwrap { position: relative; }
 
   /* ---------------------------------------------------------------- table */
-  .tablecard { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; }
+  .tablecard { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; min-width: 0; }
   .tablehead { padding: 16px 18px 12px; display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: baseline; }
   .tablehead h2 { margin: 0; font-size: 14.5px; font-weight: 620; }
   .tablehead .sub { font-size: 12.5px; color: var(--ink-muted); }
@@ -188,7 +191,7 @@
   .venue { font-size: 11px; color: var(--ink-muted); border: 1px solid var(--rule); border-radius: 4px; padding: 1px 6px; }
 
   footer { color: var(--ink-muted); font-size: 12.5px; display: flex; flex-direction: column; gap: 6px; padding-bottom: 8px; }
-  footer code { font-family: var(--mono); font-size: 12px; }
+  footer code { font-family: var(--mono); font-size: 12px; overflow-wrap: anywhere; }
   a { color: var(--accent); }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -197,13 +200,18 @@
 
 <div class="wrap">
   <header>
+    <nav class="surface-nav" aria-label="Ballast surfaces">
+      <a href="https://ballast.rouma.online/product/">Product</a>
+      <a href="https://ballast.rouma.online/risk/" aria-current="page">Risk</a>
+      <a href="https://ballast.rouma.online/enroll/">Enroll</a>
+    </nav>
     <div class="eyebrow">Ballast · risk monitor</div>
     <h1>XRP-collateralised leverage on Flare</h1>
     <div class="provenance">
       <span>measured on Flare mainnet</span>
-      <span>block 66,470,000</span>
-      <span>2026-08-02</span>
-      <span>XRP $1.0795 (FTSO)</span>
+      <span>block __SNAPSHOT_BLOCK__</span>
+      <span>__SNAPSHOT_DATE__</span>
+      <span>XRP $__SNAPSHOT_XRP__ (FTSOv2)</span>
       <span class="live">contracts live on Flare mainnet</span>
     </div>
   </header>
@@ -217,7 +225,7 @@
       <div class="kpi"><div class="k">Positions</div><div class="v" id="kPos">—</div><div class="s" id="kAddr">—</div></div>
       <div class="kpi"><div class="k">Collateral</div><div class="v" id="kColl">—</div><div class="s">backing the debt</div></div>
       <div class="kpi"><div class="k">Liquidated by XRP −25%</div><div class="v" id="kNear">—</div><div class="s" id="kNearDebt">—</div></div>
-      <div class="kpi"><div class="k">Penalties at XRP −20%</div><div class="v" id="kPen">—</div><div class="s" id="kPenPos">—</div></div>
+      <div class="kpi"><div class="k">Est. penalties at XRP −20%</div><div class="v" id="kPen">—</div><div class="s" id="kPenPos">—</div></div>
     </div>
   </section>
 
@@ -278,8 +286,8 @@
       <span>SparkDexAdapterV2 <a href="https://flare-explorer.flare.network/address/0xA3B9822228b6d0DE77089B0C67Ec0A73A9A9C202">0xA3B9…C202</a></span>
       <span>source verified on Blockscout</span>
     </div>
-    <div>Health is computed with Morpho's own share accounting, so 1.00 is exactly the seizure line. Penalty estimates use each venue's real parameters: Enosys at a 10% incentive with a 0.5 close factor, Morpho at ~7.4% with full liquidation.</div>
-    <div>Borrower addresses are truncated. The underlying positions are public on-chain state and can be recomputed with the scanners in <code>monitor/</code>; this page does not republish a ranked, directly actionable list of them. Positions with debt below $1 are excluded. stFLR-collateralised Morpho positions are excluded because they are not XRP-linked. Regenerate with <code>node dashboard/build.mjs</code>.</div>
+    <div>Health uses each venue's pinned protocol state, so 1.00 is the liquidation line. Penalty estimates use Enosys's on-chain incentive and close factor plus each Morpho market's LLTV-derived incentive.</div>
+    <div>Borrower addresses are truncated. The underlying positions are public on-chain state and can be recomputed with the scanners in <code>monitor/</code>; this page does not republish a ranked, directly actionable list of them. Positions with debt below $1 are excluded. stFLR-collateralised Morpho positions are excluded because they are not XRP-linked. Snapshot block hash: <code>__SNAPSHOT_HASH__</code>. Regenerate with <code>npm run refresh:data --prefix monitor</code>, then <code>node dashboard/build.mjs</code>.</div>
   </footer>
 </div>
 
@@ -287,13 +295,9 @@
 const DATA = /*__DATA__*/null;
 const { meta, venues: VENUES, markets: MARKETS, rows: ROWS } = DATA;
 
-// Liquidation parameters are a property of the venue, not of each position:
-// Enosys is a 10% incentive with a 0.5 close factor; Morpho is ~7.4% with full liquidation.
-const VENUE_PARAMS = { Enosys: { pen: 0.1, cf: 0.5 }, Morpho: { pen: 0.074, cf: 1.0 } };
-
-const positions = ROWS.map(([vi, a, mi, h, d, c, k]) => {
+const positions = ROWS.map(([vi, a, mi, h, d, c, k, pen, cf]) => {
   const v = VENUES[vi];
-  return { v, a, m: MARKETS[mi], h, d, c, k, ...VENUE_PARAMS[v] };
+  return { v, a, m: MARKETS[mi], h, d, c, k, pen, cf };
 });
 
 const fmtUsd = (n, dp = 0) =>

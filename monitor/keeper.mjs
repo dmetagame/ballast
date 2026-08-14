@@ -5,7 +5,9 @@ import { fileURLToPath } from "node:url";
 import {
   createPublicClient,
   createWalletClient,
+  encodeFunctionData,
   http,
+  keccak256,
   parseAbi,
   formatUnits,
   getAddress,
@@ -61,6 +63,7 @@ const account = EXECUTE
   ? operatorAccount || (() => { throw new Error("PRIVATE_KEY or PRIVATE_KEY_FILE is required with EXECUTE=true"); })()
   : null;
 const walletClient = account ? createWalletClient({ account, chain, transport: http(RPC_URL) }) : null;
+const runSerializedExecution = createSerialExecutor();
 
 const policyResult = MANAGER_VERSION === "v3"
   ? "uint128 triggerHealth, uint128 targetHealth, uint64 maxCollateralPerAction, uint32 maxSlippageBps, uint32 keeperFeeBps, uint32 cooldown, uint64 lastAction, bool enabled, address keeper"
@@ -143,6 +146,42 @@ export async function withRetry(operation, { label, attempts = RETRY_ATTEMPTS, b
     }
   }
   throw lastError;
+}
+
+export function createSerialExecutor() {
+  let tail = Promise.resolve();
+  return async function runSerial(operation) {
+    const previous = tail;
+    let release;
+    tail = new Promise((resolve) => { release = resolve; });
+    await previous;
+    try {
+      return await operation();
+    } finally {
+      release();
+    }
+  };
+}
+
+export async function prepareSignAndBroadcastTransaction({
+  prepareTransaction,
+  signTransaction,
+  sendRawTransaction,
+  attempts = RETRY_ATTEMPTS,
+  baseDelayMs = RETRY_BASE_DELAY_MS,
+  onRetry = () => {},
+}) {
+  const preparedRequest = await prepareTransaction();
+  const serializedTransaction = await signTransaction(preparedRequest);
+  const expectedHash = keccak256(serializedTransaction);
+  const hash = await withRetry(
+    () => sendRawTransaction({ serializedTransaction }),
+    { label: "rpc.sendRawProtect", attempts, baseDelayMs, onRetry },
+  );
+  if (hash.toLowerCase() !== expectedHash.toLowerCase()) {
+    throw new Error(`raw transaction hash mismatch: expected ${expectedHash}, received ${hash}`);
+  }
+  return { hash: expectedHash, serializedTransaction };
 }
 
 export async function mapWithConcurrency(items, concurrency, worker) {
@@ -480,22 +519,34 @@ async function processPolicy(row) {
       return { status: "skipped", reason: "different_keeper" };
     }
     if (!EXECUTE) return { status: "dry_run", reason: "execution_disabled" };
-    const healthGate = requireExecutionHealth();
-    log("info", "execution_health_gate_passed", healthGate);
+    return await runSerializedExecution(async () => {
+      const healthGate = requireExecutionHealth();
+      log("info", "execution_health_gate_passed", healthGate);
 
-    const simulation = await withRetry(() => publicClient.simulateContract({ account, address: BALLAST, abi, functionName: "protect", args: [item.borrower, item.id] }), { label: "rpc.simulateProtect" });
-    const gasEstimate = await withRetry(() => publicClient.estimateContractGas({ account, address: BALLAST, abi, functionName: "protect", args: [item.borrower, item.id] }), { label: "rpc.estimateProtect" });
-    const gasPrice = await withRetry(() => publicClient.getGasPrice(), { label: "rpc.getGasPrice" });
-    const economics = calculateEconomics({ repayAssets: item.repayAssets, keeperFeeBps: item.keeperFeeBps, gasEstimate, gasPrice, maxGasFlrWei: MAX_GAS_FLR_WEI, minKeeperFeeUnits: MIN_KEEPER_FEE_UNITS, loanTokenUnitsPerFlr: LOAN_TOKEN_UNITS_PER_FLR, minProfitFlrWei: MIN_PROFIT_FLR_WEI });
-    if (!economics.ok) {
-      log("warn", "policy_rejected_economics", { borrower: item.borrower, id: item.id, reason: economics.reason, expectedKeeperFee: economics.expectedKeeperFee.toString(), gasCostFlrWei: economics.gasCostFlrWei.toString() });
-      return { status: "skipped", reason: economics.reason };
-    }
-    const hash = await withRetry(() => walletClient.writeContract(simulation.request), { label: "rpc.writeProtect" });
-    const receipt = await withRetry(() => publicClient.waitForTransactionReceipt({ hash }), { label: "rpc.waitForReceipt" });
-    assertSuccessfulReceipt(receipt, hash);
-    log("info", "protection_confirmed", { borrower: item.borrower, id: item.id, hash, status: receipt.status, blockNumber: receipt.blockNumber.toString(), gasEstimate: gasEstimate.toString(), gasPrice: gasPrice.toString(), expectedKeeperFee: economics.expectedKeeperFee.toString() });
-    return { status: "confirmed", hash };
+      await withRetry(() => publicClient.simulateContract({ account, address: BALLAST, abi, functionName: "protect", args: [item.borrower, item.id] }), { label: "rpc.simulateProtect" });
+      const gasEstimate = await withRetry(() => publicClient.estimateContractGas({ account, address: BALLAST, abi, functionName: "protect", args: [item.borrower, item.id] }), { label: "rpc.estimateProtect" });
+      const gasPrice = await withRetry(() => publicClient.getGasPrice(), { label: "rpc.getGasPrice" });
+      const economics = calculateEconomics({ repayAssets: item.repayAssets, keeperFeeBps: item.keeperFeeBps, gasEstimate, gasPrice, maxGasFlrWei: MAX_GAS_FLR_WEI, minKeeperFeeUnits: MIN_KEEPER_FEE_UNITS, loanTokenUnitsPerFlr: LOAN_TOKEN_UNITS_PER_FLR, minProfitFlrWei: MIN_PROFIT_FLR_WEI });
+      if (!economics.ok) {
+        log("warn", "policy_rejected_economics", { borrower: item.borrower, id: item.id, reason: economics.reason, expectedKeeperFee: economics.expectedKeeperFee.toString(), gasCostFlrWei: economics.gasCostFlrWei.toString() });
+        return { status: "skipped", reason: economics.reason };
+      }
+
+      const data = encodeFunctionData({ abi, functionName: "protect", args: [item.borrower, item.id] });
+      const { hash } = await prepareSignAndBroadcastTransaction({
+        prepareTransaction: () => withRetry(
+          () => walletClient.prepareTransactionRequest({ account, to: BALLAST, data, gas: gasEstimate }),
+          { label: "rpc.prepareProtect" },
+        ),
+        signTransaction: (request) => account.signTransaction(request, { serializer: chain.serializers?.transaction }),
+        sendRawTransaction: (request) => walletClient.sendRawTransaction(request),
+        onRetry: ({ label, attempt, delay, error }) => log("warn", "retry_scheduled", { label, attempt, delayMs: delay, error: error.message }),
+      });
+      const receipt = await withRetry(() => publicClient.waitForTransactionReceipt({ hash }), { label: "rpc.waitForReceipt" });
+      assertSuccessfulReceipt(receipt, hash);
+      log("info", "protection_confirmed", { borrower: item.borrower, id: item.id, hash, status: receipt.status, blockNumber: receipt.blockNumber.toString(), gasEstimate: gasEstimate.toString(), gasPrice: gasPrice.toString(), expectedKeeperFee: economics.expectedKeeperFee.toString() });
+      return { status: "confirmed", hash };
+    });
   } catch (error) {
     log("error", "policy_failed", { borrower: row.borrower, id: row.id, error: error.shortMessage || error.message });
     return { status: "failed", error };

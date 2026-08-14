@@ -1,31 +1,37 @@
 {
-  "generated": "2026-08-02",
-  "positions": 739,
-  "addresses": 676,
-  "debt": 27107943,
-  "collateral": 56976433,
+  "generated": "2026-08-14",
+  "snapshot": {
+    "block": 67355884,
+    "blockHash": "0x84c1ca44371abf923ca077ddfa32952a06c30f580b6e970bfb3f4c2d064ecbeb",
+    "blockTimestamp": 1786677093,
+    "xrpUsd": 1.008506
+  },
+  "positions": 687,
+  "addresses": 638,
+  "debt": 24717294,
+  "collateral": 44586724,
   "nearBand": {
-    "positions": 148,
-    "debt": 4147077
+    "positions": 160,
+    "debt": 3990954
   },
   "drawdown": [
     {
       "drop": 10,
-      "positions": 33,
-      "debt": 1063644,
-      "penalties": 54774
+      "positions": 47,
+      "debt": 1432769,
+      "penalties": 75011
     },
     {
       "drop": 20,
-      "positions": 121,
-      "debt": 3128044,
-      "penalties": 182701
+      "positions": 113,
+      "debt": 2961327,
+      "penalties": 178567
     },
     {
       "drop": 30,
-      "positions": 192,
-      "debt": 4898690,
-      "penalties": 301832
+      "positions": 212,
+      "debt": 19378850,
+      "penalties": 1367293
     }
   ]
 }

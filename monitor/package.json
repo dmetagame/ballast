@@ -4,8 +4,11 @@
   "type": "module",
   "description": "Risk scanners for FXRP-collateralised leverage on Flare (Morpho Blue + Enosys isolated markets).",
   "scripts": {
+    "snapshot:refresh": "node refresh-snapshot.mjs",
     "scan:morpho": "node scan-morpho-markets.mjs && node scan-morpho-health.mjs",
     "scan:enosys": "node scan-enosys-borrowers.mjs && node scan-enosys-health.mjs",
+    "scan:all": "npm run scan:morpho && npm run scan:enosys && node redact.mjs",
+    "refresh:data": "npm run snapshot:refresh && npm run scan:all",
     "keeper:dry-run": "RUN_ONCE=true node keeper.mjs",
     "keeper:execute": "EXECUTE=true RUN_ONCE=true node keeper.mjs",
     "keeper:watch": "node keeper.mjs",

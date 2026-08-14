@@ -87,7 +87,7 @@ and registered the confidential trigger extension and TEE on Coston2.
 
 ## Judge-facing metrics
 
-The committed measurement snapshot reports 739 XRP-collateralised borrow positions, approximately $27.1M debt against $57.0M collateral, and 148 positions in the 1.0–1.25 health range. The forked end-to-end test moves a position from health 1.0509 to 1.3500 while selling 51,411 FXRP and repaying 47,063 USD₮0.
+The committed block-`67,355,884` measurement snapshot reports 687 XRP-collateralised borrow positions across 638 addresses, approximately $24.7M debt against $44.6M collateral, and 160 positions in the 1.0–1.25 health range. The forked end-to-end test moves a position from health 1.0509 to 1.3500 while selling 51,411 FXRP and repaying 47,063 USD₮0.
 
 ## Honest limitations
 

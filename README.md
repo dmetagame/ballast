@@ -14,27 +14,27 @@ hackathon, Bounty 1 (Interoperable Asset Products).
 ## Why this exists, in numbers
 
 Every figure below was measured on Flare mainnet by scanning contract events and reading
-protocol state directly. The scanners live in [`monitor/`](monitor) and their raw output in
-[`monitor/data/`](monitor/data).
+protocol state directly at block `67,355,884` on 2026-08-14. The scanners live in
+[`monitor/`](monitor) and their redacted published snapshots in [`monitor/data/`](monitor/data).
 
 | | |
 |---|---|
 | FXRP supply / holders | 149.9M / 13,412 |
-| XRP-collateralised borrow positions | **739** across 676 addresses |
-| Total debt | **$27.1M** against $57.0M collateral |
-| Positions at health 1.0–1.25 | 148 ($4.15M debt) |
+| XRP-collateralised borrow positions | **687** across 638 addresses |
+| Total debt | **$24.7M** against $44.6M collateral |
+| Positions at health 1.0–1.25 | 160 ($3.99M debt) |
 
 What a routine XRP move does to those positions:
 
-| XRP drop | Positions liquidated | Debt | Penalties paid by borrowers |
+| XRP drop | Positions liquidated | Debt | Estimated penalties |
 |---|---|---|---|
-| −10% | 33 | $1.06M | ~$55K |
-| −20% | **121** | **$3.13M** | **~$183K** |
-| −30% | 192 | $4.90M | ~$302K |
+| −10% | 47 | $1.43M | ~$75K |
+| −20% | **113** | **$2.96M** | **~$179K** |
+| −30% | 212 | $19.38M | ~$1.37M |
 
-That ~$183K is the value Ballast exists to keep in borrowers' pockets.
+That ~$179K is the value Ballast exists to keep in borrowers' pockets.
 
-Venues covered: **Morpho Blue** (`FXRP → USD₮0`, 77% LLTV, $18.0M debt — the largest single
+Venues covered: **Morpho Blue** (`FXRP → USD₮0`, 77% LLTV, $17.7M debt — the largest single
 market) and the **Enosys isolated markets** (a Compound-v2 fork).
 
 ## Why Flare specifically
@@ -237,7 +237,7 @@ monitor/
 
 ## The risk dashboard
 
-`dashboard/index.html` is a self-contained page over the measured mainnet dataset: 739
+`dashboard/index.html` is a self-contained page over the measured mainnet dataset: 687
 XRP-collateralised positions, filterable by venue, with the health distribution, the
 drawdown-sensitivity curve, and the positions closest to liquidation. No runtime fetches, so
 it works from a `file://` URL or any static host.

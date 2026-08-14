@@ -226,7 +226,9 @@ accepted verdict as one reproducible flow. The historical fixture above remains 
 contract integration evidence, not for a confidentiality claim.
 
 The deployed stack uses `tee-node v0.0.24`, above the **v0.0.22 minimum** required for valid
-data-provider votes.
+data-provider votes. The repository is tested against `tee-node v0.0.25` and patched
+cryptography dependencies; rolling those binaries into FCC requires a fresh extension build
+and registration because the live machine is bound to its registered code hash.
 
 ## Coston2 FCC deployment checklist
 

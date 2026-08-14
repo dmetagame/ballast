@@ -43,7 +43,7 @@
 
       <!-- Beat 2: the stakes. Every figure below is derived from monitor/data at build time. -->
       <section class="stakes" id="stakes">
-        <h2>What the {{generated}} scan found at risk on Flare</h2>
+        <h2>What the {{generated}} pinned scan found at risk on Flare</h2>
         <p class="section-lede">
           Measured by scanning contract events and reading protocol state, not estimated.
         </p>
@@ -77,9 +77,9 @@
       <section class="drawdown" id="drawdown">
         <h2>What a routine XRP move costs borrowers</h2>
         <table>
-          <caption class="sr-only">Positions liquidated, debt, and penalties paid by XRP drawdown</caption>
+          <caption class="sr-only">Estimated positions liquidated, debt, and liquidation penalties by XRP drawdown</caption>
           <thead>
-            <tr><th scope="col">XRP drop</th><th scope="col">Liquidated</th><th scope="col">Debt</th><th scope="col">Penalties paid</th></tr>
+            <tr><th scope="col">XRP drop</th><th scope="col">Liquidated</th><th scope="col">Debt</th><th scope="col">Est. penalties</th></tr>
           </thead>
           <tbody>
             <tr data-row="10"><th scope="row">−10%</th><td>{{d10Positions}}</td><td>{{d10Debt}}</td><td>{{d10Penalties}}</td></tr>
@@ -88,8 +88,8 @@
           </tbody>
         </table>
         <p class="pull">
-          A 20% move hands liquidators <strong>{{d20PenaltiesExact}}</strong> that borrowers
-          could have kept. That is the entire argument for Ballast.
+          A 20% move exposes borrowers to an estimated <strong>{{d20PenaltiesExact}}</strong>
+          in liquidation penalties. That is the entire argument for Ballast.
         </p>
       </section>
 
@@ -153,8 +153,10 @@
         </li>
       </ul>
       <p class="provenance">
-        Figures measured on Flare mainnet as of {{generated}}, from {{positions}} positions
-        across {{addresses}} addresses. Regenerate with <code>node landing/data.mjs</code>.
+        Figures measured on Flare mainnet at block {{snapshotBlock}} ({{generated}}, XRP {{snapshotXrp}}),
+        from {{positions}} positions across {{addresses}} addresses. Pinned block hash:
+        <code>{{snapshotHash}}</code>. Regenerate from <code>monitor/data/snapshot.json</code> with
+        <code>node landing/data.mjs</code>.
       </p>
     </footer>
 

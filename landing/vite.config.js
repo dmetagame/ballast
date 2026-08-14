@@ -16,6 +16,9 @@ function injectFigures() {
   const [d10, d20, d30] = figures.drawdown;
   const tokens = {
     generated: figures.generated,
+    snapshotBlock: figures.snapshot.block.toLocaleString("en-US"),
+    snapshotHash: figures.snapshot.blockHash,
+    snapshotXrp: `$${figures.snapshot.xrpUsd.toFixed(6)}`,
     positions: figures.positions.toLocaleString("en-US"),
     addresses: figures.addresses.toLocaleString("en-US"),
     debt: usdCompact(figures.debt),

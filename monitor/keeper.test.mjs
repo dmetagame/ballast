@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { toEventSelector } from "viem";
+import { keccak256, toEventSelector } from "viem";
 import {
   applyPolicyLogs,
   assertSuccessfulReceipt,
@@ -11,11 +11,13 @@ import {
   calculateEconomics,
   collectPolicyLogs,
   collectRpcPolicyLogs,
+  createSerialExecutor,
   enforcePositionLimit,
   handleCycleFailure,
   loadDiscoveryState,
   loadPrivateKey,
   mapWithConcurrency,
+  prepareSignAndBroadcastTransaction,
   resolveOperatorAddress,
   saveDiscoveryState,
   selectSyncTarget,
@@ -148,6 +150,67 @@ test("keeper rejects a reverted protection receipt", () => {
 test("keeper accepts a successful protection receipt", () => {
   const receipt = { status: "success" };
   assert.equal(assertSuccessfulReceipt(receipt, "0x1234"), receipt);
+});
+
+test("keeper prepares and signs once while retrying identical raw transaction bytes", async () => {
+  const serializedTransaction = "0x02deadbeef";
+  const expectedHash = keccak256(serializedTransaction);
+  const broadcasts = [];
+  let prepareCalls = 0;
+  let signCalls = 0;
+  const result = await prepareSignAndBroadcastTransaction({
+    prepareTransaction: async () => {
+      prepareCalls += 1;
+      return { nonce: 7 };
+    },
+    signTransaction: async (request) => {
+      signCalls += 1;
+      assert.deepEqual(request, { nonce: 7 });
+      return serializedTransaction;
+    },
+    sendRawTransaction: async ({ serializedTransaction: payload }) => {
+      broadcasts.push(payload);
+      if (broadcasts.length === 1) throw new Error("ambiguous RPC timeout");
+      return expectedHash;
+    },
+    attempts: 2,
+    baseDelayMs: 1,
+  });
+  assert.equal(prepareCalls, 1);
+  assert.equal(signCalls, 1);
+  assert.deepEqual(broadcasts, [serializedTransaction, serializedTransaction]);
+  assert.equal(result.hash, expectedHash);
+});
+
+test("keeper rejects an RPC hash that does not match the signed transaction", async () => {
+  await assert.rejects(
+    prepareSignAndBroadcastTransaction({
+      prepareTransaction: async () => ({ nonce: 1 }),
+      signTransaction: async () => "0x02cafe",
+      sendRawTransaction: async () => `0x${"11".repeat(32)}`,
+      attempts: 1,
+    }),
+    /raw transaction hash mismatch/,
+  );
+});
+
+test("keeper serializes execution broadcasts", async () => {
+  const runSerial = createSerialExecutor();
+  const order = [];
+  let active = 0;
+  let peak = 0;
+  const execute = (name, delay) => runSerial(async () => {
+    active += 1;
+    peak = Math.max(peak, active);
+    order.push(`${name}:start`);
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    order.push(`${name}:end`);
+    active -= 1;
+    return name;
+  });
+  assert.deepEqual(await Promise.all([execute("first", 5), execute("second", 0)]), ["first", "second"]);
+  assert.equal(peak, 1);
+  assert.deepEqual(order, ["first:start", "first:end", "second:start", "second:end"]);
 });
 
 test("execution health gate accepts only a fresh matching release", () => {

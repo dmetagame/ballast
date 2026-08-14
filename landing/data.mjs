@@ -30,14 +30,18 @@ const read = (name) => JSON.parse(readFileSync(join(dataDir, name), "utf8"));
 
 let generated = null;
 
-// Venue liquidation parameters, matching dashboard/build.mjs. Enosys is a 10% incentive with
-// a 0.5 close factor; Morpho's incentive at 77% LLTV is ~7.4% with full liquidation.
-const enosys = read("positions.json").map((p) => ({
-  h: p.health, d: p.debtUSD, c: p.collUSD, k: p.dropToLiq, pen: 0.1, cf: 0.5, a: p.acct,
-}));
+const enosys = read("positions.json")
+  .filter((p) => p.collXrpUSD > 0)
+  .map((p) => ({
+    h: p.health, d: p.debtUSD, c: p.collUSD, k: p.dropToLiq,
+    pen: p.liquidationPenalty, cf: p.closeFactor, a: p.acct,
+  }));
 const morpho = read("morpho-positions.json")
-  .filter((p) => p.collUSD > 0 && p.xrpCollateral)
-  .map((p) => ({ h: p.health, d: p.debtUSD, c: p.collUSD, k: p.dropToLiq, pen: 0.074, cf: 1.0, a: p.acct }));
+  .filter((p) => p.debtUSD > 1 && p.collUSD > 0 && p.xrpCollateral)
+  .map((p) => ({
+    h: p.health, d: p.debtUSD, c: p.collUSD, k: p.dropToLiq,
+    pen: p.liquidationPenalty, cf: p.closeFactor, a: p.acct,
+  }));
 
 const positions = [...enosys, ...morpho];
 const sum = (a, f) => a.reduce((s, x) => s + f(x), 0);
@@ -60,6 +64,7 @@ const nearBand = positions.filter((p) => p.h >= 1 && p.h <= 1.25);
 
 const figures = {
   generated,
+  snapshot: null,
   positions: positions.length,
   addresses: new Set(positions.map((p) => p.a)).size,
   debt: Math.round(sum(positions, (p) => p.d)),
@@ -79,6 +84,7 @@ if (existsSync(dashboard)) {
   const { meta } = JSON.parse(match[1]);
   generated = meta.generated;
   figures.generated = generated;
+  figures.snapshot = { block: meta.block, blockHash: meta.blockHash, blockTimestamp: meta.blockTimestamp, xrpUsd: meta.xrpUsd };
   for (const key of ["positions", "addresses", "debt", "collateral"]) {
     if (meta[key] !== figures[key]) {
       throw new Error(

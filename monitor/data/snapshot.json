@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "chainId": 14,
+  "blockNumber": 67355884,
+  "blockHash": "0x84c1ca44371abf923ca077ddfa32952a06c30f580b6e970bfb3f4c2d064ecbeb",
+  "blockTimestamp": 1786677093,
+  "generated": "2026-08-14",
+  "capturedAt": "2026-08-14T03:11:33.000Z",
+  "sources": {
+    "rpc": "https://flare-api.flare.network/ext/C/rpc",
+    "explorer": "https://flare-explorer.flare.network",
+    "ftsoFeeds": "https://dev.flare.network/ftso/feeds/",
+    "ftsoReference": "https://dev.flare.network/ftso/solidity-reference/"
+  },
+  "contracts": {
+    "morpho": "0xF4346F5132e810f80a28487a79c7559d9797E8B0",
+    "ftsoV2": "0x7BDE3Df0624114eDB3A67dFe6753e62f4e7c1d20",
+    "ptStXrpUsdT0Oracle": "0x405A251E9152939f241ad290cc7E8a80De53171a"
+  },
+  "feeds": {
+    "XRP/USD": {
+      "id": "0x015852502f55534400000000000000000000000000",
+      "value": "1008506",
+      "decimals": 6,
+      "timestamp": 1786677093,
+      "usd": 1.008506
+    },
+    "FLR/USD": {
+      "id": "0x01464c522f55534400000000000000000000000000",
+      "value": "602022",
+      "decimals": 8,
+      "timestamp": 1786677093,
+      "usd": 0.00602022
+    },
+    "USDT/USD": {
+      "id": "0x01555344542f555344000000000000000000000000",
+      "value": "99892",
+      "decimals": 5,
+      "timestamp": 1786677093,
+      "usd": 0.99892
+    },
+    "USDC/USD": {
+      "id": "0x01555344432f555344000000000000000000000000",
+      "value": "99991",
+      "decimals": 5,
+      "timestamp": 1786677093,
+      "usd": 0.99991
+    },
+    "stXRP/USD": {
+      "id": "0x2173745852502f5553440000000000000000000000",
+      "value": "1008578",
+      "decimals": 6,
+      "timestamp": 1786677093,
+      "usd": 1.008578
+    }
+  },
+  "prices": {
+    "FXRP": {
+      "usd": 1.008506,
+      "source": "FTSOv2 XRP/USD",
+      "feedId": "0x015852502f55534400000000000000000000000000"
+    },
+    "USD₮0": {
+      "usd": 0.99892,
+      "source": "FTSOv2 USDT/USD",
+      "feedId": "0x01555344542f555344000000000000000000000000"
+    },
+    "WFLR": {
+      "usd": 0.00602022,
+      "source": "FTSOv2 FLR/USD",
+      "feedId": "0x01464c522f55534400000000000000000000000000"
+    },
+    "stXRP": {
+      "usd": 1.008578,
+      "source": "FTSOv2 stXRP/USD",
+      "feedId": "0x2173745852502f5553440000000000000000000000"
+    },
+    "PT-stXRP(FXRP)-2026/06/04": {
+      "usd": 1.008506,
+      "source": "Pinned Morpho PT-stXRP/USD₮0 oracle × FTSOv2 USDT/USD",
+      "oracle": "0x405A251E9152939f241ad290cc7E8a80De53171a",
+      "oracleRaw": "1009596364073199054979377727946181876"
+    }
+  }
+}

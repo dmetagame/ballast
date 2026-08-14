@@ -29,18 +29,19 @@ async function load(name) {
 
 const enosys = await load("positions.json");
 const morpho = await load("morpho-positions.json");
+const snapshot = await load("snapshot.json");
 
-// Liquidation cost per venue: Enosys is a 10% incentive with a 0.5 close factor;
-// Morpho's incentive at 77% LLTV is ~7.4% and it permits a full liquidation.
-const E = enosys.map((p) => ({
-  v: "Enosys", a: p.acct, m: "FXRP → USD₮0", h: p.health, d: p.debtUSD, c: p.collUSD,
-  k: p.dropToLiq, pen: 0.1, cf: 0.5,
-}));
+const E = enosys
+  .filter((p) => p.collXrpUSD > 0)
+  .map((p) => ({
+    v: "Enosys", a: p.acct, m: "Enosys isolated markets", h: p.health, d: p.debtUSD, c: p.collUSD,
+    k: p.dropToLiq, pen: p.liquidationPenalty, cf: p.closeFactor,
+  }));
 const M = morpho
-  .filter((p) => p.collUSD > 0 && p.xrpCollateral)
+  .filter((p) => p.debtUSD > 1 && p.collUSD > 0 && p.xrpCollateral)
   .map((p) => ({
     v: "Morpho", a: p.acct, m: p.market.replace(/->/, "→"), h: p.health, d: p.debtUSD,
-    c: p.collUSD, k: p.dropToLiq, pen: 0.074, cf: 1.0,
+    c: p.collUSD, k: p.dropToLiq, pen: p.liquidationPenalty, cf: p.closeFactor,
   }));
 
 const round = (n, dp) => Math.round(n * 10 ** dp) / 10 ** dp;
@@ -52,9 +53,11 @@ const positions = measuredPositions
 const sum = (a, f) => a.reduce((s, x) => s + f(x), 0);
 const healthBand = measuredPositions.filter((p) => p.h >= 1 && p.h <= 1.25);
 const meta = {
-  generated: "2026-08-02",
-  block: 66470000,
-  xrpUsd: 1.079504,
+  generated: snapshot.generated,
+  block: snapshot.blockNumber,
+  blockHash: snapshot.blockHash,
+  blockTimestamp: snapshot.blockTimestamp,
+  xrpUsd: snapshot.prices.FXRP.usd,
   positions: positions.length,
   addresses: new Set(positions.map((p) => p.a)).size,
   debt: Math.round(sum(positions, (p) => p.d)),
@@ -68,11 +71,16 @@ const meta = {
 const VENUES = [...new Set(positions.map((p) => p.v))];
 const MARKETS = [...new Set(positions.map((p) => p.m))];
 const rows = positions.map((p) => [
-  VENUES.indexOf(p.v), p.a, MARKETS.indexOf(p.m), p.h, p.d, p.c, p.k,
+  VENUES.indexOf(p.v), p.a, MARKETS.indexOf(p.m), p.h, p.d, p.c, p.k, p.pen, p.cf,
 ]);
 const payload = JSON.stringify({ meta, venues: VENUES, markets: MARKETS, rows });
 const template = readFileSync(join(here, "template.html"), "utf8");
-const out = template.replace("/*__DATA__*/null", payload);
+const out = template
+  .replace("/*__DATA__*/null", payload)
+  .replace("__SNAPSHOT_BLOCK__", meta.block.toLocaleString("en-US"))
+  .replace("__SNAPSHOT_DATE__", meta.generated)
+  .replace("__SNAPSHOT_XRP__", meta.xrpUsd.toFixed(6))
+  .replace("__SNAPSHOT_HASH__", meta.blockHash);
 writeFileSync(join(here, "index.html"), out);
 
 console.log(`positions   : ${meta.positions} across ${meta.addresses} addresses`);

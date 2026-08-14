@@ -11,11 +11,15 @@
 import { createServer } from "node:http";
 import { readFileSync, existsSync } from "node:fs";
 import { join, extname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { chromium } from "playwright";
 
 const here = fileURLToPath(new URL(".", import.meta.url));
 const dist = join(here, "dist");
+const figures = JSON.parse(readFileSync(join(here, "src/figures.json"), "utf8"));
+const compactUsd = (value) => value >= 1e6
+  ? `$${(value / 1e6).toFixed(value >= 1e7 ? 1 : 2)}M`
+  : `$${Math.round(value / 1e3)}K`;
 
 // BASE_URL targets a deployed build instead of the local one, so the same checks can be run
 // against production. Without it, the local dist is served over loopback.
@@ -78,10 +82,11 @@ async function fetchText(url) {
 
 // Text that must be legible no matter what. Figures are the argument; caveats qualify it.
 const MUST_BE_VISIBLE = [
-  ["figure: positions", "739"],
-  ["figure: debt", "$27.1M"],
-  ["figure: near band", "148"],
-  ["figure: penalties at -20%", "$182,701"],
+  ["figure: positions", figures.positions.toLocaleString("en-US")],
+  ["figure: debt", compactUsd(figures.debt)],
+  ["figure: near band", figures.nearBand.positions.toLocaleString("en-US")],
+  ["figure: penalties at -20%", `$${figures.drawdown.find(({ drop }) => drop === 20).penalties.toLocaleString("en-US")}`],
+  ["snapshot: pinned block", figures.snapshot.block.toLocaleString("en-US")],
   ["caveat: not audited", "not audited"],
   ["caveat: owner powers", "administrative timelock"],
   ["caveat: liquidity ceiling", "300,000 FXRP"],
@@ -305,6 +310,24 @@ const browser = await chromium.launch();
   check("history: forward returns to the anchor", afterForward > 200, `scrollY ${Math.round(afterForward)}`);
 
   await ctx.close();
+}
+
+// --- sibling risk dashboard ------------------------------------------------------------
+// The dashboard is intentionally dependency-free, so this Playwright install also guards
+// its responsive shell. The wide position table must scroll internally without widening the
+// document on mobile.
+if (!REMOTE) {
+  const dashboardUrl = pathToFileURL(join(here, "../dashboard/index.html")).href;
+  for (const [name, viewport] of [["desktop", { width: 1440, height: 900 }], ["mobile", { width: 390, height: 844 }]]) {
+    const page = await browser.newPage({ viewport });
+    const consoleErrors = [];
+    page.on("console", (message) => { if (message.type() === "error") consoleErrors.push(message.text()); });
+    await navigate(page, dashboardUrl);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    check(`dashboard ${name}: no horizontal overflow`, !overflow);
+    check(`dashboard ${name}: no console errors`, consoleErrors.length === 0, consoleErrors.join(" | "));
+    await page.close();
+  }
 }
 
 await browser.close();

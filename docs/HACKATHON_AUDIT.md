@@ -62,6 +62,9 @@ Avoid claiming that Ballast directly calls FTSO contracts on mainnet unless the 
 - Slippage, action size, cooldown, keeper compensation, and authorization are borrower-bounded.
 - The manager and adapter retain no normal transaction surplus.
 - Fork tests cover real Morpho positions, real tokens, real oracle behavior, and real SparkDEX pools.
+- The published risk snapshot is pinned to one block and hash, uses each Morpho market's own
+  oracle and LLTV, reconciles every Enosys health result against the comptroller, and redacts
+  borrower addresses before publication.
 - Liquidity tests document where deleveraging stops being economically rational.
 - The keeper discovers enrolled policies, checkpoints the complete active set through the
   confirmed chain tip, previews actions, defaults to dry-run, simulates before broadcast, and
@@ -129,8 +132,7 @@ Do not spend demo time on every contract or every FCC infrastructure component. 
 
 1. Record and publish the demo video.
 2. Collect and document external user feedback.
-3. Refresh the market-data snapshot if time permits.
-4. Confirm all DoraHacks fields, deadline timezone, team details, and bounty selection in the logged-in submission flow.
+3. Confirm all DoraHacks fields, deadline timezone, team details, and bounty selection in the logged-in submission flow.
 
 ### High impact product work
 
@@ -149,4 +151,4 @@ Do not spend demo time on every contract or every FCC infrastructure component. 
 
 Freeze the core Bounty 1 contracts unless a defect is found. The enrollment UX and hosted
 infrastructure are now present. Spend remaining time on the controlled receipt, demo video,
-external feedback, fresh market data, and concise submission evidence.
+external feedback, and concise submission evidence.

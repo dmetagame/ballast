@@ -1,159 +1,109 @@
-import { createPublicClient, http, parseAbi } from "viem";
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { parseAbi } from "viem";
+import {
+  DATA_DIR,
+  MORPHO,
+  SCAN_START_BLOCK,
+  loadSnapshot,
+  pinnedMulticall,
+  scanExplorerLogs,
+  snapshotPrice,
+  tokenRatioFromOracle,
+  verifyPinnedBlock,
+  writeJsonAtomic,
+} from "./snapshot.mjs";
+import { morphoLiquidationPenaltyRate } from "./risk-math.mjs";
 
-const EXPLORER = "https://flare-explorer.flare.network/api";
-const MORPHO = "0xF4346F5132e810f80a28487a79c7559d9797E8B0";
+const snapshot = loadSnapshot();
+await verifyPinnedBlock(snapshot);
+const HEAD = BigInt(snapshot.blockNumber);
 const TOPIC_BORROW = "0x570954540bed6b1304a87dfe815a5eda4a648f7097a16240dcd85c9b5fd42a43";
-const TOPIC_SUPPLYCOLL = "0xa3b9472a1399e17e123f3c2e6586c23e504184d504de59cdaa2b375e880c6184";
-const CAP = 1000, START = 40_000_000, HEAD = 66_471_000;
-
-const flare = {
-  id: 14, name: "Flare",
-  nativeCurrency: { name: "Flare", symbol: "FLR", decimals: 18 },
-  rpcUrls: { default: { http: ["https://flare-api.flare.network/ext/C/rpc"] } },
-  contracts: { multicall3: { address: "0xcA11bde05977b3631167028862bE2a173976CA11" } },
-};
-const client = createPublicClient({ chain: flare, transport: http() });
-
-// USD prices (FTSO-derived, 2026-08-02)
-const USD = { "FXRP": 1.079504, "USD₮0": 0.998530, "WFLR": 0.006282, "stXRP": 1.079108, "PT-stXRP(FXRP)-2026/06/04": 1.079504 };
+const TOPIC_SUPPLY_COLLATERAL = "0xa3b9472a1399e17e123f3c2e6586c23e504184d504de59cdaa2b375e880c6184";
 const XRP_LINKED = new Set(["FXRP", "stXRP", "PT-stXRP(FXRP)-2026/06/04"]);
-
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-async function fetchWindow(addr, topic0, from, to, t = 0) {
-  try {
-    const j = await (await fetch(`${EXPLORER}?module=logs&action=getLogs&fromBlock=${from}&toBlock=${to}&address=${addr}&topic0=${topic0}`)).json();
-    if (Array.isArray(j.result)) return j.result;
-    if (/no logs/i.test(j.message || "")) return [];
-    throw new Error(j.message);
-  } catch (e) {
-    if (t < 3) { await sleep(700 * (t + 1)); return fetchWindow(addr, topic0, from, to, t + 1); }
-    return [];
-  }
-}
-async function scan(addr, topic0, from, to) {
-  const logs = await fetchWindow(addr, topic0, from, to);
-  if (logs.length < CAP || to - from <= 1) return logs;
-  const mid = Math.floor((from + to) / 2);
-  return [...(await scan(addr, topic0, from, mid)), ...(await scan(addr, topic0, mid + 1, to))];
-}
-
-const markets = JSON.parse(readFileSync("morpho-markets.json", "utf8"));
-const byId = Object.fromEntries(markets.map((m) => [m.id.toLowerCase(), m]));
-
-console.log("scanning Morpho Borrow + SupplyCollateral events...");
-const [bLogs, sLogs] = [await scan(MORPHO, TOPIC_BORROW, START, HEAD), await scan(MORPHO, TOPIC_SUPPLYCOLL, START, HEAD)];
-const seen = new Set();
-const pairs = new Map(); // marketId -> Set(account)
-const add = (id, acct) => {
-  const k = id.toLowerCase();
-  if (!pairs.has(k)) pairs.set(k, new Set());
-  pairs.get(k).add(acct.toLowerCase());
-};
-let bCount = 0, sCount = 0;
-for (const [logs, isB] of [[bLogs, true], [sLogs, false]]) {
-  for (const l of logs) {
-    const k = l.transactionHash + ":" + l.logIndex;
-    if (seen.has(k)) continue;
-    seen.add(k);
-    isB ? bCount++ : sCount++;
-    add(l.topics[1], "0x" + l.topics[2].slice(26)); // onBehalf
-  }
-}
-console.log(`  -> ${bCount} Borrow events, ${sCount} SupplyCollateral events`);
-console.log(`  -> ${pairs.size} markets touched, ${[...pairs.values()].reduce((s, x) => s + x.size, 0)} (market,account) pairs\n`);
-
-const posAbi = parseAbi([
-  "function position(bytes32, address) view returns (uint256 supplyShares, uint128 borrowShares, uint128 collateral)",
+const markets = JSON.parse(readFileSync(join(DATA_DIR, "morpho-markets.json"), "utf8"));
+const byId = Object.fromEntries(markets.map((market) => [market.id.toLowerCase(), market]));
+const positionAbi = parseAbi([
+  "function position(bytes32 id, address user) view returns (uint256 supplyShares, uint128 borrowShares, uint128 collateral)",
 ]);
 
+console.log(`scanning Morpho borrower events through pinned block ${snapshot.blockNumber}...`);
+const [borrowLogs, collateralLogs] = await Promise.all([
+  scanExplorerLogs({ address: MORPHO, topic0: TOPIC_BORROW, fromBlock: SCAN_START_BLOCK, toBlock: HEAD }),
+  scanExplorerLogs({ address: MORPHO, topic0: TOPIC_SUPPLY_COLLATERAL, fromBlock: SCAN_START_BLOCK, toBlock: HEAD }),
+]);
+const seen = new Set();
+const pairs = new Map();
+for (const logs of [borrowLogs, collateralLogs]) {
+  for (const log of logs) {
+    const key = `${log.transactionHash}:${log.logIndex}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const marketId = log.topics?.[1]?.toLowerCase();
+    const accountTopic = log.topics?.[2];
+    if (!/^0x[0-9a-f]{64}$/i.test(marketId || "") || !/^0x[0-9a-f]{64}$/i.test(accountTopic || "")) {
+      throw new Error(`invalid Morpho borrower event: ${key}`);
+    }
+    if (!byId[marketId]) throw new Error(`borrower event references an unknown market: ${marketId}`);
+    const account = `0x${accountTopic.slice(-40)}`.toLowerCase();
+    if (!pairs.has(marketId)) pairs.set(marketId, new Set());
+    pairs.get(marketId).add(account);
+  }
+}
+console.log(`  -> ${seen.size} unique events, ${[...pairs.values()].reduce((sum, accounts) => sum + accounts.size, 0)} market/account pairs`);
+
 const positions = [];
-for (const [id, accts] of pairs) {
-  const m = byId[id];
-  if (!m) { console.log("  unknown market", id); continue; }
-  const tbA = BigInt(m.totalBorrowAssets), tbS = BigInt(m.totalBorrowShares);
-  if (tbS === 0n) continue;
-  const list = [...accts];
-  for (let i = 0; i < list.length; i += 200) {
-    const chunk = list.slice(i, i + 200);
-    const res = await client.multicall({
-      contracts: chunk.map((a) => ({ address: MORPHO, abi: posAbi, functionName: "position", args: [m.id, a] })),
-      allowFailure: true,
-    });
-    chunk.forEach((acct, j) => {
-      const r = res[j];
-      if (r.status !== "success") return;
-      const [, borrowShares, collateral] = r.result;
+for (const [id, accounts] of pairs) {
+  const market = byId[id];
+  const totalBorrowAssets = BigInt(market.totalBorrowAssets);
+  const totalBorrowShares = BigInt(market.totalBorrowShares);
+  if (totalBorrowShares === 0n) continue;
+  const loanUsd = snapshotPrice(snapshot, market.loanSym);
+  const collateralUsd = tokenRatioFromOracle(BigInt(market.price), market.collDec, market.loanDec) * loanUsd;
+  if (!Number.isFinite(collateralUsd) || collateralUsd <= 0) throw new Error(`invalid oracle-derived USD price for ${market.collSym}`);
+  const list = [...accounts];
+  for (let index = 0; index < list.length; index += 150) {
+    const chunk = list.slice(index, index + 150);
+    const results = await pinnedMulticall(chunk.map((account) => ({
+      address: MORPHO,
+      abi: positionAbi,
+      functionName: "position",
+      args: [market.id, account],
+    })), { snapshot, label: `morpho.position(${id.slice(0, 10)})` });
+    results.forEach((result, resultIndex) => {
+      const [, borrowShares, collateral] = result;
       if (borrowShares === 0n) return;
-      const borrowAssetsRaw = (BigInt(borrowShares) * tbA + tbS - 1n) / tbS; // round up
-      const debt = Number(borrowAssetsRaw) / 10 ** m.loanDec;
-      const coll = Number(collateral) / 10 ** m.collDec;
-      const debtUSD = debt * (USD[m.loanSym] ?? 0);
-      const collUSD = coll * (USD[m.collSym] ?? 0);
-      const lltv = Number(m.lltv) / 1e18;
-      const health = debtUSD > 0 ? (collUSD * lltv) / debtUSD : Infinity;
-      const collX = XRP_LINKED.has(m.collSym), loanX = XRP_LINKED.has(m.loanSym);
-      // liquidation when collUSD*k_c*lltv < debtUSD*k_d ; k = XRP multiplier
-      let dropToLiq = null;
-      if (collX && !loanX) dropToLiq = health > 0 ? (1 - 1 / health) * 100 : null;
-      else if (collX && loanX) dropToLiq = null;      // both scale together: XRP-neutral
-      else if (!collX && loanX) dropToLiq = null;      // hurt by XRP *rising*, not falling
+      const borrowAssetsRaw = (BigInt(borrowShares) * totalBorrowAssets + totalBorrowShares - 1n) / totalBorrowShares;
+      const debt = Number(borrowAssetsRaw) / 10 ** market.loanDec;
+      const collateralTokens = Number(collateral) / 10 ** market.collDec;
+      const debtUsd = debt * loanUsd;
+      const collateralValueUsd = collateralTokens * collateralUsd;
+      const health = Number(collateral) * Number(BigInt(market.price)) * (Number(BigInt(market.lltv)) / 1e18)
+        / (Number(borrowAssetsRaw) * 1e36);
+      if (!Number.isFinite(health) || health < 0) throw new Error(`invalid Morpho health for ${chunk[resultIndex]}`);
+      const collateralXrp = XRP_LINKED.has(market.collSym);
+      const loanXrp = XRP_LINKED.has(market.loanSym);
+      const dropToLiq = collateralXrp && !loanXrp && health > 0 ? (1 - 1 / health) * 100 : null;
       positions.push({
-        market: `${m.collSym} -> ${m.loanSym}`, id: m.id, acct,
-        lltvPct: +(lltv * 100).toFixed(0),
-        collUSD: +collUSD.toFixed(2), debtUSD: +debtUSD.toFixed(2),
-        health: +health.toFixed(4),
-        dropToLiq: dropToLiq === null ? null : +dropToLiq.toFixed(2),
-        xrpCollateral: collX, xrpDebt: loanX,
+        market: `${market.collSym} -> ${market.loanSym}`,
+        id: market.id,
+        acct: chunk[resultIndex],
+        lltvPct: Number((Number(BigInt(market.lltv)) / 1e16).toFixed(2)),
+        collUSD: Number(collateralValueUsd.toFixed(2)),
+        debtUSD: Number(debtUsd.toFixed(2)),
+        health: Number(health.toFixed(4)),
+        dropToLiq: dropToLiq === null ? null : Number(dropToLiq.toFixed(2)),
+        xrpCollateral: collateralXrp,
+        xrpDebt: loanXrp,
+        closeFactor: 1,
+        liquidationPenalty: morphoLiquidationPenaltyRate(BigInt(market.lltv)),
       });
     });
   }
-  process.stdout.write(`\r  scored ${positions.length} positions...`);
+  process.stdout.write(`\r  scored ${positions.length} positions                    `);
 }
-console.log("\n");
-
-positions.sort((a, b) => a.health - b.health);
-const totalDebt = positions.reduce((s, p) => s + p.debtUSD, 0);
-const xrpColl = positions.filter((p) => p.xrpCollateral);
-const xrpOnly = positions.filter((p) => p.dropToLiq !== null);
-
-console.log("============== MORPHO ON FLARE: LIVE BORROW POSITIONS ==============");
-console.log("positions with debt            :", positions.length);
-console.log("total debt                     : $" + totalDebt.toLocaleString(undefined, { maximumFractionDigits: 0 }));
-console.log("positions w/ XRP-linked collateral:", xrpColl.length, "  debt $" + xrpColl.reduce((s, p) => s + p.debtUSD, 0).toLocaleString(undefined, { maximumFractionDigits: 0 }));
-console.log("  of which exposed to XRP falling :", xrpOnly.length, "  debt $" + xrpOnly.reduce((s, p) => s + p.debtUSD, 0).toLocaleString(undefined, { maximumFractionDigits: 0 }));
-
-console.log("\n--- per market ---");
-const byMkt = {};
-for (const p of positions) {
-  byMkt[p.market] ??= { n: 0, debt: 0, coll: 0 };
-  byMkt[p.market].n++; byMkt[p.market].debt += p.debtUSD; byMkt[p.market].coll += p.collUSD;
-}
-for (const [k, v] of Object.entries(byMkt).sort((a, b) => b[1].debt - a[1].debt))
-  console.log(`  ${k.padEnd(34)} ${String(v.n).padStart(4)} pos  $${v.debt.toLocaleString(undefined, { maximumFractionDigits: 0 }).padStart(12)} debt  $${v.coll.toLocaleString(undefined, { maximumFractionDigits: 0 }).padStart(12)} coll`);
-
-console.log("\n--- health buckets (XRP-collateral positions) ---");
-for (const [label, fn] of [
-  ["LIQUIDATABLE h<1.0", (p) => p.health < 1.0],
-  ["CRITICAL 1.0-1.1", (p) => p.health >= 1.0 && p.health < 1.1],
-  ["AT RISK  1.1-1.25", (p) => p.health >= 1.1 && p.health < 1.25],
-  ["WATCH    1.25-1.5", (p) => p.health >= 1.25 && p.health < 1.5],
-  ["SAFE     h>=1.5", (p) => p.health >= 1.5],
-]) {
-  const g = xrpColl.filter(fn);
-  console.log(`  ${label.padEnd(20)} ${String(g.length).padStart(4)} pos   $${g.reduce((s, p) => s + p.debtUSD, 0).toLocaleString(undefined, { maximumFractionDigits: 0 }).padStart(12)} debt`);
-}
-
-console.log("\n--- XRP drop that triggers liquidation (Morpho only) ---");
-for (const d of [5, 10, 15, 20, 30]) {
-  const g = xrpOnly.filter((p) => p.dropToLiq <= d);
-  console.log(`  XRP -${String(d).padStart(2)}%  =>  ${String(g.length).padStart(4)} positions, $${g.reduce((s, p) => s + p.debtUSD, 0).toLocaleString(undefined, { maximumFractionDigits: 0 })} debt`);
-}
-
-console.log("\n--- 15 riskiest XRP-collateral positions ---");
-console.log("  health  dropToLiq       debtUSD       collUSD  market                          account");
-for (const p of xrpOnly.filter((x) => x.debtUSD > 500).slice(0, 15))
-  console.log(`  ${p.health.toFixed(3).padStart(6)}  ${String(p.dropToLiq).padStart(8)}%  ${("$" + p.debtUSD.toLocaleString(undefined, { maximumFractionDigits: 0 })).padStart(12)}  ${("$" + p.collUSD.toLocaleString(undefined, { maximumFractionDigits: 0 })).padStart(12)}  ${p.market.padEnd(30)} ${p.acct}`);
-
-writeFileSync("morpho-positions.json", JSON.stringify(positions, null, 2));
-console.log("\nwrote morpho-positions.json");
+console.log();
+positions.sort((left, right) => left.health - right.health);
+const output = join(DATA_DIR, "morpho-positions.json");
+writeJsonAtomic(output, positions);
+console.log(`wrote ${output} (${positions.length} positions)`);

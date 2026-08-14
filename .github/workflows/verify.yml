@@ -23,7 +23,7 @@ jobs:
             monitor/package-lock.json
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.25.1"
+          go-version: "1.25.13"
           cache-dependency-path: fce/go.sum
       - run: for file in scripts/*.sh; do bash -n "$file"; done
       - run: node --check monitor/verify-controlled-receipt.mjs
@@ -46,7 +46,11 @@ jobs:
         working-directory: monitor
       - run: npm test
         working-directory: monitor
+      - run: node -e 'const s=require("./data/snapshot.json"); if(!s.blockHash || !s.prices?.FXRP?.usd) process.exit(1)'
+        working-directory: monitor
       - run: go test ./...
+        working-directory: fce
+      - run: go run golang.org/x/vuln/cmd/govulncheck@v1.7.0 ./...
         working-directory: fce
       - run: npm run build && npm run verify && git diff --exit-code -- index.html
         working-directory: dashboard
