@@ -61,6 +61,8 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      RPC_FALLBACK_URL: https://flare.rpc.thirdweb.com
     steps:
       - uses: actions/checkout@v7
         with:
