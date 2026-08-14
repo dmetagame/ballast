@@ -54,6 +54,22 @@ activation or public verification fails. Run it only from a committed release:
 ./scripts/verify-static-production.sh
 ```
 
+Deploy the keeper code and health monitor from the same committed release:
+
+```bash
+./scripts/deploy-keeper-aws.sh
+systemctl --user status ballast-keeper --no-pager
+systemctl --user status ballast-keeper-health.timer --no-pager
+systemctl --user start ballast-keeper-health.service
+```
+
+The runtime deployment rejects a dirty or unpushed release, installs locked monitor dependencies
+into an immutable release directory, and restores the previous keeper symlink if activation or the
+immediate health check fails. Run it alone only when the hosted static `release.json` files already
+expose the same commit. Keep `EXECUTE=false` until the controlled protection receipt is independently
+verified. For a full release, use `scripts/activate-production.sh`; it also restores the previous
+static release if the keeper cannot advance to the same commit.
+
 The Caddy configuration adds HSTS, clickjacking protection, MIME sniffing protection, a restrained
 referrer policy, and disables unused camera, microphone, and geolocation permissions.
 
@@ -106,6 +122,22 @@ The service combines the scaffold's base and Coston2 Compose files with
 `deploy/fcc/docker-compose.production.yaml`. It waits for Redis and the proxy's internal
 liveness endpoint before starting the extension TEE. The external `/info` endpoint depends on
 the TEE startup handshake, so it must not be used as the TEE dependency health check.
+
+## Incident response
+
+If the health timer fails, inspect the structured result and services before changing any chain
+configuration:
+
+```bash
+systemctl --user status ballast-keeper --no-pager
+systemctl --user status ballast-keeper-health.service --no-pager
+journalctl --user -u ballast-keeper -u ballast-keeper-health.service --since '30 minutes ago' --no-pager
+```
+
+Do not enable execution while a health check is failing. For a runtime or dependency problem,
+redeploy the intended committed release with `scripts/deploy-keeper-aws.sh`; it refuses a dirty or
+unpushed release and rolls back on activation failure. For an FCC failure, verify `/info`, the onchain TEE
+URL, and status `2` before rotating a registration.
 
 Keep the proxy ports bound to loopback when Caddy or another host reverse proxy terminates
 HTTPS:

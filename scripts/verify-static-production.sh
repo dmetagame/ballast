@@ -17,6 +17,15 @@ headers=$(curl --fail --silent --show-error --head --max-time 20 "$PRODUCT_URL" 
 grep -Fq 'x-content-type-options: nosniff' <<<"$headers"
 grep -Fq 'x-frame-options: deny' <<<"$headers"
 grep -Fq 'strict-transport-security: max-age=31536000' <<<"$headers"
+grep -Fq "content-security-policy: default-src 'self'" <<<"$headers"
+grep -Fq 'cache-control: no-cache' <<<"$headers"
+
+product_html=$(curl --fail --silent --show-error --max-time 20 "$PRODUCT_URL")
+asset_path=$(grep -Eo 'assets/[A-Za-z0-9._-]+' <<<"$product_html" | head -1)
+[[ -n "$asset_path" ]] || { printf 'product asset path is missing\n' >&2; exit 1; }
+asset_headers=$(curl --fail --silent --show-error --head --max-time 20 \
+  "${PRODUCT_URL%/}/$asset_path" | tr -d '\r' | tr '[:upper:]' '[:lower:]')
+grep -Fq 'cache-control: public, max-age=31536000, immutable' <<<"$asset_headers"
 
 if [[ -n "$EXPECTED_COMMIT" ]]; then
   for url in "$PRODUCT_URL" "$DASHBOARD_URL" "$ENROLLMENT_URL"; do

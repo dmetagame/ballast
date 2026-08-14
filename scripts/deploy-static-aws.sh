@@ -7,7 +7,6 @@ set -euo pipefail
 : "${STATIC_CURRENT:=/var/www/ballast-current}"
 : "${VITE_BALLAST_MANAGER:=0x746066ACe5dc89a3692137b8cdE3c31328629d09}"
 : "${VITE_BALLAST_KEEPER:=0xA20a59090f609329405F5DcA785Af9357F6965E7}"
-: "${ALLOW_DIRTY_DEPLOY:=false}"
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 commit=$(git -C "$repo_root" rev-parse HEAD)
@@ -25,23 +24,30 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if [[ "$ALLOW_DIRTY_DEPLOY" != true ]] && [[ -n "$(git -C "$repo_root" status --porcelain --untracked-files=normal)" ]]; then
-  printf 'refusing dirty production deploy; commit the release or set ALLOW_DIRTY_DEPLOY=true\n' >&2
+if [[ -n "$(git -C "$repo_root" status --porcelain --untracked-files=normal)" ]]; then
+  printf 'refusing dirty production deploy; commit the release first\n' >&2
   exit 1
 fi
 
+git -C "$repo_root" fetch --quiet origin main
+remote_main=$(git -C "$repo_root" rev-parse origin/main)
+[[ "$remote_main" = "$commit" ]] || {
+  printf 'refusing unpushed static deploy: HEAD=%s origin/main=%s\n' "$commit" "$remote_main" >&2
+  exit 1
+}
+
 "$repo_root/scripts/verify-production.sh"
 
-(cd "$repo_root/landing" && npm ci && npm run build && npm run verify)
+(cd "$repo_root/dashboard" && npm run build && npm run verify)
+(cd "$repo_root/landing" && npm ci && npx playwright install chromium && node data.mjs && npm run build && npm run verify)
 (cd "$repo_root/app" && npm ci && \
   VITE_BALLAST_MANAGER="$VITE_BALLAST_MANAGER" \
   VITE_BALLAST_KEEPER="$VITE_BALLAST_KEEPER" \
   VITE_ENABLE_ENROLLMENT_WRITES=true \
   VITE_MANAGER_VERSION=v3 \
-  npm run build && npm run verify:production)
-(cd "$repo_root/dashboard" && npm run build && npm run verify)
+  npm run build && npm run verify:production && npm run verify)
 
-if [[ "$ALLOW_DIRTY_DEPLOY" != true ]] && [[ -n "$(git -C "$repo_root" status --porcelain --untracked-files=normal)" ]]; then
+if [[ -n "$(git -C "$repo_root" status --porcelain --untracked-files=normal)" ]]; then
   printf 'build changed tracked release inputs; commit regenerated artifacts before deploying\n' >&2
   exit 1
 fi

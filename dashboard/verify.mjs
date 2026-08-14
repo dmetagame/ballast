@@ -12,7 +12,15 @@ const checks = [
   ["risk snapshot", html.includes("const DATA =") && /"positions":\d+/.test(html)],
   ["production manager", html.toLowerCase().includes("0x746066ace5dc89a3692137b8cde3c31328629d09")],
   ["controlled address disclosure", html.includes("Borrower addresses are truncated")],
+  ["drawdown metric is named precisely", html.includes("Liquidated by XRP −25%")],
 ];
+
+const payload = html.match(/const DATA = (\{.*?\});/s)?.[1];
+if (!payload) throw new Error("dashboard payload is missing");
+const { meta } = JSON.parse(payload);
+if (!Number.isInteger(meta.healthBandPositions) || !Number.isInteger(meta.healthBandDebt)) {
+  throw new Error("dashboard health-band provenance is missing");
+}
 
 const failed = checks.filter(([, pass]) => !pass);
 for (const [name, pass] of checks) console.log(`${pass ? "ok" : "FAIL"} ${name}`);

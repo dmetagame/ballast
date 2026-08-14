@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Ballast keeper health check
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+Persistent=true
+Unit=ballast-keeper-health.service
+
+[Install]
+WantedBy=timers.target

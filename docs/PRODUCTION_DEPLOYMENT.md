@@ -58,8 +58,23 @@ Build and deploy from `app/` only after the pool is active and ownership state i
 Run `npm run verify:production` after the build; it fails if the bundle contains the legacy
 manager, wrong keeper, wrong ABI version, or disabled writes.
 
-Use `scripts/activate-production.sh` for production releases. It also updates the public alias
-and runs `npm run verify:deployment` against the live artifact before returning success.
+Use `scripts/activate-production.sh` for production releases. It deploys and verifies the static
+surfaces, advances the keeper runtime to the same Git commit, and rolls both components back if
+the keeper activation or immediate health check fails.
+
+Deploy the keeper runtime separately from the static surfaces so the host runs the exact commit
+that was tested and published:
+
+```bash
+./scripts/deploy-keeper-aws.sh
+```
+
+The keeper deployment requires a clean commit already pushed to `origin/main`, creates an
+immutable runtime release, installs locked monitor dependencies, switches a release symlink, and
+immediately runs a fail-closed health check. Run it directly only when the hosted static
+`release.json` files already expose the same commit; otherwise use `scripts/activate-production.sh`
+for a coordinated static and keeper release. If activation fails, it restores the previous runtime
+symlink and restarts the previous keeper.
 
 ## Keeper configuration
 
@@ -94,7 +109,7 @@ The repository includes a hardened user-level systemd unit:
 ```bash
 ./scripts/install-keeper-service.sh
 $EDITOR ~/.config/ballast/keeper.env
-systemctl --user enable --now ballast-keeper
+systemctl --user enable --now ballast-keeper ballast-keeper-health.timer
 journalctl --user -u ballast-keeper -f
 ```
 
@@ -105,6 +120,12 @@ The systemd unit loads the keeper key from `~/.config/ballast/keeper.private-key
 `LoadCredential`; the key is not placed in `keeper.env` or exported directly by the service.
 Write the dedicated keeper key to that file with mode `0600` only after dry-run validation, and
 never configure both `PRIVATE_KEY` and `PRIVATE_KEY_FILE`.
+
+The health timer checks the keeper checkpoint age, Flare chain identity, finalized manager,
+adapter, pool and admin state, Coston2 FCC registration/PRODUCTION status, and all three hosted static surfaces every
+five minutes. With `EXECUTE=true`, every broadcast additionally requires a fresh successful health
+result for the exact runtime release. Set `ALERT_WEBHOOK_URL` in the protected environment file
+for a JSON alert on a failure or recovery transition.
 
 ## Pre-enrollment checks
 

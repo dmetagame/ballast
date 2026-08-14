@@ -27,14 +27,20 @@ jobs:
           cache-dependency-path: fce/go.sum
       - run: for file in scripts/*.sh; do bash -n "$file"; done
       - run: node --check monitor/verify-controlled-receipt.mjs
+      - run: node --check monitor/healthcheck.mjs
+      - run: systemd-analyze --user verify deploy/systemd/ballast-keeper.service deploy/systemd/ballast-keeper-health.service deploy/systemd/ballast-keeper-health.timer
       - run: forge test --no-match-path 'test/*.fork.t.sol'
       - run: npm ci
         working-directory: app
       - run: npm run check && VITE_ENABLE_ENROLLMENT_WRITES=true npm run build && npm run verify:production
         working-directory: app
+      - run: npx playwright install --with-deps chromium
+        working-directory: app
+      - run: npm run verify
+        working-directory: app
       - run: npm ci
         working-directory: landing
-      - run: npm run build
+      - run: node data.mjs && git diff --exit-code -- src/figures.json && npm run build && npm run verify
         working-directory: landing
       - run: npm ci
         working-directory: monitor

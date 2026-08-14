@@ -1,0 +1,16 @@
+[Unit]
+Description=Ballast keeper health check
+After=network-online.target ballast-keeper.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/ballast-runtime-current/monitor
+EnvironmentFile=%h/.config/ballast/keeper.env
+ExecStart=/usr/bin/env node healthcheck.mjs
+TimeoutStartSec=180
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.config/ballast

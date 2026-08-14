@@ -17,6 +17,7 @@ read-only unless `VITE_ENABLE_ENROLLMENT_WRITES=true` is set. Production release
 ```sh
 VITE_ENABLE_ENROLLMENT_WRITES=true npm run build
 npm run verify:production
+npm run verify
 ```
 
 `verify:production` rejects a bundle containing the legacy manager, the wrong ABI version,

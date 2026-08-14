@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "check": "node --check src/main.js",
+    "verify": "node verify.mjs",
     "verify:production": "node verify-production-build.mjs",
     "verify:deployment": "node verify-deployment.mjs"
   },
@@ -14,6 +15,7 @@
     "viem": "^2.21.0"
   },
   "devDependencies": {
+    "playwright": "^1.62.1",
     "vite": "^6.0.0"
   }
 }

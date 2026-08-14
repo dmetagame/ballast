@@ -44,11 +44,13 @@ const M = morpho
   }));
 
 const round = (n, dp) => Math.round(n * 10 ** dp) / 10 ** dp;
-const positions = [...E, ...M]
+const measuredPositions = [...E, ...M];
+const positions = measuredPositions
   .map((p) => ({ ...p, d: round(p.d, 2), c: round(p.c, 2), h: round(p.h, 4), k: p.k === null ? null : round(p.k, 2) }))
   .sort((x, y) => x.h - y.h);
 
 const sum = (a, f) => a.reduce((s, x) => s + f(x), 0);
+const healthBand = measuredPositions.filter((p) => p.h >= 1 && p.h <= 1.25);
 const meta = {
   generated: "2026-08-02",
   block: 66470000,
@@ -57,6 +59,8 @@ const meta = {
   addresses: new Set(positions.map((p) => p.a)).size,
   debt: Math.round(sum(positions, (p) => p.d)),
   collateral: Math.round(sum(positions, (p) => p.c)),
+  healthBandPositions: healthBand.length,
+  healthBandDebt: Math.round(sum(healthBand, (p) => p.d)),
 };
 
 // Compact wire form: intern the repeated strings and emit rows as tuples. The venue implies

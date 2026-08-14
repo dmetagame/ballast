@@ -1,0 +1,64 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { runChecks, validateKeeperState, validateProductionState } from "./healthcheck.mjs";
+
+const MANAGER = "0x746066ACe5dc89a3692137b8cdE3c31328629d09";
+
+test("keeper health state accepts a fresh matching checkpoint", () => {
+  assert.deepEqual(validateKeeperState({
+    state: { version: 1, chainId: 14, manager: MANAGER.toLowerCase(), fromBlock: "67019411", nextBlock: "123", policies: [{ borrower: "0x1", id: "0x2" }] },
+    manager: MANAGER,
+    modifiedMs: 9_000,
+    nowMs: 10_000,
+    maxAgeMs: 5_000,
+  }), { nextBlock: "123", policyCount: 1, ageMs: 1_000 });
+});
+
+test("keeper health state rejects stale or mismatched checkpoints", () => {
+  const state = { version: 1, chainId: 14, manager: MANAGER.toLowerCase(), fromBlock: "67019411", nextBlock: "123", policies: [] };
+  assert.throws(() => validateKeeperState({ state, manager: MANAGER, modifiedMs: 0, nowMs: 10_000, maxAgeMs: 5_000 }), /stale/);
+  assert.throws(() => validateKeeperState({ state: { ...state, chainId: 114 }, manager: MANAGER, modifiedMs: 9_000, nowMs: 10_000, maxAgeMs: 5_000 }), /identity/);
+});
+
+test("production state requires the finalized manager, adapter, pool, and owners", () => {
+  const state = {
+    chainId: 14,
+    blockNumber: 123n,
+    paused: false,
+    managerCode: "0x01",
+    adapterCode: "0x01",
+    managerAdapter: "0xA3B9822228b6d0DE77089B0C67Ec0A73A9A9C202",
+    managerOwner: "0x302a6505c225bBB145569F35B89611d0677195a9",
+    managerGuardian: "0xFf97ED39EAe2a4f5fa79097EdDbFD4c27876f8ce",
+    pendingManagerOwner: "0x0000000000000000000000000000000000000000",
+    pendingSwapAdapter: "0x0000000000000000000000000000000000000000",
+    adapterManager: MANAGER,
+    adapterOwner: "0x302a6505c225bBB145569F35B89611d0677195a9",
+    pendingAdapterOwner: "0x0000000000000000000000000000000000000000",
+    activePool: "0x927485d88a66253c63Af9163dca5f21c25A57393",
+    pendingPool: "0x0000000000000000000000000000000000000000",
+  };
+  assert.deepEqual(validateProductionState(state), {
+    chainId: 14,
+    blockNumber: "123",
+    paused: false,
+    adapter: state.managerAdapter,
+    pool: state.activePool,
+  });
+  assert.throws(() => validateProductionState({ ...state, activePool: MANAGER }), /active pool mismatch/);
+  assert.throws(() => validateProductionState({ ...state, pendingSwapAdapter: state.managerAdapter }), /pending swap adapter mismatch/);
+});
+
+test("healthcheck aggregates failures without skipping remaining checks", async () => {
+  const calls = [];
+  const result = await runChecks({
+    checkState: async () => { calls.push("state"); throw new Error("stale"); },
+    checkService: async () => { calls.push("service"); return { active: true }; },
+    checkChainFn: async () => { calls.push("chain"); throw new Error("paused"); },
+    checkFccFn: async () => { calls.push("fcc"); return { teeStatus: 2 }; },
+    checkStaticFn: async () => { calls.push("static"); return [{ status: 200 }]; },
+  });
+  assert.deepEqual(calls, ["state", "service", "chain", "fcc", "static"]);
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.errors, ["state: stale", "chain: paused"]);
+});

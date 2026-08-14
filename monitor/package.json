@@ -10,8 +10,9 @@
     "keeper:execute": "EXECUTE=true RUN_ONCE=true node keeper.mjs",
     "keeper:watch": "node keeper.mjs",
     "keeper:execute-watch": "EXECUTE=true node keeper.mjs",
+    "healthcheck": "node healthcheck.mjs",
     "verify:controlled": "node verify-controlled-receipt.mjs",
-    "test": "node --test keeper.test.mjs"
+    "test": "node --test *.test.mjs"
   },
   "dependencies": {
     "viem": "^2.21.0"

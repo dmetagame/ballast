@@ -40,7 +40,7 @@
 
         <article class="card flow-card">
           <div class="card-heading"><div><p class="eyebrow">02 / Authorization</p><h2>Allow Ballast to act</h2></div><span class="step">Wallet transaction</span></div>
-          <p class="body-copy">Morpho authorization lets the manager operate on your position. Ballast does not receive custody of your collateral; Morpho records this permission against your account.</p>
+          <p class="body-copy">Morpho authorization lets the manager operate on your position. During protection, collateral passes through Ballast only inside one atomic transaction; the manager does not retain custody afterward.</p>
           <div class="callout"><span class="check">✓</span><span>Revocable at any time through Morpho’s authorization control.</span></div>
           <button id="authorizeButton" class="button button-primary" disabled>Authorize Ballast on Morpho</button>
           <p id="authorizationHint" class="hint">Connect your wallet to inspect authorization.</p>

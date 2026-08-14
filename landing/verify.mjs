@@ -46,6 +46,36 @@ const check = (name, pass, detail = "") => {
   console.log(`${pass ? "ok  " : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`);
 };
 
+async function navigate(page, url) {
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      return await page.goto(url, { waitUntil: "networkidle" });
+    } catch (error) {
+      lastError = error;
+      if (!REMOTE || attempt === 3) throw error;
+      await page.waitForTimeout(attempt * 1_000);
+    }
+  }
+  throw lastError;
+}
+
+async function fetchText(url) {
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const response = await fetch(url, { signal: AbortSignal.timeout(20_000) });
+      if (!response.ok) throw new Error(`fetch failed: ${response.status} ${response.statusText}`);
+      return response.text();
+    } catch (error) {
+      lastError = error;
+      if (!REMOTE || attempt === 3) throw error;
+      await new Promise((resolve) => setTimeout(resolve, attempt * 1_000));
+    }
+  }
+  throw lastError;
+}
+
 // Text that must be legible no matter what. Figures are the argument; caveats qualify it.
 const MUST_BE_VISIBLE = [
   ["figure: positions", "739"],
@@ -73,7 +103,7 @@ const browser = await chromium.launch();
 {
   const ctx = await browser.newContext({ reducedMotion: "reduce" });
   const page = await ctx.newPage();
-  await page.goto(base, { waitUntil: "networkidle" });
+  await navigate(page, base);
 
   // Guards against a smooth-scroll library being reintroduced. Lenis was removed because it
   // broke back/forward restoration; if one comes back, this fails before the navigation does.
@@ -106,7 +136,7 @@ const browser = await chromium.launch();
 {
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
-  await page.goto(base, { waitUntil: "networkidle" });
+  await navigate(page, base);
 
   // With no smooth-scroll library, the observable difference between motion on and off is
   // whether the gsap context ran. It dims the mechanism steps to 0.35; reduced motion leaves
@@ -139,7 +169,7 @@ const browser = await chromium.launch();
 {
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
-  await page.goto(`${base}/#limits`, { waitUntil: "networkidle" });
+  await navigate(page, `${base}/#limits`);
   await page.waitForTimeout(600);
 
   const rows = await page.evaluate(() =>
@@ -153,7 +183,7 @@ const browser = await chromium.launch();
 // Expected values are read from the built HTML, not typed here, so this compares the page
 // against what the build actually wrote from monitor/data.
 {
-  const html = REMOTE ? await (await fetch(REMOTE)).text() : readFileSync(join(dist, "index.html"), "utf8");
+  const html = REMOTE ? await fetchText(REMOTE) : readFileSync(join(dist, "index.html"), "utf8");
   const authored = [...html.matchAll(/data-count="(\d+)"[^>]*>([^<]+)</g)].map((m) => ({
     count: m[1],
     text: m[2].trim(),
@@ -162,7 +192,7 @@ const browser = await chromium.launch();
 
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
-  await page.goto(base, { waitUntil: "networkidle" });
+  await navigate(page, base);
 
   // Bring the figures into view so the counters run, then let them finish.
   await page.evaluate(() => document.getElementById("stakes").scrollIntoView());
@@ -197,16 +227,15 @@ const browser = await chromium.launch();
 }
 
 // --- keyboard, anchors, history --------------------------------------------------------
-// Smooth scroll is the most common way to break these. Lenis wraps native scroll rather than
-// replacing it, which is why it was chosen over ScrollSmoother; this is where that claim gets
-// tested instead of asserted.
+// Scroll effects are the most common way to break these. The page deliberately keeps native
+// scrolling, so this verifies keyboard navigation, fragment links, and history restoration.
 {
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
-  await page.goto(base, { waitUntil: "networkidle" });
+  await navigate(page, base);
 
-  // Smooth scroll has no fixed duration, so waiting a constant is a race. Poll until the
-  // position stops changing, which is what "settled" actually means.
+  // Browser fragment navigation can settle asynchronously. Poll until the position stops
+  // changing instead of relying on a fixed delay.
   const settle = async () => {
     let previous = -1;
     for (let i = 0; i < 40; i++) {
@@ -244,7 +273,7 @@ const browser = await chromium.launch();
   check("keyboard: Tab follows DOM order", seen.join("|") === expected.slice(0, seen.length).join("|"), seen.join(" "));
   check("keyboard: focused control stays in view", offscreen === 0, `${offscreen} off-screen`);
 
-  // In-page anchor. Lenis is configured with anchors:true; this proves it actually moves.
+  // In-page anchor must still move the native viewport.
   await page.evaluate(() => window.scrollTo(0, 0));
   await settle();
   await page.click('a[href="#limits"]');

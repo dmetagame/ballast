@@ -87,6 +87,12 @@ if (existsSync(dashboard)) {
       );
     }
   }
+  if (meta.healthBandPositions !== figures.nearBand.positions || meta.healthBandDebt !== figures.nearBand.debt) {
+    throw new Error(
+      `health-band drift: landing ${figures.nearBand.positions}/$${figures.nearBand.debt} ` +
+        `vs dashboard ${meta.healthBandPositions}/$${meta.healthBandDebt}`,
+    );
+  }
   console.log("cross-check : matches dashboard/index.html");
 } else {
   console.log("cross-check : skipped, dashboard/index.html not present");

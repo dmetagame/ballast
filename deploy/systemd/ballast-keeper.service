@@ -5,7 +5,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=%h/ballast/monitor
+WorkingDirectory=%h/ballast-runtime-current/monitor
 EnvironmentFile=%h/.config/ballast/keeper.env
 LoadCredential=keeper_private_key:%h/.config/ballast/keeper.private-key
 ExecStart=/usr/bin/env npm run keeper:watch

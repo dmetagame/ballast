@@ -308,6 +308,12 @@ The hosted operator is `0xA20a59090f609329405F5DcA785Af9357F6965E7`. Its AWS ser
 with `EXECUTE=false`; it is not yet a protection SLA and will remain dry-run until a controlled
 mainnet `Protected` receipt succeeds.
 
+The host also runs a five-minute fail-closed health timer over keeper checkpoint freshness,
+manager, adapter, pool and admin state, FCC registration, and the three public surfaces. When execution is
+enabled, the keeper refuses to broadcast unless that result is fresh and matches its immutable
+release commit. Release deployment rolls static and keeper components back if they cannot advance
+to the same Git commit. An external webhook destination is optional and must be configured separately.
+
 The borrower enrollment app lives in `app/` and is publicly deployed at
 `https://ballast.rouma.online/enroll/`. It targets the finalized V3 manager with enrollment
 writes enabled:
@@ -399,7 +405,8 @@ Two things that will waste your time otherwise:
   are delayed, protection can be guardian-paused, and both ownership handoffs are complete.
 - **The keeper is hosted but intentionally dry-run.** The AWS service runs continuously with
   restart supervision and execution-economics bounds, but no borrower has enrolled on V3 and no
-  live `Protected` receipt exists. It is not an uptime or protection guarantee.
+  live `Protected` receipt exists. Health monitoring is active, but it is not an uptime or
+  protection guarantee.
 - **Single-venue routing.** The adapter swaps against one registered pool per pair. Splitting
   across the Algebra and UniV3 pools would add roughly 20% more depth.
 - **The drawdown simulation is a worst case.** `PoolPusher` moves the price by dumping into a

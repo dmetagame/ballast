@@ -20,6 +20,7 @@ import {
   selectSyncTarget,
   shouldSkipForDifferentKeeper,
   validateBlockscoutTip,
+  validateExecutionHealth,
 } from "./keeper.mjs";
 
 const OPERATOR = "0xEE3eA6f858aE84dD6959f241DfC257a2f8fA3f53";
@@ -135,6 +136,42 @@ test("keeper rejects a reverted protection receipt", () => {
 test("keeper accepts a successful protection receipt", () => {
   const receipt = { status: "success" };
   assert.equal(assertSuccessfulReceipt(receipt, "0x1234"), receipt);
+});
+
+test("execution health gate accepts only a fresh matching release", () => {
+  const state = {
+    version: 2,
+    status: "ok",
+    checkedAt: "2026-08-13T22:00:00.000Z",
+    releaseCommit: "abc123",
+    errors: [],
+  };
+  assert.deepEqual(validateExecutionHealth({
+    state,
+    expectedReleaseCommit: "abc123",
+    nowMs: Date.parse("2026-08-13T22:05:00.000Z"),
+    maxAgeMs: 420_000,
+  }), { ageMs: 300_000, releaseCommit: "abc123" });
+  assert.throws(() => validateExecutionHealth({
+    state: { ...state, status: "failed" },
+    expectedReleaseCommit: "abc123",
+  }), /not passing/);
+  assert.throws(() => validateExecutionHealth({
+    state,
+    expectedReleaseCommit: "different",
+    nowMs: Date.parse("2026-08-13T22:05:00.000Z"),
+  }), /release mismatch/);
+  assert.throws(() => validateExecutionHealth({
+    state,
+    expectedReleaseCommit: null,
+    nowMs: Date.parse("2026-08-13T22:05:00.000Z"),
+  }), /no expected release commit/);
+  assert.throws(() => validateExecutionHealth({
+    state,
+    expectedReleaseCommit: "abc123",
+    nowMs: Date.parse("2026-08-13T22:10:00.001Z"),
+    maxAgeMs: 600_000,
+  }), /stale/);
 });
 
 test("one-shot keeper failures exit non-zero while watch mode continues", () => {
