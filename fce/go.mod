@@ -5,11 +5,12 @@ go 1.25.1
 require (
 	github.com/ethereum/go-ethereum v1.17.5
 	github.com/flare-foundation/go-flare-common v1.2.2-0.20260727094511-09a10067e6a4
-	github.com/flare-foundation/tee-node v0.0.24
+	github.com/flare-foundation/tee-node v0.0.25
 )
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProjectZKM/Ziren/crates/go-runtime/zkvm_runtime v0.0.0-20251106012722-c7be33e82a11 // indirect
 	github.com/bits-and-blooms/bitset v1.24.3 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
@@ -23,6 +24,7 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-sql-driver/mysql v1.9.3 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
@@ -33,6 +35,7 @@ require (
 	github.com/supranational/blst v0.3.16 // indirect
 	github.com/tklauser/go-sysconf v0.3.15 // indirect
 	github.com/tklauser/numcpus v0.10.0 // indirect
+	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel v1.41.0 // indirect
 	go.opentelemetry.io/otel/metric v1.41.0 // indirect
