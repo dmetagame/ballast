@@ -12,6 +12,7 @@ on:
         default: false
 
 permissions:
+  actions: read
   contents: read
   issues: write
 
@@ -25,6 +26,8 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v7
         with:
           node-version: 22
@@ -32,13 +35,42 @@ jobs:
         continue-on-error: true
         env:
           EXERCISE_ALERT: ${{ inputs.exercise_alert }}
-          EXPECTED_RELEASE_COMMIT: ${{ github.sha }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -o pipefail
-          if [[ "${EXERCISE_ALERT:-false}" = true ]]; then
-            export HEALTH_URL="https://ballast.rouma.online/ops/watchdog-alert-drill.json"
-          fi
-          node monitor/watchdog.mjs 2>&1 | tee /tmp/ballast-watchdog.log
+          (
+            set -euo pipefail
+            previous_commit=$(curl --fail --silent --show-error --retry 3 --retry-all-errors --max-time 20 \
+              https://ballast.rouma.online/ops/health.json | jq -er '.releaseCommit')
+            previous_commit=${previous_commit,,}
+            [[ "$previous_commit" =~ ^[0-9a-f]{40}$ ]]
+            git cat-file -e "${previous_commit}^{commit}"
+            git merge-base --is-ancestor "$previous_commit" "$GITHUB_SHA" || {
+              echo "deployed release is not an ancestor of main: $previous_commit" >&2
+              exit 1
+            }
+            rollout_started_at=""
+            for attempt in 1 2 3; do
+              if rollout_started_at=$(gh api -X GET \
+                "repos/${GITHUB_REPOSITORY}/actions/workflows/verify.yml/runs" \
+                -f head_sha="$GITHUB_SHA" -f event=push -f per_page=1 \
+                --jq '.workflow_runs[0].created_at // empty'); then
+                break
+              fi
+              sleep "$attempt"
+            done
+            if [[ -z "$rollout_started_at" ]]; then
+              rollout_started_at=$(git show -s --format=%cI HEAD)
+            fi
+            rollout_epoch=$(date -d "$rollout_started_at" +%s)
+            export EXPECTED_RELEASE_COMMIT="$GITHUB_SHA"
+            export PREVIOUS_RELEASE_COMMIT="$previous_commit"
+            export RELEASE_ROLLOUT_DEADLINE_MS=$(( (rollout_epoch + 20 * 60) * 1000 ))
+            if [[ "${EXERCISE_ALERT:-false}" = true ]]; then
+              export HEALTH_URL="https://ballast.rouma.online/ops/watchdog-alert-drill.json"
+            fi
+            node monitor/watchdog.mjs
+          ) 2>&1 | tee /tmp/ballast-watchdog.log
       - uses: actions/github-script@v9
         if: always() && steps.watchdog.outcome == 'failure'
         env:

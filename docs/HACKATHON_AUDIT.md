@@ -77,7 +77,8 @@ Remaining technical risks:
 2. Contracts are unaudited.
 3. Only one pool is used per token pair.
 4. Keeper restart supervision, persistent event checkpoints, profitability controls, a fail-closed
-   health timer, and an independent GitHub issue watchdog exist. A second private webhook destination
+   execution health gate, and an independent GitHub issue watchdog exist. FCC and static-site
+   incidents remain visible without disabling independent mainnet protection. A second private webhook destination
    and live execution history do not.
 5. Mainnet enrollment and protection have not occurred with a consenting live borrower.
 

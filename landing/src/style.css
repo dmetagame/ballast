@@ -131,3 +131,9 @@ code { font-family: var(--mono); overflow-wrap: anywhere; }
 @media (min-width: 48rem) {
   .steps { grid-template-columns: repeat(5, 1fr); }
 }
+
+@media (max-width: 21.25rem) {
+  table { table-layout: fixed; }
+  th, td { padding-inline: 0.25rem; font-size: 0.78rem; }
+  thead th { font-size: 0.65rem; letter-spacing: 0; }
+}

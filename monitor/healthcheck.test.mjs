@@ -79,7 +79,23 @@ test("healthcheck aggregates failures without skipping remaining checks", async 
   });
   assert.deepEqual(calls, ["state", "service", "chain", "fcc", "static"]);
   assert.equal(result.ok, false);
+  assert.equal(result.executionOk, false);
   assert.deepEqual(result.errors, ["state: stale", "chain: paused"]);
+  assert.deepEqual(result.executionErrors, ["state: stale", "chain: paused"]);
+});
+
+test("noncritical FCC and static failures do not disable mainnet execution", async () => {
+  const result = await runChecks({
+    checkState: async () => ({ nextBlock: "123" }),
+    checkService: async () => ({ active: true }),
+    checkChainFn: async () => ({ chainId: 14 }),
+    checkFccFn: async () => { throw new Error("offline"); },
+    checkStaticFn: async () => { throw new Error("unavailable"); },
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.executionOk, true);
+  assert.deepEqual(result.errors, ["fcc: offline", "static: unavailable"]);
+  assert.deepEqual(result.executionErrors, []);
 });
 
 test("public health state exposes only status, freshness, and release provenance", () => {

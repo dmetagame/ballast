@@ -1,11 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { keccak256, toEventSelector, zeroAddress } from "viem";
 import {
   applyPolicyLogs,
+  acquireExecutionLock,
   assertSuccessfulReceipt,
   buildRpcLogRanges,
   calculateEconomics,
@@ -129,6 +130,29 @@ test("loadPrivateKey rejects ambiguous key configuration", () => {
     () => loadPrivateKey({ privateKey: "0x1234", privateKeyFile: "/tmp/key" }),
     /set only one/,
   );
+});
+
+test("execution lock rejects a second active process and releases cleanly", () => {
+  const directory = mkdtempSync(join(tmpdir(), "ballast-execution-lock-"));
+  const lockFile = join(directory, "execution.lock");
+  const release = acquireExecutionLock({ enabled: true, lockFile, processId: 1234, isProcessAlive: () => true });
+  assert.equal(readFileSync(lockFile, "utf8").trim(), "1234");
+  assert.throws(
+    () => acquireExecutionLock({ enabled: true, lockFile, processId: 5678, isProcessAlive: () => true }),
+    /held by process 1234/,
+  );
+  release();
+  const releaseAgain = acquireExecutionLock({ enabled: true, lockFile, processId: 5678, isProcessAlive: () => true });
+  releaseAgain();
+});
+
+test("execution lock reclaims a stale process file", () => {
+  const directory = mkdtempSync(join(tmpdir(), "ballast-stale-execution-lock-"));
+  const lockFile = join(directory, "execution.lock");
+  writeFileSync(lockFile, "1234\n", { mode: 0o600 });
+  const release = acquireExecutionLock({ enabled: true, lockFile, processId: 5678, isProcessAlive: () => false });
+  assert.equal(readFileSync(lockFile, "utf8").trim(), "5678");
+  release();
 });
 
 test("calculateEconomics rejects gas above the configured ceiling", () => {
@@ -334,8 +358,9 @@ test("keeper serializes execution broadcasts", async () => {
 
 test("execution health gate accepts only a fresh matching release", () => {
   const state = {
-    version: 2,
+    version: 3,
     status: "ok",
+    executionStatus: "ok",
     checkedAt: "2026-08-13T22:00:00.000Z",
     releaseCommit: "abc123",
     errors: [],
@@ -346,8 +371,14 @@ test("execution health gate accepts only a fresh matching release", () => {
     nowMs: Date.parse("2026-08-13T22:05:00.000Z"),
     maxAgeMs: 420_000,
   }), { ageMs: 300_000, releaseCommit: "abc123" });
+  assert.deepEqual(validateExecutionHealth({
+    state: { ...state, status: "failed", errors: ["fcc: offline"] },
+    expectedReleaseCommit: "abc123",
+    nowMs: Date.parse("2026-08-13T22:05:00.000Z"),
+    maxAgeMs: 420_000,
+  }), { ageMs: 300_000, releaseCommit: "abc123" });
   assert.throws(() => validateExecutionHealth({
-    state: { ...state, status: "failed" },
+    state: { ...state, executionStatus: "failed" },
     expectedReleaseCommit: "abc123",
   }), /not passing/);
   assert.throws(() => validateExecutionHealth({

@@ -36,8 +36,9 @@ Leveraged FXRP borrowers can lose approximately 7.4% of position value when a Mo
   `previewProtect`, simulates before execution, verifies a conservative exact-input quote from the
   same SparkDEX Algebra pool used by the adapter, caps revenue by realizable swap surplus, persists
   confirmed event checkpoints, and remains dry-run pending a controlled receipt. A five-minute health timer checks keeper freshness,
-  manager, adapter, pool, quoter/factory route and admin state, FCC registration, and hosted release provenance; future
-  execution fails closed unless that result is fresh and matches the running release. A separate
+  manager, adapter, pool, quoter/factory route and admin state, FCC registration, and hosted release provenance; the
+  execution-critical subset fails closed unless it is fresh and matches the running release, while FCC and static-site
+  incidents remain visible without disabling independent mainnet protection. A separate
   GitHub watchdog checks the sanitized public health signal four times per hour and manages a
   `production-alert` issue across failure and recovery.
 - Fresh FCC extension and simulated TEE in PRODUCTION on the redeployed Coston2 manager.

@@ -128,7 +128,8 @@ The continuous systemd unit is structurally dry-run-only: it uses `OPERATOR_ADDR
 policy ownership and explicitly hides `~/.config/ballast/keeper.private-key` from the service.
 Store the dedicated keeper key with mode `0600` and expose it only during an explicitly approved
 manual execution window through `PRIVATE_KEY_FILE`; never configure both `PRIVATE_KEY` and
-`PRIVATE_KEY_FILE`.
+`PRIVATE_KEY_FILE`. Execution also acquires `~/.config/ballast/execution.lock`, so a second signer
+process fails before preparing a nonce.
 
 Execution configuration is fail-closed. Before signing, the keeper verifies that the deployed
 Algebra QuoterV2 belongs to the configured SparkDEX factory, that the factory resolves the exact
@@ -144,9 +145,11 @@ surfaces every five minutes. A sanitized status document at `/ops/health.json` c
 result, timestamp, and release commit. The scheduled `Production Watchdog` workflow checks that
 document and release synchronization against the current `main` commit four times per hour,
 opening and resolving a GitHub `production-alert` issue across failure and recovery. With
-`EXECUTE=true`, every broadcast additionally requires a fresh successful internal health result for
-the exact runtime release. Set `ALERT_WEBHOOK_URL` in the protected environment file only if a
-second private alert channel is wanted.
+`EXECUTE=true`, every broadcast additionally requires a fresh successful internal execution result
+for the exact runtime release. That execution gate covers the keeper checkpoint, dry-run service,
+and mainnet contract/liquidity route; FCC and static-site failures remain public incidents but do not
+disable independent mainnet protection. Set `ALERT_WEBHOOK_URL` in the protected environment file
+only if a second private alert channel is wanted.
 
 ## Pre-enrollment checks
 

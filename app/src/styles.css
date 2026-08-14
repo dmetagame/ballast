@@ -7,3 +7,4 @@
 .exit-card { margin-bottom:18px; } .exit-actions { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:12px; }
 .trust-card ul { color:var(--muted); padding-left:19px; margin:0; } .trust-card li { margin:9px 0; } footer { display:flex; justify-content:flex-end; gap:15px; flex-wrap:wrap; color:var(--muted); font-size:12px; padding-top:15px; } footer span { font-family:var(--mono); }
 @media (max-width:760px) { .topbar { flex-wrap:wrap; } .surface-nav { order:3; width:100%; } .network { order:4; width:100%; margin:0; } .grid,.trust-grid,.form-grid { grid-template-columns:1fr; } .address-field { grid-column:auto; } .address-field input { font-size:11px; } .intro { padding-top:52px; } .card { padding:20px; } }
+@media (max-width:340px) { .card-heading { flex-wrap:wrap; } .card-heading > div { min-width:0; } .step,.badge { max-width:100%; white-space:normal; } }

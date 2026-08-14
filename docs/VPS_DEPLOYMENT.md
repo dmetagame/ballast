@@ -137,7 +137,8 @@ systemctl --user status ballast-keeper-health.service --no-pager
 journalctl --user -u ballast-keeper -u ballast-keeper-health.service --since '30 minutes ago' --no-pager
 ```
 
-Do not enable execution while a health check is failing. For a runtime or dependency problem,
+Do not enable execution while an execution-critical health check is failing. FCC and static-site
+failures remain public incidents but do not block the independent mainnet execution gate. For a runtime or dependency problem,
 redeploy the intended committed release with `scripts/deploy-keeper-aws.sh`; it refuses a dirty or
 unpushed release and rolls back on activation failure. For an FCC failure, verify `/info`, the onchain TEE
 URL, and status `2` before rotating a registration.
@@ -146,6 +147,11 @@ The health timer writes a sanitized public signal to `/var/www/ballast-ops/healt
 `https://ballast.rouma.online/ops/health.json` with `no-store`. GitHub's scheduled
 `Production Watchdog` compares its release commit with all three static releases and current `main`,
 then opens a `production-alert` issue if the signal fails, becomes stale, or diverges.
+During a release it accepts only current `main` and the release commit reported by the existing
+public health signal, after verifying that deployed commit is an ancestor of `main`. That tolerance
+lasts at most 20 minutes from the matching GitHub push verification run and still requires a fresh
+`ok` signal. This covers the intentional static-then-runtime handoff without assuming a one-commit
+release or hiding a stuck deployment; exact parity is required after the deadline.
 
 Keep the proxy ports bound to loopback when Caddy or another host reverse proxy terminates
 HTTPS:

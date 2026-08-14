@@ -39,20 +39,31 @@ contract VerdictRecorder is IGatedProtect {
 
     /// @notice Only this address may record, so a stranger cannot pad the log with noise.
     /// @dev Set once after deployment rather than in the constructor, because the trigger and
-    ///      the recorder each need the other's address. Settable exactly once, so it cannot be
-    ///      repointed later at a contract that skips verification.
+    ///      the recorder each need the other's address. Only the recorder deployer may complete
+    ///      this one-time initialization, so a third party cannot claim it first.
     address public trigger;
+    address public immutable initializer;
 
     event VerdictRecorded(
         address indexed borrower, Id indexed id, uint128 targetHealth, uint32 maxSlippageBps, uint256 index
     );
+    event TriggerSet(address indexed trigger);
 
     error OnlyTrigger(address caller);
+    error OnlyInitializer(address caller);
     error TriggerAlreadySet();
+    error InvalidTrigger(address trigger);
+
+    constructor() {
+        initializer = msg.sender;
+    }
 
     function setTrigger(address trigger_) external {
+        if (msg.sender != initializer) revert OnlyInitializer(msg.sender);
         if (trigger != address(0)) revert TriggerAlreadySet();
+        if (trigger_ == address(0) || trigger_.code.length == 0) revert InvalidTrigger(trigger_);
         trigger = trigger_;
+        emit TriggerSet(trigger_);
     }
 
     /// @inheritdoc IGatedProtect

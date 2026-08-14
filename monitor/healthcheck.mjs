@@ -43,6 +43,7 @@ const STATIC_URLS = [
   process.env.DASHBOARD_URL || "https://ballast.rouma.online/risk/",
   process.env.ENROLLMENT_URL || "https://ballast.rouma.online/enroll/",
 ];
+const EXECUTION_CHECKS = new Set(["state", "service", "chain"]);
 const ALERT_WEBHOOK_URL = process.env.ALERT_WEBHOOK_URL?.trim();
 const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
 const EXPECTED_RELEASE_COMMIT = process.env.EXPECTED_RELEASE_COMMIT
@@ -332,15 +333,17 @@ function writeJsonAtomic(path, value, mode, directoryMode = 0o700) {
   renameSync(temporaryPath, path);
 }
 
-function saveHealthState(status, errors) {
+function saveHealthState(status, errors, executionStatus, executionErrors) {
   const checkedAt = new Date().toISOString();
   mkdirSync(dirname(HEALTH_STATE_FILE), { recursive: true, mode: 0o700 });
   writeJsonAtomic(HEALTH_STATE_FILE, {
-    version: 2,
+    version: 3,
     status,
+    executionStatus,
     checkedAt,
     releaseCommit: EXPECTED_RELEASE_COMMIT,
     errors,
+    executionErrors,
   }, 0o600);
   if (PUBLIC_HEALTH_FILE) {
     writeJsonAtomic(PUBLIC_HEALTH_FILE, publicHealthState({ status, checkedAt }), 0o644, 0o755);
@@ -372,16 +375,28 @@ export async function runChecks({
     try { return { name, result: await check() }; } catch (error) { return { name, error }; }
   }));
   const errors = [];
+  const executionErrors = [];
   for (const outcome of outcomes) {
-    if (outcome.error) errors.push(`${outcome.name}: ${outcome.error.message}`);
+    if (outcome.error) {
+      const message = `${outcome.name}: ${outcome.error.message}`;
+      errors.push(message);
+      if (EXECUTION_CHECKS.has(outcome.name)) executionErrors.push(message);
+    }
     else checks[outcome.name] = outcome.result;
   }
-  return { ok: errors.length === 0, checks, errors };
+  return {
+    ok: errors.length === 0,
+    executionOk: executionErrors.length === 0,
+    checks,
+    errors,
+    executionErrors,
+  };
 }
 
 export async function main() {
   const result = await runChecks();
   const status = result.ok ? "ok" : "failed";
+  const executionStatus = result.executionOk ? "ok" : "failed";
   const previousStatus = loadPreviousStatus();
   if (status !== previousStatus && (status === "failed" || previousStatus === "failed")) {
     try {
@@ -390,8 +405,8 @@ export async function main() {
       result.errors.push(`alert: ${error.message}`);
     }
   }
-  saveHealthState(status, result.errors);
-  console.log(JSON.stringify({ timestamp: new Date().toISOString(), service: "ballast-healthcheck", status, ...result }));
+  saveHealthState(status, result.errors, executionStatus, result.executionErrors);
+  console.log(JSON.stringify({ timestamp: new Date().toISOString(), service: "ballast-healthcheck", status, executionStatus, ...result }));
   if (!result.ok) process.exitCode = 1;
 }
 

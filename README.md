@@ -291,7 +291,10 @@ EXECUTE=true \
 npm run keeper:execute
 ```
 
-Useful controls are `BALLAST`, `FROM_BLOCK`, `STATE_FILE`, `BLOCKSCOUT_URL`,
+Execution acquires a persistent process lock before loading policies, so concurrent signer
+processes fail closed instead of racing the operator nonce.
+
+Useful controls are `BALLAST`, `FROM_BLOCK`, `STATE_FILE`, `EXECUTION_LOCK_FILE`, `BLOCKSCOUT_URL`,
 `CONFIRMATION_BLOCKS`, `RPC_LOG_PAGE_BLOCKS`, `LOG_QUERY_CONCURRENCY`, and `MAX_POSITIONS`. The
 keeper indexes history through Blockscout cursor pages, fills any explorer lag through Flare's
 30-block RPC log windows, and atomically checkpoints the complete active-policy set through the
@@ -313,10 +316,11 @@ The hosted operator is `0xA20a59090f609329405F5DcA785Af9357F6965E7`. Its AWS ser
 with `EXECUTE=false`; it is not yet a protection SLA and will remain dry-run until a controlled
 mainnet `Protected` receipt succeeds.
 
-The host also runs a five-minute fail-closed health timer over keeper checkpoint freshness,
-manager, adapter, pool, Algebra quoter/factory route and admin state, FCC registration, and the three public surfaces. It publishes
-only status, check time, and release provenance at `/ops/health.json`; no borrower or operator data is
-exposed. A separate GitHub Actions watchdog checks that signal and every public `release.json` four
+The host also runs a five-minute health timer over keeper checkpoint freshness, manager, adapter,
+pool, Algebra quoter/factory route and admin state, FCC registration, and the three public surfaces.
+Its execution-critical subset fails closed; FCC and static-site incidents remain visible without
+disabling independent mainnet protection. It publishes only status, check time, and release provenance
+at `/ops/health.json`; no borrower or operator data is exposed. A separate GitHub Actions watchdog checks that signal and every public `release.json` four
 times per hour against the current `main` commit, opens a `production-alert` issue on failure, and
 closes it after recovery. When execution is enabled, the keeper refuses to broadcast unless the
 internal result is fresh and matches its immutable release commit. Release deployment rolls static

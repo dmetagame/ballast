@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -28,6 +28,7 @@ const DEFAULT_DEPLOYMENT_BLOCK = 67019411n;
 const FROM_BLOCK = BigInt(process.env.FROM_BLOCK || DEFAULT_DEPLOYMENT_BLOCK);
 const STATE_FILE = process.env.STATE_FILE || join(process.env.HOME || process.cwd(), ".config", "ballast", "keeper-state.json");
 const HEALTH_STATE_FILE = process.env.HEALTH_STATE_FILE || join(process.env.HOME || process.cwd(), ".config", "ballast", "health-state.json");
+const EXECUTION_LOCK_FILE = process.env.EXECUTION_LOCK_FILE || join(process.env.HOME || process.cwd(), ".config", "ballast", "execution.lock");
 const CONFIRMATION_BLOCKS = nonNegativeInteger("CONFIRMATION_BLOCKS", 12);
 const RPC_LOG_PAGE_BLOCKS = boundedPositiveInteger("RPC_LOG_PAGE_BLOCKS", 30, 30);
 const LOG_QUERY_CONCURRENCY = positiveInteger("LOG_QUERY_CONCURRENCY", 4);
@@ -131,6 +132,56 @@ export function loadPrivateKey({
   if (!filePath) return undefined;
   const fileKey = readFileSync(filePath, "utf8").trim();
   return fileKey || undefined;
+}
+
+export function acquireExecutionLock({
+  enabled = EXECUTE,
+  lockFile = EXECUTION_LOCK_FILE,
+  processId = process.pid,
+  isProcessAlive = (pid) => {
+    try {
+      process.kill(pid, 0);
+      return true;
+    } catch (error) {
+      return error.code === "EPERM";
+    }
+  },
+} = {}) {
+  if (!enabled) return () => {};
+  mkdirSync(dirname(lockFile), { recursive: true, mode: 0o700 });
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    let descriptor;
+    try {
+      descriptor = openSync(lockFile, "wx", 0o600);
+      writeFileSync(descriptor, `${processId}\n`);
+      let released = false;
+      return () => {
+        if (released) return;
+        released = true;
+        try { closeSync(descriptor); } catch {}
+        try {
+          if (readFileSync(lockFile, "utf8").trim() === String(processId)) unlinkSync(lockFile);
+        } catch {}
+      };
+    } catch (error) {
+      if (descriptor !== undefined) {
+        try { closeSync(descriptor); } catch {}
+        try { unlinkSync(lockFile); } catch {}
+      }
+      if (error.code !== "EEXIST") throw error;
+
+      let existingPid;
+      try { existingPid = Number.parseInt(readFileSync(lockFile, "utf8").trim(), 10); } catch { existingPid = NaN; }
+      if (Number.isInteger(existingPid) && existingPid > 0 && isProcessAlive(existingPid)) {
+        throw new Error(`keeper execution lock is held by process ${existingPid}`);
+      }
+      try { unlinkSync(lockFile); } catch (unlinkError) {
+        if (unlinkError.code !== "ENOENT") throw unlinkError;
+      }
+    }
+  }
+  throw new Error(`keeper execution lock could not be acquired: ${lockFile}`);
 }
 
 export function resolveOperatorAddress({ configuredAddress, signerAddress } = {}) {
@@ -646,7 +697,9 @@ export function validateExecutionHealth({
   maxAgeMs = EXECUTION_HEALTH_MAX_AGE_MS,
 }) {
   if (!expectedReleaseCommit) throw new Error("production health gate has no expected release commit");
-  if (state?.version !== 2 || state.status !== "ok") throw new Error("production health gate is not passing");
+  if (state?.version !== 3 || !["ok", "failed"].includes(state.status) || state.executionStatus !== "ok") {
+    throw new Error("production health gate is not passing");
+  }
   const checkedAtMs = Date.parse(state.checkedAt);
   if (!Number.isFinite(checkedAtMs)) throw new Error("production health gate timestamp is invalid");
   const ageMs = nowMs - checkedAtMs;
@@ -793,19 +846,24 @@ export async function runCycle() {
 }
 
 export async function main() {
-  log("info", "keeper_started", { chainId: chain.id, ballast: BALLAST, managerVersion: MANAGER_VERSION, mode: EXECUTE ? "execute" : "dry_run", operator: operatorAddress || null, operatorSource: operatorAccount ? "private_key" : operatorAddress ? "address" : null, runOnce: RUN_ONCE, pollIntervalMs: POLL_INTERVAL_MS, maxConcurrency: MAX_CONCURRENCY, maxPositions: MAX_POSITIONS, stateFile: STATE_FILE, healthStateFile: HEALTH_STATE_FILE, expectedReleaseCommit: EXPECTED_RELEASE_COMMIT, blockscoutUrl: BLOCKSCOUT_URL, confirmationBlocks: CONFIRMATION_BLOCKS, rpcLogPageBlocks: RPC_LOG_PAGE_BLOCKS, logQueryConcurrency: LOG_QUERY_CONCURRENCY });
-  if (MANAGER_VERSION === "v3" && !operatorAddress) {
-    log("warn", "keeper_identity_unverified", { reason: "no_operator_address_in_dry_run" });
-  }
-  do {
-    try {
-      await runCycle();
-    } catch (error) {
-      log("error", "cycle_failed", { error: error.shortMessage || error.message });
-      handleCycleFailure(error);
+  const releaseExecutionLock = acquireExecutionLock();
+  try {
+    log("info", "keeper_started", { chainId: chain.id, ballast: BALLAST, managerVersion: MANAGER_VERSION, mode: EXECUTE ? "execute" : "dry_run", operator: operatorAddress || null, operatorSource: operatorAccount ? "private_key" : operatorAddress ? "address" : null, runOnce: RUN_ONCE, pollIntervalMs: POLL_INTERVAL_MS, maxConcurrency: MAX_CONCURRENCY, maxPositions: MAX_POSITIONS, stateFile: STATE_FILE, healthStateFile: HEALTH_STATE_FILE, expectedReleaseCommit: EXPECTED_RELEASE_COMMIT, blockscoutUrl: BLOCKSCOUT_URL, confirmationBlocks: CONFIRMATION_BLOCKS, rpcLogPageBlocks: RPC_LOG_PAGE_BLOCKS, logQueryConcurrency: LOG_QUERY_CONCURRENCY });
+    if (MANAGER_VERSION === "v3" && !operatorAddress) {
+      log("warn", "keeper_identity_unverified", { reason: "no_operator_address_in_dry_run" });
     }
-    if (!RUN_ONCE) await sleep(POLL_INTERVAL_MS);
-  } while (!RUN_ONCE);
+    do {
+      try {
+        await runCycle();
+      } catch (error) {
+        log("error", "cycle_failed", { error: error.shortMessage || error.message });
+        handleCycleFailure(error);
+      }
+      if (!RUN_ONCE) await sleep(POLL_INTERVAL_MS);
+    } while (!RUN_ONCE);
+  } finally {
+    releaseExecutionLock();
+  }
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) await main();

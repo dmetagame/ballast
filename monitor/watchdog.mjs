@@ -13,6 +13,17 @@ function positiveInteger(name, fallback, env = process.env) {
   return value;
 }
 
+function optionalPositiveInteger(name, env = process.env) {
+  if (!env[name]) return null;
+  return positiveInteger(name, undefined, env);
+}
+
+function normalizeCommit(value, label) {
+  if (!value) return null;
+  if (!/^[0-9a-f]{40}$/i.test(value)) throw new Error(`${label} is invalid`);
+  return value.toLowerCase();
+}
+
 export function validatePublicHealth(payload, {
   nowMs = Date.now(),
   maxAgeMs = 12 * 60_000,
@@ -54,10 +65,17 @@ export async function runWatchdog({
     : DEFAULT_RELEASE_URLS,
   maxAgeMs = positiveInteger("MAX_HEALTH_AGE_SECONDS", 12 * 60) * 1_000,
   expectedCommit = process.env.EXPECTED_RELEASE_COMMIT?.trim(),
+  previousCommit = process.env.PREVIOUS_RELEASE_COMMIT?.trim(),
+  rolloutDeadlineMs = optionalPositiveInteger("RELEASE_ROLLOUT_DEADLINE_MS"),
   nowMs = Date.now(),
   fetchImpl = fetch,
 } = {}) {
   if (!releaseUrls.length) throw new Error("at least one release URL is required");
+  const expected = normalizeCommit(expectedCommit, "expected release commit");
+  const previous = normalizeCommit(previousCommit, "previous release commit");
+  if ((previous && rolloutDeadlineMs === null) || (!previous && rolloutDeadlineMs !== null) || (previous && !expected)) {
+    throw new Error("release rollout configuration is incomplete");
+  }
   const [health, ...releases] = await Promise.all([
     fetchJson(healthUrl, fetchImpl),
     ...releaseUrls.map((url) => fetchJson(url, fetchImpl)),
@@ -67,11 +85,33 @@ export async function runWatchdog({
     return release.commit.toLowerCase();
   });
   if (!commits.every((commit) => commit === commits[0])) throw new Error(`static release mismatch: ${commits.join(", ")}`);
-  if (expectedCommit && commits[0] !== expectedCommit.toLowerCase()) {
-    throw new Error(`deployed release mismatch: ${commits[0]} != ${expectedCommit}`);
+  const staticCommit = commits[0];
+  const rolloutActive = Boolean(expected && previous && nowMs <= rolloutDeadlineMs);
+  const acceptedCommits = new Set(expected ? [expected] : [staticCommit]);
+  if (rolloutActive) acceptedCommits.add(previous);
+  if (!acceptedCommits.has(staticCommit)) {
+    throw new Error(`deployed release mismatch: ${staticCommit} != ${expected}`);
   }
-  const state = validatePublicHealth(health, { nowMs, maxAgeMs, expectedCommit: commits[0] });
-  return { ...state, healthUrl, releaseUrls };
+  const state = validatePublicHealth(health, { nowMs, maxAgeMs });
+  const healthCommit = state.releaseCommit.toLowerCase();
+  if (!acceptedCommits.has(healthCommit)) {
+    throw new Error(`public health release mismatch: ${healthCommit} is not an accepted release`);
+  }
+  if (healthCommit !== staticCommit && !rolloutActive) {
+    throw new Error(`public health release mismatch: ${healthCommit} != ${staticCommit}`);
+  }
+  const rolloutState = expected
+    ? staticCommit === expected && healthCommit === expected ? "current" : "in_progress"
+    : "unversioned";
+  return {
+    ...state,
+    staticReleaseCommit: staticCommit,
+    expectedReleaseCommit: expected,
+    rolloutState,
+    rolloutDeadlineMs: rolloutActive ? rolloutDeadlineMs : null,
+    healthUrl,
+    releaseUrls,
+  };
 }
 
 async function main() {

@@ -8,6 +8,9 @@ let account;
 let currentChainId;
 let currentHealth;
 let isAuthorized = false;
+let currentPolicyEnabled = false;
+let accountStateReady = false;
+let transactionPending = false;
 let policyFormDirty = false;
 let loadedPolicyAccount;
 
@@ -27,8 +30,61 @@ const DEFAULT_POLICY = {
 const setStatus = (message, tone = "") => { $("statusMessage").textContent = message; $("statusMessage").className = `status-bar ${tone}`; };
 const isFlare = () => currentChainId === flare.id;
 
+function updateControlState() {
+  $("connectButton").disabled = transactionPending;
+  $("refreshButton").disabled = transactionPending || !account;
+  $("authorizeButton").disabled = transactionPending || !accountStateReady || !ENABLE_WRITES || isAuthorized;
+  $("policyButton").disabled = transactionPending || !accountStateReady || !ENABLE_WRITES || !isAuthorized;
+  $("disablePolicyButton").disabled = transactionPending || !accountStateReady || !ENABLE_WRITES || !currentPolicyEnabled;
+  $("revokeAuthorizationButton").disabled = transactionPending || !accountStateReady || !ENABLE_WRITES || !isAuthorized || currentPolicyEnabled;
+  document.querySelector(".shell")?.setAttribute("aria-busy", String(transactionPending));
+}
+
+async function runTransaction(operation) {
+  if (transactionPending) return;
+  const transactionAccount = account;
+  transactionPending = true;
+  updateControlState();
+  try {
+    const successMessage = await operation(transactionAccount);
+    if (!successMessage) return;
+    if (account !== transactionAccount) {
+      if (account) await refresh();
+      setStatus(`Transaction confirmed for ${short(transactionAccount)}, but the connected wallet changed. Review the current account.`, "warning");
+      return;
+    }
+    await refresh();
+    setStatus(successMessage, "success");
+  } catch (error) {
+    setStatus(error.shortMessage || error.message, "error");
+  } finally {
+    transactionPending = false;
+    updateControlState();
+  }
+}
+
+function assertTransactionAccount(expectedAccount) {
+  if (account !== expectedAccount) throw new Error("The connected wallet changed before the transaction was submitted.");
+}
+
 function resetPolicyForm() {
   for (const [id, value] of Object.entries(DEFAULT_POLICY)) $(id).value = value;
+}
+
+function clearAccountReadouts(message = "Refreshing...") {
+  currentHealth = undefined;
+  isAuthorized = false;
+  currentPolicyEnabled = false;
+  accountStateReady = false;
+  for (const id of ["authorizationStatus", "healthStatus", "policyStatus", "previewStatus"]) {
+    $(id).textContent = message;
+    $(id).className = "muted";
+  }
+  $("authorizationHint").textContent = "Refreshing authorization for this wallet.";
+  $("policyHint").textContent = "Refreshing the policy for this wallet.";
+  $("exitHint").textContent = "Refreshing exit controls for this wallet.";
+  updateSummary();
+  updateControlState();
 }
 
 async function waitForSuccess(hash, action) {
@@ -41,7 +97,7 @@ function renderAccount() {
   $("connectButton").textContent = short(account);
   $("walletBadge").textContent = short(account);
   $("walletAddress").textContent = account;
-  $("refreshButton").disabled = false;
+  updateControlState();
 }
 
 function resetAccount() {
@@ -49,6 +105,8 @@ function resetAccount() {
   currentChainId = undefined;
   currentHealth = undefined;
   isAuthorized = false;
+  currentPolicyEnabled = false;
+  accountStateReady = false;
   policyFormDirty = false;
   loadedPolicyAccount = undefined;
   resetPolicyForm();
@@ -65,11 +123,10 @@ function resetAccount() {
   $("policyStatus").className = "";
   $("previewStatus").textContent = "—";
   $("previewStatus").className = "";
-  $("refreshButton").disabled = true;
-  $("authorizeButton").disabled = true;
-  $("policyButton").disabled = true;
-  $("disablePolicyButton").disabled = true;
-  $("revokeAuthorizationButton").disabled = true;
+  $("authorizationHint").textContent = "Connect your wallet to inspect authorization.";
+  $("policyHint").textContent = "Authorize the finalized V3 manager on Morpho before saving a policy.";
+  $("exitHint").textContent = "Connect your wallet to inspect exit controls.";
+  updateControlState();
   setStatus("Wallet disconnected.", "warning");
 }
 
@@ -118,14 +175,18 @@ async function switchToFlare() {
 
 async function refresh() {
   if (!account) return;
+  const refreshAccount = account;
+  accountStateReady = false;
+  updateControlState();
   currentChainId = walletClient ? await walletClient.getChainId() : currentChainId;
   $("chainStatus").textContent = isFlare() ? "Flare mainnet (chain 14)" : `Wrong network (chain ${currentChainId})`;
   $("chainStatus").className = isFlare() ? "good" : "bad";
   const [authorized, policy, preview] = await Promise.all([
-    publicClient.readContract({ address: MORPHO, abi: morphoAbi, functionName: "isAuthorized", args: [account, MANAGER] }),
-    publicClient.readContract({ address: MANAGER, abi: managerAbi, functionName: "policyOf", args: [account, MARKET_ID] }),
-    publicClient.readContract({ address: MANAGER, abi: managerAbi, functionName: "previewProtect", args: [account, MARKET_ID] }),
+    publicClient.readContract({ address: MORPHO, abi: morphoAbi, functionName: "isAuthorized", args: [refreshAccount, MANAGER] }),
+    publicClient.readContract({ address: MANAGER, abi: managerAbi, functionName: "policyOf", args: [refreshAccount, MARKET_ID] }),
+    publicClient.readContract({ address: MANAGER, abi: managerAbi, functionName: "previewProtect", args: [refreshAccount, MARKET_ID] }),
   ]);
+  if (account !== refreshAccount) return;
   const [actionable, health, repayAssets, collateralNeeded] = preview;
   if (policy.triggerHealth > 0n && (!policyFormDirty || loadedPolicyAccount !== account)) {
     $("triggerHealth").value = formatUnits(policy.triggerHealth, 18);
@@ -140,6 +201,8 @@ async function refresh() {
   }
   currentHealth = health;
   isAuthorized = authorized;
+  currentPolicyEnabled = policy.enabled;
+  accountStateReady = true;
   const healthText = health === (2n ** 256n - 1n) ? "No debt" : `${formatUnits(health, 18)}×`;
   $("healthStatus").textContent = healthText;
   $("healthStatus").className = health < 10n ** 18n ? "bad" : health < 125n * 10n ** 16n ? "warning" : "good";
@@ -151,10 +214,7 @@ async function refresh() {
     ? `Actionable · repay ${formatUnits(repayAssets, 6)} USD₮0 · sell ${formatUnits(collateralNeeded, 6)} FXRP`
     : policy.enabled ? "Not actionable now" : "Set a policy to preview";
   $("previewStatus").className = actionable ? "warning" : "muted";
-  $("authorizeButton").disabled = !ENABLE_WRITES || authorized;
-  $("policyButton").disabled = !ENABLE_WRITES || !authorized;
-  $("disablePolicyButton").disabled = !ENABLE_WRITES || !policy.enabled;
-  $("revokeAuthorizationButton").disabled = !ENABLE_WRITES || !authorized || policy.enabled;
+  updateControlState();
   $("authorizationHint").textContent = authorized ? "Authorization is already active for this wallet." : ENABLE_WRITES ? "The next step asks Morpho to authorize the configured manager." : "Writes are disabled for the published manager.";
   $("policyHint").textContent = !ENABLE_WRITES
     ? "Policy writes are disabled in this build."
@@ -213,46 +273,61 @@ function updateSummary() {
 
 async function sendAuthorization() {
   if (!ENABLE_WRITES) return setStatus("Enrollment writes are disabled in this build.", "warning");
-  if (!isFlare() && !(await switchToFlare())) return;
-  try { setStatus("Waiting for Morpho authorization confirmation…"); const hash = await walletClient.writeContract({ address: MORPHO, abi: morphoAbi, functionName: "setAuthorization", args: [MANAGER, true], account, chain: flare }); setStatus(`Authorization submitted: ${short(hash)} · ${explorer(hash)}`); await waitForSuccess(hash, "Morpho authorization"); await refresh(); setStatus("Morpho authorization confirmed.", "success"); }
-  catch (error) { setStatus(error.shortMessage || error.message, "error"); }
+  await runTransaction(async (transactionAccount) => {
+    if (!isFlare() && !(await switchToFlare())) return null;
+    assertTransactionAccount(transactionAccount);
+    setStatus("Waiting for Morpho authorization confirmation…");
+    const hash = await walletClient.writeContract({ address: MORPHO, abi: morphoAbi, functionName: "setAuthorization", args: [MANAGER, true], account: transactionAccount, chain: flare });
+    setStatus(`Authorization submitted: ${short(hash)} · ${explorer(hash)}`);
+    await waitForSuccess(hash, "Morpho authorization");
+    return "Morpho authorization confirmed.";
+  });
 }
 
 async function disablePolicy() {
   if (!ENABLE_WRITES) return setStatus("Enrollment writes are disabled in this build.", "warning");
-  if (!isFlare() && !(await switchToFlare())) return;
   if (!window.confirm("Disable Ballast protection for this Morpho market? Keepers will no longer be able to act.")) return;
-  try {
+  await runTransaction(async (transactionAccount) => {
+    if (!isFlare() && !(await switchToFlare())) return null;
+    assertTransactionAccount(transactionAccount);
     setStatus("Waiting for policy-disable confirmation…");
-    const hash = await walletClient.writeContract({ address: MANAGER, abi: managerAbi, functionName: "disablePolicy", args: [MARKET_ID], account, chain: flare });
+    const hash = await walletClient.writeContract({ address: MANAGER, abi: managerAbi, functionName: "disablePolicy", args: [MARKET_ID], account: transactionAccount, chain: flare });
     setStatus(`Policy disable submitted: ${short(hash)} · ${explorer(hash)}`);
     await waitForSuccess(hash, "Policy disable");
-    await refresh();
-    setStatus("Ballast policy disabled. You can now revoke Morpho authorization.", "success");
-  } catch (error) { setStatus(error.shortMessage || error.message, "error"); }
+    return "Ballast policy disabled. You can now revoke Morpho authorization.";
+  });
 }
 
 async function revokeAuthorization() {
   if (!ENABLE_WRITES) return setStatus("Enrollment writes are disabled in this build.", "warning");
-  if (!isFlare() && !(await switchToFlare())) return;
   if (!window.confirm("Revoke Ballast's Morpho authorization for this wallet?")) return;
-  try {
+  await runTransaction(async (transactionAccount) => {
+    if (!isFlare() && !(await switchToFlare())) return null;
+    assertTransactionAccount(transactionAccount);
     setStatus("Waiting for authorization-revocation confirmation…");
-    const hash = await walletClient.writeContract({ address: MORPHO, abi: morphoAbi, functionName: "setAuthorization", args: [MANAGER, false], account, chain: flare });
+    const hash = await walletClient.writeContract({ address: MORPHO, abi: morphoAbi, functionName: "setAuthorization", args: [MANAGER, false], account: transactionAccount, chain: flare });
     setStatus(`Authorization revoke submitted: ${short(hash)} · ${explorer(hash)}`);
     await waitForSuccess(hash, "Authorization revoke");
-    await refresh();
-    setStatus("Morpho authorization revoked.", "success");
-  } catch (error) { setStatus(error.shortMessage || error.message, "error"); }
+    return "Morpho authorization revoked.";
+  });
 }
 
 async function submitPolicy(event) {
   event.preventDefault(); updateSummary();
   if (!ENABLE_WRITES) return setStatus("Enrollment writes are disabled in this build.", "warning");
   if (!isAuthorized) return setStatus("Authorize the V3 manager on Morpho before saving a policy.", "warning");
-  if (!isFlare() && !(await switchToFlare())) return;
-  try { const args = validatePolicy(); if (MANAGER_VERSION !== "v3") throw new Error("Enrollment writes require VITE_MANAGER_VERSION=v3."); setStatus("Waiting for policy confirmation…"); const hash = await walletClient.writeContract({ address: MANAGER, abi: managerAbi, functionName: "setPolicy", args, account, chain: flare }); setStatus(`Policy submitted: ${short(hash)} · ${explorer(hash)}`); await waitForSuccess(hash, "Policy update"); policyFormDirty = false; await refresh(); setStatus("Protection policy confirmed onchain.", "success"); }
-  catch (error) { setStatus(error.shortMessage || error.message, "error"); }
+  await runTransaction(async (transactionAccount) => {
+    if (!isFlare() && !(await switchToFlare())) return null;
+    assertTransactionAccount(transactionAccount);
+    const args = validatePolicy();
+    if (MANAGER_VERSION !== "v3") throw new Error("Enrollment writes require VITE_MANAGER_VERSION=v3.");
+    setStatus("Waiting for policy confirmation…");
+    const hash = await walletClient.writeContract({ address: MANAGER, abi: managerAbi, functionName: "setPolicy", args, account: transactionAccount, chain: flare });
+    setStatus(`Policy submitted: ${short(hash)} · ${explorer(hash)}`);
+    await waitForSuccess(hash, "Policy update");
+    policyFormDirty = false;
+    return "Protection policy confirmed onchain.";
+  });
 }
 
 $("connectButton").addEventListener("click", connect);
@@ -268,7 +343,10 @@ $("policyForm").addEventListener("submit", submitPolicy);
 if (window.ethereum) {
   window.ethereum.on?.("chainChanged", (chainId) => {
     currentChainId = Number.parseInt(chainId, 16);
-    if (account) refresh().catch((error) => setStatus(error.shortMessage || error.message, "error"));
+    if (account) {
+      clearAccountReadouts();
+      refresh().catch((error) => setStatus(error.shortMessage || error.message, "error"));
+    }
   });
   window.ethereum.on?.("accountsChanged", (accounts) => {
     if (!accounts.length) return resetAccount();
@@ -276,8 +354,10 @@ if (window.ethereum) {
     policyFormDirty = false;
     loadedPolicyAccount = undefined;
     resetPolicyForm();
+    clearAccountReadouts();
     renderAccount();
     refresh().catch((error) => setStatus(error.shortMessage || error.message, "error"));
   });
 }
 updateSummary();
+updateControlState();

@@ -316,7 +316,7 @@ const browser = await chromium.launch();
 }
 
 // --- responsive surfaces ---------------------------------------------------------------
-for (const [name, viewport] of [["desktop", { width: 1440, height: 900 }], ["mobile", { width: 390, height: 844 }]]) {
+for (const [name, viewport] of [["desktop", { width: 1440, height: 900 }], ["mobile", { width: 390, height: 844 }], ["narrow", { width: 320, height: 700 }]]) {
   const page = await browser.newPage({ viewport });
   const consoleErrors = [];
   page.on("console", (message) => { if (message.type() === "error") consoleErrors.push(message.text()); });
@@ -334,7 +334,7 @@ for (const [name, viewport] of [["desktop", { width: 1440, height: 900 }], ["mob
 // document on mobile.
 if (!REMOTE) {
   const dashboardUrl = pathToFileURL(join(here, "../dashboard/index.html")).href;
-  for (const [name, viewport] of [["desktop", { width: 1440, height: 900 }], ["mobile", { width: 390, height: 844 }]]) {
+  for (const [name, viewport] of [["desktop", { width: 1440, height: 900 }], ["mobile", { width: 390, height: 844 }], ["narrow", { width: 320, height: 700 }]]) {
     const page = await browser.newPage({ viewport });
     const consoleErrors = [];
     page.on("console", (message) => { if (message.type() === "error") consoleErrors.push(message.text()); });
