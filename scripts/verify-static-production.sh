@@ -2,6 +2,7 @@
 set -euo pipefail
 
 : "${PRODUCT_URL:=https://ballast.rouma.online/product/}"
+: "${ROOT_URL:=https://ballast.rouma.online/}"
 : "${DASHBOARD_URL:=https://ballast.rouma.online/risk/}"
 : "${ENROLLMENT_URL:=https://ballast.rouma.online/enroll/}"
 : "${EXPECTED_COMMIT:=}"
@@ -14,6 +15,10 @@ repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 (cd "$repo_root/dashboard" && BASE_URL="$DASHBOARD_URL" npm run verify)
 (cd "$repo_root/app" && BASE_URL="$ENROLLMENT_URL" npm run verify:deployment)
 "$repo_root/scripts/verify-fcc-production.sh"
+
+root_headers=$(curl --silent --show-error --head --max-time 20 "$ROOT_URL" | tr -d '\r')
+grep -Fq 'HTTP/2 308' <<<"$root_headers" || grep -Fq 'HTTP/1.1 308' <<<"$root_headers"
+grep -Fiq 'location: /product/' <<<"$root_headers"
 
 headers=$(curl --fail --silent --show-error --head --max-time 20 "$PRODUCT_URL" | tr -d '\r' | tr '[:upper:]' '[:lower:]')
 grep -Fq 'x-content-type-options: nosniff' <<<"$headers"

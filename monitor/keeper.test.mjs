@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { keccak256, toEventSelector } from "viem";
+import { keccak256, toEventSelector, zeroAddress } from "viem";
 import {
   applyPolicyLogs,
   assertSuccessfulReceipt,
@@ -18,18 +18,27 @@ import {
   loadPrivateKey,
   mapWithConcurrency,
   prepareSignAndBroadcastTransaction,
+  quoteSwapOutput,
   resolveOperatorAddress,
   saveDiscoveryState,
   selectSyncTarget,
   shouldSkipForDifferentKeeper,
   validateBlockscoutTip,
+  validateExecutionConfiguration,
   validateExecutionHealth,
+  verifyExecutionRoute,
 } from "./keeper.mjs";
 
 const OPERATOR = "0xEE3eA6f858aE84dD6959f241DfC257a2f8fA3f53";
 const OTHER_KEEPER = "0x302a6505c225bBB145569F35B89611d0677195a9";
 const MANAGER = "0x746066ACe5dc89a3692137b8cdE3c31328629d09";
+const ADAPTER = "0xA3B9822228b6d0DE77089B0C67Ec0A73A9A9C202";
 const MARKET_ID = "0x2f31ab3fc12d6d10d1de9e5c74053126f03ac1f80a2e6d69d36a411fef7d942f";
+const QUOTER = "0x6AD6A4f233F1E33613e996CCc17409B93fF8bf5f";
+const FACTORY = "0x805488DaA81c1b9e7C5cE3f1DCeA28F21448EC6A";
+const POOL = "0x927485d88a66253c63Af9163dca5f21c25A57393";
+const FXRP = "0xAd552A648C74D49E10027AB8a618A3ad4901c5bE";
+const USDT0 = "0xe7cd86e13AC4309349F30B3435a9d337750fC82D";
 const POLICY_SET_TOPIC = toEventSelector("PolicySet(address,bytes32,uint128,uint128,uint64,uint32)");
 const POLICY_DISABLED_TOPIC = toEventSelector("PolicyDisabled(address,bytes32)");
 const addressTopic = (address) => `0x${address.slice(2).padStart(64, "0")}`;
@@ -123,21 +132,131 @@ test("loadPrivateKey rejects ambiguous key configuration", () => {
 });
 
 test("calculateEconomics rejects gas above the configured ceiling", () => {
-  const result = calculateEconomics({ repayAssets: 1_000_000n, keeperFeeBps: 100, gasEstimate: 100_000n, gasPrice: 2n, maxGasFlrWei: 100_000n, minKeeperFeeUnits: null, loanTokenUnitsPerFlr: null, minProfitFlrWei: null });
+  const result = calculateEconomics({ repayAssets: 1_000_000n, keeperFeeBps: 100, quotedAmountOut: 1_100_000n, quoteHaircutBps: 0, gasEstimate: 100_000n, gasPrice: 2n, maxGasFlrWei: 100_000n, minKeeperFeeUnits: null, loanTokenUnitsPerFlr: null, minProfitFlrWei: null });
   assert.equal(result.ok, false);
   assert.equal(result.reason, "gas_limit_exceeded");
 });
 
 test("calculateEconomics rejects fees below the configured minimum", () => {
-  const result = calculateEconomics({ repayAssets: 1_000_000n, keeperFeeBps: 10, gasEstimate: 1n, gasPrice: 1n, maxGasFlrWei: null, minKeeperFeeUnits: 2_000n, loanTokenUnitsPerFlr: null, minProfitFlrWei: null });
+  const result = calculateEconomics({ repayAssets: 1_000_000n, keeperFeeBps: 10, quotedAmountOut: 1_100_000n, quoteHaircutBps: 0, gasEstimate: 1n, gasPrice: 1n, maxGasFlrWei: null, minKeeperFeeUnits: 2_000n, loanTokenUnitsPerFlr: null, minProfitFlrWei: null });
   assert.equal(result.ok, false);
   assert.equal(result.reason, "keeper_fee_below_minimum");
 });
 
 test("calculateEconomics checks priced profit after gas", () => {
-  const result = calculateEconomics({ repayAssets: 10_000_000n, keeperFeeBps: 100, gasEstimate: 10n, gasPrice: 1n, maxGasFlrWei: null, minKeeperFeeUnits: null, loanTokenUnitsPerFlr: 1_000_000n, minProfitFlrWei: 999_999_999_999_999_991n });
+  const result = calculateEconomics({ repayAssets: 10_000_000n, keeperFeeBps: 100, quotedAmountOut: 11_000_000n, quoteHaircutBps: 0, gasEstimate: 10n, gasPrice: 1n, maxGasFlrWei: null, minKeeperFeeUnits: null, loanTokenUnitsPerFlr: 1_000_000n, minProfitFlrWei: 999_999_999_999_999_991n });
   assert.equal(result.ok, false);
   assert.equal(result.reason, "profit_below_minimum");
+});
+
+test("calculateEconomics prices profit from realizable surplus rather than the policy ceiling", () => {
+  const result = calculateEconomics({ repayAssets: 10_000_000n, keeperFeeBps: 500, quotedAmountOut: 10_010_000n, quoteHaircutBps: 0, gasEstimate: 1n, gasPrice: 1n, maxGasFlrWei: null, minKeeperFeeUnits: null, loanTokenUnitsPerFlr: 1_000_000n, minProfitFlrWei: 10_000_000_000_000_000n });
+  assert.equal(result.maximumKeeperFee, 500_000n);
+  assert.equal(result.expectedKeeperFee, 10_000n);
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, "profit_below_minimum");
+});
+
+test("calculateEconomics rejects a missing quote", () => {
+  const result = calculateEconomics({ repayAssets: 1_000_000n, keeperFeeBps: 100, quotedAmountOut: null, quoteHaircutBps: 0, gasEstimate: 1n, gasPrice: 1n, maxGasFlrWei: null, minKeeperFeeUnits: null, loanTokenUnitsPerFlr: null, minProfitFlrWei: null });
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, "quote_unavailable");
+});
+
+test("calculateEconomics caps keeper revenue by conservative quoted surplus", () => {
+  const result = calculateEconomics({ repayAssets: 1_000_000n, keeperFeeBps: 100, quotedAmountOut: 1_006_000n, quoteHaircutBps: 10, gasEstimate: 1n, gasPrice: 1n, maxGasFlrWei: null, minKeeperFeeUnits: null, loanTokenUnitsPerFlr: null, minProfitFlrWei: null });
+  assert.equal(result.ok, true);
+  assert.equal(result.conservativeAmountOut, 1_004_994n);
+  assert.equal(result.quotedSurplus, 4_994n);
+  assert.equal(result.maximumKeeperFee, 10_000n);
+  assert.equal(result.expectedKeeperFee, 4_994n);
+});
+
+test("calculateEconomics rejects a quote that cannot conservatively repay", () => {
+  const result = calculateEconomics({ repayAssets: 1_000_000n, keeperFeeBps: 100, quotedAmountOut: 1_001_000n, quoteHaircutBps: 20, gasEstimate: 1n, gasPrice: 1n, maxGasFlrWei: null, minKeeperFeeUnits: null, loanTokenUnitsPerFlr: null, minProfitFlrWei: null });
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, "quote_below_repayment");
+  assert.equal(result.expectedKeeperFee, 0n);
+});
+
+test("execution requires complete quote and profitability configuration", () => {
+  const base = {
+    execute: true,
+    maxGasFlrWei: 1n,
+    minKeeperFeeUnits: 1n,
+    loanTokenUnitsPerFlr: 1n,
+    minProfitFlrWei: 0n,
+    quoter: QUOTER,
+    factory: FACTORY,
+    quoteDeployer: zeroAddress,
+    adapter: ADAPTER,
+    activePool: POOL,
+    collateralToken: FXRP,
+    loanToken: USDT0,
+    quoteHaircutBps: 10,
+  };
+  assert.equal(validateExecutionConfiguration({ ...base, execute: false }), null);
+  assert.throws(() => validateExecutionConfiguration({ ...base, quoter: null }), /SPARKDEX_QUOTER/);
+  assert.throws(() => validateExecutionConfiguration({ ...base, adapter: null }), /ADAPTER/);
+  assert.throws(() => validateExecutionConfiguration({ ...base, quoteHaircutBps: 1_001 }), /cannot exceed 1000/);
+  assert.equal(validateExecutionConfiguration(base).quoter, QUOTER);
+});
+
+test("SparkDEX quote verifies quoter identity and the exact active pool", async () => {
+  const rpcClient = {
+    getCode: async () => "0x01",
+    readContract: async ({ functionName }) => functionName === "factory" ? FACTORY : POOL,
+    simulateContract: async () => ({ result: [1_010_000n, 1_000_000n, 2n, 3, 4n, 5] }),
+  };
+  const quote = await quoteSwapOutput({ rpcClient, quoter: QUOTER, factory: FACTORY, quoteDeployer: zeroAddress, expectedPool: POOL, tokenIn: FXRP, tokenOut: USDT0, amountIn: 1_000_000n });
+  assert.equal(quote.amountOut, 1_010_000n);
+  assert.equal(quote.amountIn, 1_000_000n);
+  assert.equal(quote.pool, POOL);
+});
+
+test("SparkDEX quote fails closed on a different resolved pool", async () => {
+  const rpcClient = {
+    getCode: async () => "0x01",
+    readContract: async ({ functionName }) => functionName === "factory" ? FACTORY : MANAGER,
+    simulateContract: async () => { throw new Error("must not quote"); },
+  };
+  await assert.rejects(
+    quoteSwapOutput({ rpcClient, quoter: QUOTER, factory: FACTORY, quoteDeployer: zeroAddress, expectedPool: POOL, tokenIn: FXRP, tokenOut: USDT0, amountIn: 1_000_000n }),
+    /quote pool mismatch/,
+  );
+});
+
+test("execution route verifies the manager adapter and its active pool", async () => {
+  const rpcClient = {
+    getCode: async () => "0x01",
+    readContract: async ({ functionName }) => functionName === "swapAdapter" ? ADAPTER : POOL,
+  };
+  assert.deepEqual(
+    await verifyExecutionRoute({ rpcClient, manager: MANAGER, expectedAdapter: ADAPTER, expectedPool: POOL, tokenIn: FXRP, tokenOut: USDT0 }),
+    { adapter: ADAPTER, pool: POOL },
+  );
+});
+
+test("execution route fails closed when the manager adapter changes", async () => {
+  const rpcClient = {
+    getCode: async () => "0x01",
+    readContract: async ({ functionName }) => functionName === "swapAdapter" ? OTHER_KEEPER : POOL,
+  };
+  await assert.rejects(
+    verifyExecutionRoute({ rpcClient, manager: MANAGER, expectedAdapter: ADAPTER, expectedPool: POOL, tokenIn: FXRP, tokenOut: USDT0 }),
+    /swap adapter mismatch/,
+  );
+});
+
+test("execution route fails closed when the adapter pool changes", async () => {
+  const rpcClient = {
+    getCode: async () => "0x01",
+    readContract: async ({ functionName }) => functionName === "swapAdapter" ? ADAPTER : OTHER_KEEPER,
+  };
+  await assert.rejects(
+    verifyExecutionRoute({ rpcClient, manager: MANAGER, expectedAdapter: ADAPTER, expectedPool: POOL, tokenIn: FXRP, tokenOut: USDT0 }),
+    /active pool mismatch/,
+  );
 });
 
 test("keeper rejects a reverted protection receipt", () => {

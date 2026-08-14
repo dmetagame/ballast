@@ -18,6 +18,11 @@ const OPERATOR_ADDRESS = process.env.OPERATOR_ADDRESS?.trim()
 const ACTIVE_POOL = getAddress(process.env.ACTIVE_POOL || "0x927485d88a66253c63Af9163dca5f21c25A57393");
 const COLLATERAL_TOKEN = getAddress(process.env.COLLATERAL_TOKEN || "0xAd552A648C74D49E10027AB8a618A3ad4901c5bE");
 const LOAN_TOKEN = getAddress(process.env.LOAN_TOKEN || "0xe7cd86e13AC4309349F30B3435a9d337750fC82D");
+const SPARKDEX_QUOTER = getAddress(process.env.SPARKDEX_QUOTER || "0x6AD6A4f233F1E33613e996CCc17409B93fF8bf5f");
+const SPARKDEX_FACTORY = getAddress(process.env.SPARKDEX_FACTORY || "0x805488DaA81c1b9e7C5cE3f1DCeA28F21448EC6A");
+const SPARKDEX_QUOTE_DEPLOYER = getAddress(process.env.SPARKDEX_QUOTE_DEPLOYER || zeroAddress);
+const HEALTHCHECK_QUOTE_AMOUNT = BigInt(process.env.HEALTHCHECK_QUOTE_AMOUNT || "1000000");
+if (HEALTHCHECK_QUOTE_AMOUNT <= 0n) throw new Error("HEALTHCHECK_QUOTE_AMOUNT must be greater than zero");
 const POOL_KEY = keccak256(encodePacked(["address", "address"], [COLLATERAL_TOKEN, LOAN_TOKEN]));
 const FROM_BLOCK = String(process.env.FROM_BLOCK || "67019411");
 const STATE_FILE = process.env.STATE_FILE || join(process.env.HOME || process.cwd(), ".config", "ballast", "keeper-state.json");
@@ -65,6 +70,11 @@ const adapterAbi = parseAbi([
   "function poolFor(bytes32 key) view returns (address)",
   "function pendingPool(bytes32 key) view returns (address)",
 ]);
+const quoterAbi = parseAbi([
+  "function factory() view returns (address)",
+  "function quoteExactInputSingle((address tokenIn,address tokenOut,address deployer,uint256 amountIn,uint160 limitSqrtPrice) params) returns (uint256 amountOut,uint256 amountIn,uint160 sqrtPriceX96After,uint32 initializedTicksCrossed,uint256 gasEstimate,uint16 fee)",
+]);
+const algebraFactoryAbi = parseAbi(["function poolByPair(address token0,address token1) view returns (address)"]);
 const teeAbi = parseAbi([
   "function getExtensionId(address teeId) view returns (uint256)",
   "function getTeeMachine(address teeId) view returns ((address machineId, address owner, string url))",
@@ -142,6 +152,8 @@ export function validateProductionState({
   paused,
   managerCode,
   adapterCode,
+  quoterCode,
+  factoryCode,
   managerAdapter,
   managerOwner,
   managerGuardian,
@@ -152,10 +164,15 @@ export function validateProductionState({
   pendingAdapterOwner,
   activePool,
   pendingPool,
+  quoterFactory,
+  quotePool,
+  quoterQuote,
 }) {
   if (chainId !== 14) throw new Error(`unexpected chain id: ${chainId}`);
   if (!managerCode || managerCode === "0x") throw new Error("Ballast manager has no deployed code");
   if (!adapterCode || adapterCode === "0x") throw new Error("Ballast adapter has no deployed code");
+  if (!quoterCode || quoterCode === "0x") throw new Error("SparkDEX quoter has no deployed code");
+  if (!factoryCode || factoryCode === "0x") throw new Error("SparkDEX factory has no deployed code");
   if (paused) throw new Error("Ballast manager is paused");
   const addresses = [
     ["manager adapter", managerAdapter, ADAPTER],
@@ -164,6 +181,8 @@ export function validateProductionState({
     ["adapter manager", adapterManager, BALLAST],
     ["adapter owner", adapterOwner, OWNER],
     ["active pool", activePool, ACTIVE_POOL],
+    ["quoter factory", quoterFactory, SPARKDEX_FACTORY],
+    ["quote pool", quotePool, ACTIVE_POOL],
     ["pending manager owner", pendingManagerOwner, zeroAddress],
     ["pending swap adapter", pendingSwapAdapter, zeroAddress],
     ["pending adapter owner", pendingAdapterOwner, zeroAddress],
@@ -172,7 +191,10 @@ export function validateProductionState({
   for (const [label, actual, expected] of addresses) {
     if (!sameAddress(actual, expected)) throw new Error(`${label} mismatch: ${actual}`);
   }
-  return { chainId, blockNumber: blockNumber.toString(), paused, adapter: managerAdapter, pool: activePool };
+  if (!Array.isArray(quoterQuote) || quoterQuote.length !== 6) throw new Error("SparkDEX quote response is invalid");
+  if (quoterQuote[0] <= 0n) throw new Error("SparkDEX health quote returned no output");
+  if (quoterQuote[1] !== HEALTHCHECK_QUOTE_AMOUNT) throw new Error(`SparkDEX health quote used ${quoterQuote[1]} input units`);
+  return { chainId, blockNumber: blockNumber.toString(), paused, adapter: managerAdapter, pool: activePool, quoter: SPARKDEX_QUOTER, factory: SPARKDEX_FACTORY, quoteAmountOut: quoterQuote[0].toString() };
 }
 
 async function checkChain() {
@@ -182,6 +204,8 @@ async function checkChain() {
     paused,
     managerCode,
     adapterCode,
+    quoterCode,
+    factoryCode,
     managerAdapter,
     managerOwner,
     managerGuardian,
@@ -192,12 +216,17 @@ async function checkChain() {
     pendingAdapterOwner,
     activePool,
     pendingPool,
+    quoterFactory,
+    quotePool,
+    quoterQuote,
   ] = await Promise.all([
     flareClient.getChainId(),
     flareClient.getBlockNumber(),
     flareClient.readContract({ address: BALLAST, abi: managerAbi, functionName: "paused" }),
     flareClient.getCode({ address: BALLAST }),
     flareClient.getCode({ address: ADAPTER }),
+    flareClient.getCode({ address: SPARKDEX_QUOTER }),
+    flareClient.getCode({ address: SPARKDEX_FACTORY }),
     flareClient.readContract({ address: BALLAST, abi: managerAbi, functionName: "swapAdapter" }),
     flareClient.readContract({ address: BALLAST, abi: managerAbi, functionName: "owner" }),
     flareClient.readContract({ address: BALLAST, abi: managerAbi, functionName: "guardian" }),
@@ -208,6 +237,14 @@ async function checkChain() {
     flareClient.readContract({ address: ADAPTER, abi: adapterAbi, functionName: "pendingOwner" }),
     flareClient.readContract({ address: ADAPTER, abi: adapterAbi, functionName: "poolFor", args: [POOL_KEY] }),
     flareClient.readContract({ address: ADAPTER, abi: adapterAbi, functionName: "pendingPool", args: [POOL_KEY] }),
+    flareClient.readContract({ address: SPARKDEX_QUOTER, abi: quoterAbi, functionName: "factory" }),
+    flareClient.readContract({ address: SPARKDEX_FACTORY, abi: algebraFactoryAbi, functionName: "poolByPair", args: [COLLATERAL_TOKEN, LOAN_TOKEN] }),
+    flareClient.simulateContract({
+      address: SPARKDEX_QUOTER,
+      abi: quoterAbi,
+      functionName: "quoteExactInputSingle",
+      args: [{ tokenIn: COLLATERAL_TOKEN, tokenOut: LOAN_TOKEN, deployer: SPARKDEX_QUOTE_DEPLOYER, amountIn: HEALTHCHECK_QUOTE_AMOUNT, limitSqrtPrice: 0n }],
+    }).then(({ result }) => result),
   ]);
   return validateProductionState({
     chainId,
@@ -215,6 +252,8 @@ async function checkChain() {
     paused,
     managerCode,
     adapterCode,
+    quoterCode,
+    factoryCode,
     managerAdapter,
     managerOwner,
     managerGuardian,
@@ -225,6 +264,9 @@ async function checkChain() {
     pendingAdapterOwner,
     activePool,
     pendingPool,
+    quoterFactory,
+    quotePool,
+    quoterQuote,
   });
 }
 

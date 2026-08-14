@@ -28,6 +28,9 @@ ballast.rouma.online {
 		file_server
 	}
 
+	@root path /
+	redir @root /product/ 308
+
 	@product path /product
 	redir @product /product/ 308
 	handle_path /product/* {

@@ -256,7 +256,7 @@ directly actionable list of who is closest to being liquidated.
 
 ## Try it
 
-The product landing page is publicly deployed at
+The bare domain `https://ballast.rouma.online/` redirects to the product landing page at
 `https://ballast.rouma.online/product/`. It links to the measured risk dashboard at
 `https://ballast.rouma.online/risk/` and the V3 enrollment app below. The landing page
 lives in `landing/`; regenerate its committed figures with `node landing/data.mjs` before
@@ -279,7 +279,10 @@ npm run keeper:dry-run
 ```
 
 After reviewing the output, an operator can opt into execution with a funded Flare account. The
-keeper simulates each transaction before submitting it and never overrides a borrower's policy:
+keeper simulates each transaction, verifies the deployed Algebra quoter resolves the exact adapter
+pool, quotes the full collateral sale, caps expected compensation by conservative realizable swap
+surplus, and rechecks the manager's adapter and active pool immediately before signing. It never
+overrides a borrower's policy:
 
 ```bash
 RPC_URL=https://flare-api.flare.network/ext/C/rpc \
@@ -298,8 +301,9 @@ an indexing gap. `MAX_POSITIONS=0` means no limit; a positive limit fails closed
 silently dropping policies. The default manager and start block are the finalized V3 deployment.
 Keep the private key outside shell history and use a dedicated keeper account. Dry-run needs only
 `OPERATOR_ADDRESS`, which lets the keeper prove that each V3 policy names this operator without
-exposing the funded key to the continuous service. A failed simulation is skipped rather than
-broadcast.
+exposing the funded key to the continuous service. A failed simulation, route identity check,
+quote, or profitability check is skipped rather than broadcast. Execution also refuses to start
+unless every quote and economics setting in `monitor/.env.example` is present.
 
 For hardened production operation, set `MANAGER_VERSION=v3` and point `BALLAST` at
 `0x746066ACe5dc89a3692137b8cdE3c31328629d09`. V3 requires each borrower to name the keeper that may act on their
@@ -310,7 +314,7 @@ with `EXECUTE=false`; it is not yet a protection SLA and will remain dry-run unt
 mainnet `Protected` receipt succeeds.
 
 The host also runs a five-minute fail-closed health timer over keeper checkpoint freshness,
-manager, adapter, pool and admin state, FCC registration, and the three public surfaces. It publishes
+manager, adapter, pool, Algebra quoter/factory route and admin state, FCC registration, and the three public surfaces. It publishes
 only status, check time, and release provenance at `/ops/health.json`; no borrower or operator data is
 exposed. A separate GitHub Actions watchdog checks that signal and every public `release.json` four
 times per hour against the current `main` commit, opens a `production-alert` issue on failure, and

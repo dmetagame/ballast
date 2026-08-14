@@ -8,6 +8,15 @@ set -euo pipefail
 : "${RUNTIME_SERVICE:=ballast-keeper.service}"
 : "${HEALTH_TIMER:=ballast-keeper-health.timer}"
 : "${RUNTIME_OPERATOR:=0xA20a59090f609329405F5DcA785Af9357F6965E7}"
+: "${RUNTIME_ADAPTER:=0xA3B9822228b6d0DE77089B0C67Ec0A73A9A9C202}"
+: "${RUNTIME_QUOTER:=0x6AD6A4f233F1E33613e996CCc17409B93fF8bf5f}"
+: "${RUNTIME_FACTORY:=0x805488DaA81c1b9e7C5cE3f1DCeA28F21448EC6A}"
+: "${RUNTIME_QUOTE_DEPLOYER:=0x0000000000000000000000000000000000000000}"
+: "${RUNTIME_POOL:=0x927485d88a66253c63Af9163dca5f21c25A57393}"
+: "${RUNTIME_COLLATERAL_TOKEN:=0xAd552A648C74D49E10027AB8a618A3ad4901c5bE}"
+: "${RUNTIME_LOAN_TOKEN:=0xe7cd86e13AC4309349F30B3435a9d337750fC82D}"
+: "${RUNTIME_QUOTE_HAIRCUT_BPS:=25}"
+: "${RUNTIME_HEALTHCHECK_QUOTE_AMOUNT:=1000000}"
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 commit=$(git -C "$repo_root" rev-parse HEAD)
@@ -50,7 +59,8 @@ tar -czf "$archive" -C "$stage" .
 scp "${ssh_options[@]}" "$archive" "$STATIC_HOST:$remote_archive"
 
 ssh "${ssh_options[@]}" "$STATIC_HOST" bash -s -- \
-  "$remote_archive" "$release_id" "$RUNTIME_RELEASE_ROOT" "$RUNTIME_CURRENT" "$RUNTIME_SERVICE" "$HEALTH_TIMER" "$RUNTIME_OPERATOR" <<'REMOTE'
+  "$remote_archive" "$release_id" "$RUNTIME_RELEASE_ROOT" "$RUNTIME_CURRENT" "$RUNTIME_SERVICE" "$HEALTH_TIMER" "$RUNTIME_OPERATOR" \
+  "$RUNTIME_ADAPTER" "$RUNTIME_QUOTER" "$RUNTIME_FACTORY" "$RUNTIME_QUOTE_DEPLOYER" "$RUNTIME_POOL" "$RUNTIME_COLLATERAL_TOKEN" "$RUNTIME_LOAN_TOKEN" "$RUNTIME_QUOTE_HAIRCUT_BPS" "$RUNTIME_HEALTHCHECK_QUOTE_AMOUNT" <<'REMOTE'
 set -euo pipefail
 archive=$1
 release_id=$2
@@ -59,6 +69,15 @@ current_link=$4
 service=$5
 health_timer=$6
 expected_operator=$7
+expected_adapter=$8
+expected_quoter=$9
+expected_factory=${10}
+expected_quote_deployer=${11}
+expected_pool=${12}
+expected_collateral=${13}
+expected_loan=${14}
+expected_quote_haircut=${15}
+expected_healthcheck_quote_amount=${16}
 release_dir="$release_root/$release_id"
 unit_dir="$HOME/.config/systemd/user"
 env_file="$HOME/.config/ballast/keeper.env"
@@ -69,6 +88,24 @@ configured_operator=$(sed -n 's/^OPERATOR_ADDRESS=//p' "$env_file" | tail -1)
   echo "keeper OPERATOR_ADDRESS is missing or unexpected" >&2
   exit 1
 }
+require_env_value() {
+  name=$1
+  expected=$2
+  actual=$(sed -n "s/^${name}=//p" "$env_file" | tail -1)
+  [[ -n "$actual" && "${actual,,}" = "${expected,,}" ]] || {
+    echo "keeper ${name} is missing or unexpected" >&2
+    exit 1
+  }
+}
+require_env_value SPARKDEX_QUOTER "$expected_quoter"
+require_env_value SPARKDEX_FACTORY "$expected_factory"
+require_env_value SPARKDEX_QUOTE_DEPLOYER "$expected_quote_deployer"
+require_env_value ADAPTER "$expected_adapter"
+require_env_value ACTIVE_POOL "$expected_pool"
+require_env_value COLLATERAL_TOKEN "$expected_collateral"
+require_env_value LOAN_TOKEN "$expected_loan"
+require_env_value QUOTE_HAIRCUT_BPS "$expected_quote_haircut"
+require_env_value HEALTHCHECK_QUOTE_AMOUNT "$expected_healthcheck_quote_amount"
 grep -Eq '^EXECUTE=false$' "$env_file" || {
   echo "keeper.env must retain EXECUTE=false for the continuous service" >&2
   exit 1

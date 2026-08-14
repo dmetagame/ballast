@@ -49,6 +49,16 @@ h3 { font-size: 1rem; margin: 0 0 0.25rem; }
 .lede { font-size: clamp(1.05rem, 2vw, 1.3rem); color: var(--ink-muted); max-width: 44rem; margin: 0 0 3rem; }
 .section-lede { color: var(--ink-muted); max-width: 44rem; margin: 0 0 2.5rem; }
 
+.hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: -1rem 0 3rem; }
+.action {
+  display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0.65rem 1rem;
+  border: 1px solid var(--rule); border-radius: 4px; color: var(--ink); text-decoration: none;
+  font-family: var(--mono); font-size: 0.82rem;
+}
+.action:hover { border-color: var(--ink-muted); }
+.action-primary { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.action-primary:hover { opacity: 0.88; }
+
 .topnav {
   max-width: 68rem; margin: 0 auto; padding: 1.25rem 1.5rem;
   display: flex; flex-wrap: wrap; gap: 1.5rem;

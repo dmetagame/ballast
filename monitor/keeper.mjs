@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import {
   createPublicClient,
   createWalletClient,
+  encodePacked,
   encodeFunctionData,
   http,
   keccak256,
@@ -12,6 +13,7 @@ import {
   formatUnits,
   getAddress,
   toEventSelector,
+  zeroAddress,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
@@ -20,6 +22,7 @@ const BLOCKSCOUT_URL = (process.env.BLOCKSCOUT_URL
   || process.env.EXPLORER_URL?.replace(/\/api\/?$/, "")
   || "https://flare-explorer.flare.network").replace(/\/$/, "");
 const BALLAST = getAddress(process.env.BALLAST || "0x746066ACe5dc89a3692137b8cdE3c31328629d09");
+const MORPHO = getAddress(process.env.MORPHO || "0xF4346F5132e810f80a28487a79c7559d9797E8B0");
 const MANAGER_VERSION = process.env.MANAGER_VERSION || "v3";
 const DEFAULT_DEPLOYMENT_BLOCK = 67019411n;
 const FROM_BLOCK = BigInt(process.env.FROM_BLOCK || DEFAULT_DEPLOYMENT_BLOCK);
@@ -40,6 +43,14 @@ const MAX_GAS_FLR_WEI = optionalBigInt("MAX_GAS_FLR_WEI");
 const MIN_KEEPER_FEE_UNITS = optionalBigInt("MIN_KEEPER_FEE_UNITS");
 const LOAN_TOKEN_UNITS_PER_FLR = optionalBigInt("LOAN_TOKEN_UNITS_PER_FLR");
 const MIN_PROFIT_FLR_WEI = optionalBigInt("MIN_PROFIT_FLR_WEI");
+const SPARKDEX_QUOTER = optionalAddress("SPARKDEX_QUOTER");
+const SPARKDEX_FACTORY = optionalAddress("SPARKDEX_FACTORY");
+const SPARKDEX_QUOTE_DEPLOYER = optionalAddress("SPARKDEX_QUOTE_DEPLOYER");
+const ADAPTER = optionalAddress("ADAPTER");
+const ACTIVE_POOL = optionalAddress("ACTIVE_POOL");
+const COLLATERAL_TOKEN = optionalAddress("COLLATERAL_TOKEN");
+const LOAN_TOKEN = optionalAddress("LOAN_TOKEN");
+const QUOTE_HAIRCUT_BPS = optionalNonNegativeInteger("QUOTE_HAIRCUT_BPS");
 const EXECUTION_HEALTH_MAX_AGE_MS = nonNegativeInteger("EXECUTION_HEALTH_MAX_AGE_MS", 420_000);
 const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
 const EXPECTED_RELEASE_COMMIT = process.env.EXPECTED_RELEASE_COMMIT
@@ -64,6 +75,21 @@ const account = EXECUTE
   : null;
 const walletClient = account ? createWalletClient({ account, chain, transport: http(RPC_URL) }) : null;
 const runSerializedExecution = createSerialExecutor();
+const executionConfiguration = validateExecutionConfiguration({
+  execute: EXECUTE,
+  maxGasFlrWei: MAX_GAS_FLR_WEI,
+  minKeeperFeeUnits: MIN_KEEPER_FEE_UNITS,
+  loanTokenUnitsPerFlr: LOAN_TOKEN_UNITS_PER_FLR,
+  minProfitFlrWei: MIN_PROFIT_FLR_WEI,
+  quoter: SPARKDEX_QUOTER,
+  factory: SPARKDEX_FACTORY,
+  quoteDeployer: SPARKDEX_QUOTE_DEPLOYER,
+  adapter: ADAPTER,
+  activePool: ACTIVE_POOL,
+  collateralToken: COLLATERAL_TOKEN,
+  loanToken: LOAN_TOKEN,
+  quoteHaircutBps: QUOTE_HAIRCUT_BPS,
+});
 
 const policyResult = MANAGER_VERSION === "v3"
   ? "uint128 triggerHealth, uint128 targetHealth, uint64 maxCollateralPerAction, uint32 maxSlippageBps, uint32 keeperFeeBps, uint32 cooldown, uint64 lastAction, bool enabled, address keeper"
@@ -74,6 +100,21 @@ const abi = parseAbi([
   `function policyOf(address borrower, bytes32 id) view returns (${policyResult})`,
   "function previewProtect(address borrower, bytes32 id) view returns (bool actionable, uint256 health, uint256 repayAssets, uint256 collateralNeeded)",
   "function protect(address borrower, bytes32 id)",
+  "function swapAdapter() view returns (address)",
+]);
+const morphoAbi = parseAbi([
+  "function idToMarketParams(bytes32 id) view returns (address loanToken, address collateralToken, address oracle, address irm, uint256 lltv)",
+]);
+const algebraQuoterAbi = parseAbi([
+  "function factory() view returns (address)",
+  "function quoteExactInputSingle((address tokenIn,address tokenOut,address deployer,uint256 amountIn,uint160 limitSqrtPrice) params) returns (uint256 amountOut,uint256 amountIn,uint160 sqrtPriceX96After,uint32 initializedTicksCrossed,uint256 gasEstimate,uint16 fee)",
+]);
+const algebraFactoryAbi = parseAbi([
+  "function poolByPair(address token0,address token1) view returns (address)",
+  "function customPoolByPair(address deployer,address token0,address token1) view returns (address)",
+]);
+const adapterAbi = parseAbi([
+  "function poolFor(bytes32 key) view returns (address)",
 ]);
 const POLICY_SET_TOPIC = toEventSelector("PolicySet(address,bytes32,uint128,uint128,uint64,uint32)");
 const POLICY_DISABLED_TOPIC = toEventSelector("PolicyDisabled(address,bytes32)");
@@ -128,6 +169,76 @@ function optionalBigInt(name) {
   } catch (error) {
     throw new Error(`${name} must be a non-negative integer: ${error.message}`);
   }
+}
+
+function optionalAddress(name) {
+  const value = process.env[name]?.trim();
+  return value ? getAddress(value) : null;
+}
+
+function optionalNonNegativeInteger(name) {
+  if (process.env[name] === undefined || process.env[name] === "") return null;
+  return nonNegativeInteger(name, 0);
+}
+
+function sameAddress(left, right) {
+  return left.toLowerCase() === right.toLowerCase();
+}
+
+export function validateExecutionConfiguration({
+  execute,
+  maxGasFlrWei,
+  minKeeperFeeUnits,
+  loanTokenUnitsPerFlr,
+  minProfitFlrWei,
+  quoter,
+  factory,
+  quoteDeployer,
+  adapter,
+  activePool,
+  collateralToken,
+  loanToken,
+  quoteHaircutBps,
+}) {
+  if (!execute) return null;
+  const values = {
+    MAX_GAS_FLR_WEI: maxGasFlrWei,
+    MIN_KEEPER_FEE_UNITS: minKeeperFeeUnits,
+    LOAN_TOKEN_UNITS_PER_FLR: loanTokenUnitsPerFlr,
+    MIN_PROFIT_FLR_WEI: minProfitFlrWei,
+    SPARKDEX_QUOTER: quoter,
+    SPARKDEX_FACTORY: factory,
+    SPARKDEX_QUOTE_DEPLOYER: quoteDeployer,
+    ADAPTER: adapter,
+    ACTIVE_POOL: activePool,
+    COLLATERAL_TOKEN: collateralToken,
+    LOAN_TOKEN: loanToken,
+    QUOTE_HAIRCUT_BPS: quoteHaircutBps,
+  };
+  const missing = Object.entries(values).filter(([, value]) => value === null || value === undefined).map(([name]) => name);
+  if (missing.length) throw new Error(`execution configuration is incomplete: ${missing.join(", ")}`);
+  if (maxGasFlrWei <= 0n) throw new Error("MAX_GAS_FLR_WEI must be greater than zero");
+  if (minKeeperFeeUnits <= 0n) throw new Error("MIN_KEEPER_FEE_UNITS must be greater than zero");
+  if (loanTokenUnitsPerFlr <= 0n) throw new Error("LOAN_TOKEN_UNITS_PER_FLR must be greater than zero");
+  if (quoteHaircutBps > 1_000) throw new Error("QUOTE_HAIRCUT_BPS cannot exceed 1000");
+  for (const [name, address] of Object.entries({ SPARKDEX_QUOTER: quoter, SPARKDEX_FACTORY: factory, ADAPTER: adapter, ACTIVE_POOL: activePool, COLLATERAL_TOKEN: collateralToken, LOAN_TOKEN: loanToken })) {
+    if (sameAddress(address, zeroAddress)) throw new Error(`${name} cannot be the zero address`);
+  }
+  if (sameAddress(collateralToken, loanToken)) throw new Error("COLLATERAL_TOKEN and LOAN_TOKEN must differ");
+  return {
+    maxGasFlrWei,
+    minKeeperFeeUnits,
+    loanTokenUnitsPerFlr,
+    minProfitFlrWei,
+    quoter,
+    factory,
+    quoteDeployer,
+    adapter,
+    activePool,
+    collateralToken,
+    loanToken,
+    quoteHaircutBps,
+  };
 }
 
 export const sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -203,18 +314,76 @@ export async function mapWithConcurrency(items, concurrency, worker) {
   return results;
 }
 
-export function calculateEconomics({ repayAssets, keeperFeeBps, gasEstimate, gasPrice, maxGasFlrWei, minKeeperFeeUnits, loanTokenUnitsPerFlr, minProfitFlrWei }) {
-  const expectedKeeperFee = (repayAssets * BigInt(keeperFeeBps)) / 10_000n;
+export function calculateEconomics({ repayAssets, keeperFeeBps, quotedAmountOut, quoteHaircutBps, gasEstimate, gasPrice, maxGasFlrWei, minKeeperFeeUnits, loanTokenUnitsPerFlr, minProfitFlrWei }) {
+  if (quotedAmountOut === null || quotedAmountOut === undefined) return { ok: false, reason: "quote_unavailable" };
+  if (!Number.isSafeInteger(quoteHaircutBps) || quoteHaircutBps < 0 || quoteHaircutBps > 1_000) {
+    return { ok: false, reason: "quote_haircut_invalid" };
+  }
+  const conservativeAmountOut = (quotedAmountOut * BigInt(10_000 - quoteHaircutBps)) / 10_000n;
+  const quotedSurplus = conservativeAmountOut > repayAssets ? conservativeAmountOut - repayAssets : 0n;
+  const maximumKeeperFee = (repayAssets * BigInt(keeperFeeBps)) / 10_000n;
+  const expectedKeeperFee = quotedSurplus < maximumKeeperFee ? quotedSurplus : maximumKeeperFee;
   const gasCostFlrWei = gasEstimate * gasPrice;
-  if (maxGasFlrWei !== null && gasCostFlrWei > maxGasFlrWei) return { ok: false, reason: "gas_limit_exceeded", expectedKeeperFee, gasCostFlrWei };
-  if (minKeeperFeeUnits !== null && expectedKeeperFee < minKeeperFeeUnits) return { ok: false, reason: "keeper_fee_below_minimum", expectedKeeperFee, gasCostFlrWei };
+  const quoteFields = { quotedAmountOut, conservativeAmountOut, quotedSurplus, maximumKeeperFee, expectedKeeperFee, gasCostFlrWei };
+  if (conservativeAmountOut < repayAssets) return { ok: false, reason: "quote_below_repayment", ...quoteFields };
+  if (maxGasFlrWei !== null && gasCostFlrWei > maxGasFlrWei) return { ok: false, reason: "gas_limit_exceeded", ...quoteFields };
+  if (minKeeperFeeUnits !== null && expectedKeeperFee < minKeeperFeeUnits) return { ok: false, reason: "keeper_fee_below_minimum", ...quoteFields };
   if (loanTokenUnitsPerFlr !== null && minProfitFlrWei !== null) {
     const revenueFlrWei = (expectedKeeperFee * 10n ** 18n) / loanTokenUnitsPerFlr;
     const profitFlrWei = revenueFlrWei - gasCostFlrWei;
-    if (profitFlrWei < minProfitFlrWei) return { ok: false, reason: "profit_below_minimum", expectedKeeperFee, gasCostFlrWei, revenueFlrWei, profitFlrWei };
-    return { ok: true, expectedKeeperFee, gasCostFlrWei, revenueFlrWei, profitFlrWei };
+    if (profitFlrWei < minProfitFlrWei) return { ok: false, reason: "profit_below_minimum", ...quoteFields, revenueFlrWei, profitFlrWei };
+    return { ok: true, ...quoteFields, revenueFlrWei, profitFlrWei };
   }
-  return { ok: true, expectedKeeperFee, gasCostFlrWei, pricingConfigured: false };
+  return { ok: true, ...quoteFields, pricingConfigured: false };
+}
+
+export async function quoteSwapOutput({
+  rpcClient,
+  quoter,
+  factory,
+  quoteDeployer,
+  expectedPool,
+  tokenIn,
+  tokenOut,
+  amountIn,
+}) {
+  if (amountIn <= 0n) throw new Error("swap quote amount must be greater than zero");
+  const poolRequest = sameAddress(quoteDeployer, zeroAddress)
+    ? { address: factory, abi: algebraFactoryAbi, functionName: "poolByPair", args: [tokenIn, tokenOut] }
+    : { address: factory, abi: algebraFactoryAbi, functionName: "customPoolByPair", args: [quoteDeployer, tokenIn, tokenOut] };
+  const [quoterCode, factoryCode, quoterFactory, resolvedPool] = await Promise.all([
+    rpcClient.getCode({ address: quoter }),
+    rpcClient.getCode({ address: factory }),
+    rpcClient.readContract({ address: quoter, abi: algebraQuoterAbi, functionName: "factory" }),
+    rpcClient.readContract(poolRequest),
+  ]);
+  if (!quoterCode || quoterCode === "0x") throw new Error("SparkDEX quoter has no deployed code");
+  if (!factoryCode || factoryCode === "0x") throw new Error("SparkDEX factory has no deployed code");
+  if (!sameAddress(quoterFactory, factory)) throw new Error(`SparkDEX quoter factory mismatch: ${quoterFactory}`);
+  if (!sameAddress(resolvedPool, expectedPool)) throw new Error(`SparkDEX quote pool mismatch: ${resolvedPool}`);
+  const { result } = await rpcClient.simulateContract({
+    address: quoter,
+    abi: algebraQuoterAbi,
+    functionName: "quoteExactInputSingle",
+    args: [{ tokenIn, tokenOut, deployer: quoteDeployer, amountIn, limitSqrtPrice: 0n }],
+  });
+  const [amountOut, quotedAmountIn, sqrtPriceAfter, initializedTicksCrossed, quoteGasEstimate, fee] = result;
+  if (quotedAmountIn !== amountIn) throw new Error(`SparkDEX quote used ${quotedAmountIn} of ${amountIn} input units`);
+  if (amountOut <= 0n) throw new Error("SparkDEX quote returned no output");
+  return { amountOut, amountIn: quotedAmountIn, sqrtPriceAfter, initializedTicksCrossed, quoteGasEstimate, fee, pool: resolvedPool };
+}
+
+export async function verifyExecutionRoute({ rpcClient, manager, expectedAdapter, expectedPool, tokenIn, tokenOut }) {
+  const poolKey = keccak256(encodePacked(["address", "address"], [tokenIn, tokenOut]));
+  const [adapter, adapterCode, activePool] = await Promise.all([
+    rpcClient.readContract({ address: manager, abi, functionName: "swapAdapter" }),
+    rpcClient.getCode({ address: expectedAdapter }),
+    rpcClient.readContract({ address: expectedAdapter, abi: adapterAbi, functionName: "poolFor", args: [poolKey] }),
+  ]);
+  if (!sameAddress(adapter, expectedAdapter)) throw new Error(`Ballast swap adapter mismatch: ${adapter}`);
+  if (!adapterCode || adapterCode === "0x") throw new Error("Ballast swap adapter has no deployed code");
+  if (!sameAddress(activePool, expectedPool)) throw new Error(`Ballast active pool mismatch: ${activePool}`);
+  return { adapter, pool: activePool };
 }
 
 function log(level, event, fields = {}) {
@@ -499,6 +668,14 @@ export function handleCycleFailure(error, runOnce = RUN_ONCE) {
 
 const formatHealth = (value) => formatUnits(value, 18);
 
+async function readMarketTokens(id) {
+  const [loanToken, collateralToken] = await withRetry(
+    () => publicClient.readContract({ address: MORPHO, abi: morphoAbi, functionName: "idToMarketParams", args: [id] }),
+    { label: "rpc.idToMarketParams" },
+  );
+  return { loanToken, collateralToken };
+}
+
 async function inspectPolicy(row) {
   const [policy, preview] = await Promise.all([
     withRetry(() => publicClient.readContract({ address: BALLAST, abi, functionName: "policyOf", args: [row.borrower, row.id] }), { label: "rpc.policyOf" }),
@@ -523,16 +700,65 @@ async function processPolicy(row) {
       const healthGate = requireExecutionHealth();
       log("info", "execution_health_gate_passed", healthGate);
 
-      await withRetry(() => publicClient.simulateContract({ account, address: BALLAST, abi, functionName: "protect", args: [item.borrower, item.id] }), { label: "rpc.simulateProtect" });
-      const gasEstimate = await withRetry(() => publicClient.estimateContractGas({ account, address: BALLAST, abi, functionName: "protect", args: [item.borrower, item.id] }), { label: "rpc.estimateProtect" });
+      const currentItem = await inspectPolicy(row);
+      if (!currentItem.enabled || !currentItem.actionable) return { status: "skipped", reason: "state_changed" };
+      if (shouldSkipForDifferentKeeper({ managerVersion: MANAGER_VERSION, policyKeeper: currentItem.keeper, operator: operatorAddress })) {
+        return { status: "skipped", reason: "different_keeper" };
+      }
+      const marketTokens = await readMarketTokens(currentItem.id);
+      if (!sameAddress(marketTokens.collateralToken, executionConfiguration.collateralToken)
+        || !sameAddress(marketTokens.loanToken, executionConfiguration.loanToken)) {
+        throw new Error(`policy market tokens do not match the configured SparkDEX route: ${marketTokens.collateralToken}/${marketTokens.loanToken}`);
+      }
+      await withRetry(() => publicClient.simulateContract({ account, address: BALLAST, abi, functionName: "protect", args: [currentItem.borrower, currentItem.id] }), { label: "rpc.simulateProtect" });
+      const gasEstimate = await withRetry(() => publicClient.estimateContractGas({ account, address: BALLAST, abi, functionName: "protect", args: [currentItem.borrower, currentItem.id] }), { label: "rpc.estimateProtect" });
       const gasPrice = await withRetry(() => publicClient.getGasPrice(), { label: "rpc.getGasPrice" });
-      const economics = calculateEconomics({ repayAssets: item.repayAssets, keeperFeeBps: item.keeperFeeBps, gasEstimate, gasPrice, maxGasFlrWei: MAX_GAS_FLR_WEI, minKeeperFeeUnits: MIN_KEEPER_FEE_UNITS, loanTokenUnitsPerFlr: LOAN_TOKEN_UNITS_PER_FLR, minProfitFlrWei: MIN_PROFIT_FLR_WEI });
+      const quote = await withRetry(() => quoteSwapOutput({
+        rpcClient: publicClient,
+        quoter: executionConfiguration.quoter,
+        factory: executionConfiguration.factory,
+        quoteDeployer: executionConfiguration.quoteDeployer,
+        expectedPool: executionConfiguration.activePool,
+        tokenIn: marketTokens.collateralToken,
+        tokenOut: marketTokens.loanToken,
+        amountIn: currentItem.collateralNeeded,
+      }), { label: "rpc.quoteSparkDex" });
+      const economics = calculateEconomics({
+        repayAssets: currentItem.repayAssets,
+        keeperFeeBps: currentItem.keeperFeeBps,
+        quotedAmountOut: quote.amountOut,
+        quoteHaircutBps: executionConfiguration.quoteHaircutBps,
+        gasEstimate,
+        gasPrice,
+        maxGasFlrWei: executionConfiguration.maxGasFlrWei,
+        minKeeperFeeUnits: executionConfiguration.minKeeperFeeUnits,
+        loanTokenUnitsPerFlr: executionConfiguration.loanTokenUnitsPerFlr,
+        minProfitFlrWei: executionConfiguration.minProfitFlrWei,
+      });
       if (!economics.ok) {
-        log("warn", "policy_rejected_economics", { borrower: item.borrower, id: item.id, reason: economics.reason, expectedKeeperFee: economics.expectedKeeperFee.toString(), gasCostFlrWei: economics.gasCostFlrWei.toString() });
+        log("warn", "policy_rejected_economics", {
+          borrower: currentItem.borrower,
+          id: currentItem.id,
+          reason: economics.reason,
+          quotedAmountOut: economics.quotedAmountOut?.toString() || null,
+          conservativeAmountOut: economics.conservativeAmountOut?.toString() || null,
+          quotedSurplus: economics.quotedSurplus?.toString() || null,
+          expectedKeeperFee: economics.expectedKeeperFee?.toString() || null,
+          gasCostFlrWei: economics.gasCostFlrWei?.toString() || null,
+        });
         return { status: "skipped", reason: economics.reason };
       }
 
-      const data = encodeFunctionData({ abi, functionName: "protect", args: [item.borrower, item.id] });
+      const executionRoute = await withRetry(() => verifyExecutionRoute({
+        rpcClient: publicClient,
+        manager: BALLAST,
+        expectedAdapter: executionConfiguration.adapter,
+        expectedPool: executionConfiguration.activePool,
+        tokenIn: marketTokens.collateralToken,
+        tokenOut: marketTokens.loanToken,
+      }), { label: "rpc.verifyExecutionRoute" });
+
+      const data = encodeFunctionData({ abi, functionName: "protect", args: [currentItem.borrower, currentItem.id] });
       const { hash } = await prepareSignAndBroadcastTransaction({
         prepareTransaction: () => withRetry(
           () => walletClient.prepareTransactionRequest({ account, to: BALLAST, data, gas: gasEstimate }),
@@ -544,7 +770,7 @@ async function processPolicy(row) {
       });
       const receipt = await withRetry(() => publicClient.waitForTransactionReceipt({ hash }), { label: "rpc.waitForReceipt" });
       assertSuccessfulReceipt(receipt, hash);
-      log("info", "protection_confirmed", { borrower: item.borrower, id: item.id, hash, status: receipt.status, blockNumber: receipt.blockNumber.toString(), gasEstimate: gasEstimate.toString(), gasPrice: gasPrice.toString(), expectedKeeperFee: economics.expectedKeeperFee.toString() });
+      log("info", "protection_confirmed", { borrower: currentItem.borrower, id: currentItem.id, hash, status: receipt.status, blockNumber: receipt.blockNumber.toString(), gasEstimate: gasEstimate.toString(), gasPrice: gasPrice.toString(), adapter: executionRoute.adapter, pool: executionRoute.pool, quotedAmountOut: economics.quotedAmountOut.toString(), conservativeAmountOut: economics.conservativeAmountOut.toString(), expectedKeeperFee: economics.expectedKeeperFee.toString() });
       return { status: "confirmed", hash };
     });
   } catch (error) {

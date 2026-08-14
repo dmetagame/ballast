@@ -33,9 +33,10 @@ Leveraged FXRP borrowers can lose approximately 7.4% of position value when a Mo
 - Static risk dashboard from measured Flare mainnet state.
 - Hosted enrollment UI with Morpho authorization, V3 policy setup, and borrower exit controls.
 - Always-on AWS keeper service that discovers policies, verifies the named V3 operator, calls
-  `previewProtect`, simulates before execution, persists confirmed event checkpoints, and remains
-  dry-run pending a controlled receipt. A five-minute health timer checks keeper freshness,
-  manager, adapter, pool and admin state, FCC registration, and hosted release provenance; future
+  `previewProtect`, simulates before execution, verifies a conservative exact-input quote from the
+  same SparkDEX Algebra pool used by the adapter, caps revenue by realizable swap surplus, persists
+  confirmed event checkpoints, and remains dry-run pending a controlled receipt. A five-minute health timer checks keeper freshness,
+  manager, adapter, pool, quoter/factory route and admin state, FCC registration, and hosted release provenance; future
   execution fails closed unless that result is fresh and matches the running release. A separate
   GitHub watchdog checks the sanitized public health signal four times per hour and manages a
   `production-alert` issue across failure and recovery.
@@ -46,10 +47,11 @@ Leveraged FXRP borrowers can lose approximately 7.4% of position value when a Mo
 - Product narrative: `https://ballast.rouma.online/product/`
 - Measured risk dashboard: `https://ballast.rouma.online/risk/`
 - Controlled enrollment beta: `https://ballast.rouma.online/enroll/`
-- FCC proxy: `https://ballast.rouma.online`
+- FCC proxy status: `https://ballast.rouma.online/info` (registered base URL: `https://ballast.rouma.online`)
 
 The static frontends are served from the same AWS host as the FCC proxy under isolated paths;
-the root and FCC API routes continue to proxy to the registered extension service.
+the bare root redirects to the product while FCC API routes such as `/info` continue to proxy to
+the registered extension service.
 
 The enrollment UI accepts policy transactions, but the hosted keeper remains dry-run. Do not
 describe an enrolled policy as active automated protection until the live receipt milestone is met.

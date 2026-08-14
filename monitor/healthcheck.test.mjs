@@ -34,6 +34,8 @@ test("production state requires the finalized manager, adapter, pool, and owners
     paused: false,
     managerCode: "0x01",
     adapterCode: "0x01",
+    quoterCode: "0x01",
+    factoryCode: "0x01",
     managerAdapter: "0xA3B9822228b6d0DE77089B0C67Ec0A73A9A9C202",
     managerOwner: "0x302a6505c225bBB145569F35B89611d0677195a9",
     managerGuardian: "0xFf97ED39EAe2a4f5fa79097EdDbFD4c27876f8ce",
@@ -44,6 +46,9 @@ test("production state requires the finalized manager, adapter, pool, and owners
     pendingAdapterOwner: "0x0000000000000000000000000000000000000000",
     activePool: "0x927485d88a66253c63Af9163dca5f21c25A57393",
     pendingPool: "0x0000000000000000000000000000000000000000",
+    quoterFactory: "0x805488DaA81c1b9e7C5cE3f1DCeA28F21448EC6A",
+    quotePool: "0x927485d88a66253c63Af9163dca5f21c25A57393",
+    quoterQuote: [1_003_000n, 1_000_000n, 2n, 0, 3n, 500],
   };
   assert.deepEqual(validateProductionState(state), {
     chainId: 14,
@@ -51,8 +56,15 @@ test("production state requires the finalized manager, adapter, pool, and owners
     paused: false,
     adapter: state.managerAdapter,
     pool: state.activePool,
+    quoter: "0x6AD6A4f233F1E33613e996CCc17409B93fF8bf5f",
+    factory: state.quoterFactory,
+    quoteAmountOut: "1003000",
   });
   assert.throws(() => validateProductionState({ ...state, activePool: MANAGER }), /active pool mismatch/);
+  assert.throws(() => validateProductionState({ ...state, quotePool: MANAGER }), /quote pool mismatch/);
+  assert.throws(() => validateProductionState({ ...state, quoterFactory: MANAGER }), /quoter factory mismatch/);
+  assert.throws(() => validateProductionState({ ...state, quoterQuote: [0n, 1_000_000n, 2n, 0, 3n, 500] }), /returned no output/);
+  assert.throws(() => validateProductionState({ ...state, quoterQuote: [1n, 999_999n, 2n, 0, 3n, 500] }), /used 999999 input units/);
   assert.throws(() => validateProductionState({ ...state, pendingSwapAdapter: state.managerAdapter }), /pending swap adapter mismatch/);
 });
 

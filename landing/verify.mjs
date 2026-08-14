@@ -92,6 +92,9 @@ const MUST_BE_VISIBLE = [
   ["caveat: liquidity ceiling", "300,000 FXRP"],
   ["caveat: no guarantee", "not a guarantee against liquidation"],
   ["caveat: keeper dry-run", "hosted keeper remains dry-run"],
+  ["action: controlled enrollment", "Try controlled enrollment"],
+  ["action: measured risk", "Explore measured risk"],
+  ["action: fork demo", "Run the fork demo"],
 ];
 
 async function visibleText(page) {
@@ -321,6 +324,7 @@ for (const [name, viewport] of [["desktop", { width: 1440, height: 900 }], ["mob
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   check(`product ${name}: no horizontal overflow`, !overflow);
   check(`product ${name}: no console errors`, consoleErrors.length === 0, consoleErrors.join(" | "));
+  check(`product ${name}: hero actions are visible`, await page.locator(".hero-actions .action").count() === 3);
   await page.close();
 }
 

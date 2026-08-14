@@ -14,7 +14,8 @@ until a controlled borrower enrollment and protection receipt are verified.
 - Mode: continuous dry-run, `EXECUTE=false`
 - Identity: `OPERATOR_ADDRESS` only; the funded key is hidden from the dry-run service
 - Service state verified August 13, 2026: active, zero restarts; confirm the deployed commit during each release
-- Execution bounds: gas ceiling, minimum fee, loan-token/FLR conversion, and minimum profit set
+- Execution bounds: verified Algebra pool quote with a 25 bps haircut, gas ceiling, minimum
+  realizable fee, loan-token/FLR conversion, and minimum profit set
 
 The dry-run service rejects policies naming a different keeper using the public operator address;
 it does not load the funded signing key.
@@ -43,6 +44,7 @@ The same Caddy site serves immutable static releases without taking over the FCC
 - `/product/` serves the landing surface.
 - `/risk/` serves the generated risk dashboard.
 - `/enroll/` serves the V3 borrower control panel.
+- `/` redirects visitors to `/product/`.
 - Every other path, including `/info`, continues to proxy to the FCC service on `127.0.0.1:6674`.
 
 `scripts/deploy-static-aws.sh` builds and verifies all three surfaces, refuses a dirty release by

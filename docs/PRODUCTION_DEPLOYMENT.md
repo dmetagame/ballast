@@ -91,6 +91,14 @@ MAX_POSITIONS=0
 EXECUTE=false
 RUN_ONCE=false
 OPERATOR_ADDRESS=<dedicated keeper address>
+ADAPTER=0xA3B9822228b6d0DE77089B0C67Ec0A73A9A9C202
+SPARKDEX_QUOTER=0x6AD6A4f233F1E33613e996CCc17409B93fF8bf5f
+SPARKDEX_FACTORY=0x805488DaA81c1b9e7C5cE3f1DCeA28F21448EC6A
+SPARKDEX_QUOTE_DEPLOYER=0x0000000000000000000000000000000000000000
+ACTIVE_POOL=0x927485d88a66253c63Af9163dca5f21c25A57393
+COLLATERAL_TOKEN=0xAd552A648C74D49E10027AB8a618A3ad4901c5bE
+LOAN_TOKEN=0xe7cd86e13AC4309349F30B3435a9d337750fC82D
+QUOTE_HAIRCUT_BPS=25
 MAX_GAS_FLR_WEI=<hard ceiling>
 MIN_KEEPER_FEE_UNITS=<USD₮0 base units>
 LOAN_TOKEN_UNITS_PER_FLR=<USD₮0 base units per FLR>
@@ -122,8 +130,16 @@ Store the dedicated keeper key with mode `0600` and expose it only during an exp
 manual execution window through `PRIVATE_KEY_FILE`; never configure both `PRIVATE_KEY` and
 `PRIVATE_KEY_FILE`.
 
+Execution configuration is fail-closed. Before signing, the keeper verifies that the deployed
+Algebra QuoterV2 belongs to the configured SparkDEX factory, that the factory resolves the exact
+pool registered in the adapter, and that the policy market is FXRP/USD₮0. It quotes the complete
+collateral sale immediately before broadcast, applies `QUOTE_HAIRCUT_BPS`, and caps expected keeper
+revenue by the remaining quoted swap surplus rather than the policy's maximum fee. It then rechecks
+the manager's configured adapter and that adapter's active token-pair pool immediately before
+signing.
+
 The health timer checks the keeper checkpoint age, Flare chain identity, finalized manager,
-adapter, pool and admin state, Coston2 FCC registration/PRODUCTION status, and all three hosted static
+adapter, pool, Algebra quoter/factory route and admin state, Coston2 FCC registration/PRODUCTION status, and all three hosted static
 surfaces every five minutes. A sanitized status document at `/ops/health.json` contains only the
 result, timestamp, and release commit. The scheduled `Production Watchdog` workflow checks that
 document and release synchronization against the current `main` commit four times per hour,
@@ -161,8 +177,9 @@ Completed and verified:
   unpaused state, and empty pending admin actions.
 - `scripts/verify-production-fork.sh` passes against pinned block `67260848`, executing the
   deployed V3 manager and adapter against a real position.
-- The AWS keeper service is active without restarts, targets V3 from block `67019411`, applies
-  gas/fee/profit bounds, and remains `EXECUTE=false`. Its active policy index is persisted with
+- The AWS keeper service is active without restarts, targets V3 from block `67019411`, verifies a
+  conservative live quote from the exact Algebra pool before applying gas/fee/profit bounds, and
+  remains `EXECUTE=false`. Its active policy index is persisted with
   mode `0600`, bootstraps through Blockscout, fills explorer lag through Flare's 30-block RPC log
   windows, and resumes from confirmed checkpoints without rescanning deployment history.
 - The dedicated keeper is `0xA20a59090f609329405F5DcA785Af9357F6965E7`.

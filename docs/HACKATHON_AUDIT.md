@@ -67,8 +67,9 @@ Avoid claiming that Ballast directly calls FTSO contracts on mainnet unless the 
   borrower addresses before publication.
 - Liquidity tests document where deleveraging stops being economically rational.
 - The keeper discovers enrolled policies, checkpoints the complete active set through the
-  confirmed chain tip, previews actions, defaults to dry-run, simulates before broadcast, and
-  requires explicit execution credentials.
+  confirmed chain tip, previews actions, defaults to dry-run, simulates before broadcast, verifies
+  the exact SparkDEX Algebra quote route, caps expected revenue by conservative realizable surplus,
+  and requires explicit execution credentials.
 
 Remaining technical risks:
 

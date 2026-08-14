@@ -109,9 +109,9 @@ function policyResult(policy) {
   };
 }
 
-async function walletPage(browser, { initialChainId = 14, revertedHash = null } = {}) {
+async function walletPage(browser, { initialChainId = 14, revertedHash = null, viewport = { width: 1280, height: 900 } } = {}) {
   const state = { authorized: false, policy: null, appliedReceipts: new Set() };
-  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const page = await browser.newPage({ viewport });
   await page.addInitScript(({ account, hashes, initialChainId, selectors }) => {
     let chainId = initialChainId;
     const requests = [];
@@ -210,6 +210,11 @@ const writesEnabled = await (async () => {
 })();
 check("wallet flow: production writes build is enabled", writesEnabled);
 if (writesEnabled) {
+  const connectedMobile = await walletPage(browser, { viewport: { width: 390, height: 844 } });
+  await connectedMobile.page.locator("#connectButton").click();
+  check("wallet flow: connected mobile has no horizontal overflow", await connectedMobile.page.evaluate(() => document.documentElement.scrollWidth === innerWidth));
+  await connectedMobile.page.close();
+
   const { page } = await walletPage(browser, { initialChainId: 1 });
   page.on("dialog", (dialog) => dialog.accept());
   await page.locator("#connectButton").click();
