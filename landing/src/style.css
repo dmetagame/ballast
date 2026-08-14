@@ -116,7 +116,7 @@ footer ul { padding-left: 1.1rem; margin: 0 0 2rem; max-width: 46rem; }
 footer li { margin-bottom: 0.6rem; color: var(--ink-muted); }
 footer li strong { color: var(--ink); }
 .provenance { font-family: var(--mono); font-size: 0.8rem; color: var(--ink-muted); }
-code { font-family: var(--mono); }
+code { font-family: var(--mono); overflow-wrap: anywhere; }
 
 @media (min-width: 48rem) {
   .steps { grid-template-columns: repeat(5, 1fr); }

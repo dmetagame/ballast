@@ -312,6 +312,18 @@ const browser = await chromium.launch();
   await ctx.close();
 }
 
+// --- responsive surfaces ---------------------------------------------------------------
+for (const [name, viewport] of [["desktop", { width: 1440, height: 900 }], ["mobile", { width: 390, height: 844 }]]) {
+  const page = await browser.newPage({ viewport });
+  const consoleErrors = [];
+  page.on("console", (message) => { if (message.type() === "error") consoleErrors.push(message.text()); });
+  await navigate(page, base);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+  check(`product ${name}: no horizontal overflow`, !overflow);
+  check(`product ${name}: no console errors`, consoleErrors.length === 0, consoleErrors.join(" | "));
+  await page.close();
+}
+
 // --- sibling risk dashboard ------------------------------------------------------------
 // The dashboard is intentionally dependency-free, so this Playwright install also guards
 // its responsive shell. The wide position table must scroll internally without widening the
