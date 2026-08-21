@@ -19,6 +19,6 @@
     "test": "node --test *.test.mjs"
   },
   "dependencies": {
-    "viem": "^2.21.0"
+    "viem": "^2.55.18"
   }
 }
