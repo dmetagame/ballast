@@ -4,8 +4,8 @@ go 1.25.1
 
 require (
 	github.com/ethereum/go-ethereum v1.17.5
-	github.com/flare-foundation/go-flare-common v1.2.2-0.20260727094511-09a10067e6a4
-	github.com/flare-foundation/tee-node v0.0.25
+	github.com/flare-foundation/go-flare-common v1.2.2-0.20260820114858-51165807a89f
+	github.com/flare-foundation/tee-node v0.0.27
 )
 
 require (
